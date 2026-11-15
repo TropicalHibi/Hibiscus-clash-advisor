@@ -140,8 +140,8 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
     const idx = settings.heroOrder.indexOf(item.id);
     const tier = isQueen ? T.queen : T.heroes;
     const reason = isQueen
-      ? `Tier 0: Queen below book threshold (next ${fmtDuration(st.next.timeSec)} < ${fmtDuration(data.bookThresholdSec)})`
-      : `Hero #${idx + 1} in order; not book-ready yet (${fmtDuration(st.next.timeSec)} < ${fmtDuration(data.bookThresholdSec)})`;
+      ? `Tier 0: Queen not book-ready (raw next level ${fmtDuration(st.next.timeSec)} < ${fmtDuration(data.bookThresholdSec)} threshold)`
+      : `Hero #${idx + 1} in order; not book-ready (raw next level ${fmtDuration(st.next.timeSec)} < ${fmtDuration(data.bookThresholdSec)} threshold)`;
     fromLevel(item, inst, st.next, tier, [idx < 0 ? 99 : idx], reason, 'upgrade');
   }
 
