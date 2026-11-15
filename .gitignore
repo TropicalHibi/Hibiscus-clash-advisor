@@ -1,0 +1,7 @@
+node_modules/
+dist/
+samples/
+.env
+.env.*
+*.log
+.vite/

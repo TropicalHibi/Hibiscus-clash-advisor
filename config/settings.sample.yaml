@@ -1,0 +1,31 @@
+# Default settings for the CoC Upgrade Planner.
+# The UI loads these on first run; edits made in the UI are saved to
+# localStorage. Delete local data in the UI to reset to this file.
+
+goldPass: none            # none | max
+
+heroOrder:                # tier 3 order; Archer Queen also gets tier 0
+  - archer-queen
+  - grand-warden
+  - dragon-duke
+  - barbarian-king
+  - royal-champion
+  - minion-prince
+
+forecast:
+  windowHours: 24
+  blacksmithTopN: 3       # equipment picks included in ore totals
+
+lab:
+  pinned: []              # item ids pinned to the top of the lab queue
+petHouse:
+  pinned: []
+blacksmith:
+  pinned: []
+
+meta:
+  leagueTierId: 105000036 # Legend League I
+  maxPlayers: 1000
+  windowDays: 14
+  halfLifeDays: 5
+  requestsPerSecond: 10
