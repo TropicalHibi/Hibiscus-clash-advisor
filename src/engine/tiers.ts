@@ -42,15 +42,24 @@ export interface Levels {
   blacksmith: number;
 }
 
+/**
+ * Tier numbers per mode (SPEC §6.2–6.4). Tier 0 = new buildings (incl. ready merges), then the Queen.
+ * `gate` = TH gate: merge source upgrades so every available merge can be performed.
+ * Merged-defense upgrades past level 1 sit in `defenses`.
+ */
 export const TIERS = {
-  rush: { queen: 0, thPath: 1, offense: 2, heroes: 3, resources: 4, defenses: 5, temporary: 6, newMerges: 1, oldMerges: 1, weapon: 1 },
-  maxTH: { queen: 0, thPath: 5, offense: 1, heroes: 2, resources: 4, defenses: 5, temporary: 6, newMerges: 3, oldMerges: 5, weapon: 5 },
+  rush: { newBuild: 0, queen: 0, thPath: 1, gate: 1, offense: 2, heroes: 3, resources: 4, defenses: 5, temporary: 6, weapon: 1 },
+  maxTH: { newBuild: 0, queen: 0, thPath: 5, gate: 3, offense: 1, heroes: 2, resources: 4, defenses: 5, temporary: 6, weapon: 5 },
 } as const;
 
 export const TIER_NAMES: Record<Mode, string[]> = {
-  rush: ['Archer Queen', 'Town Hall path', 'Offense', 'Heroes', 'Resources', 'Permanent defenses', 'Temporary'],
-  maxTH: ['Archer Queen', 'Offense', 'Heroes', 'New-TH merges', 'Resources', 'Permanent defenses', 'Temporary'],
+  rush: ['New buildings + Archer Queen', 'Town Hall path + TH gate', 'Offense', 'Heroes', 'Resources', 'Permanent defenses', 'Temporary'],
+  maxTH: ['New buildings + Archer Queen', 'Offense', 'Heroes', 'TH gate (merge sources)', 'Resources', 'Permanent defenses', 'Temporary'],
 };
+
+/** Order of Tier 0: new buildings (sub-group 0) before the Queen (sub-group 1). */
+const T0_BUILD = 0;
+const T0_QUEEN = 1;
 
 /** Offense (non-hero) building order (SPEC §6.3 tier 2). */
 export const OFFENSE_ORDER = [
@@ -140,16 +149,17 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
     const idx = settings.heroOrder.indexOf(item.id);
     const tier = isQueen ? T.queen : T.heroes;
     const reason = isQueen
-      ? `Tier 0: Queen not book-ready (raw next level ${fmtDuration(st.next.timeSec)} < ${fmtDuration(data.bookThresholdSec)} threshold)`
+      ? `Tier 0 (after new buildings): Queen not book-ready (raw next level ${fmtDuration(st.next.timeSec)} < ${fmtDuration(data.bookThresholdSec)} threshold)`
       : `Hero #${idx + 1} in order; not book-ready (raw next level ${fmtDuration(st.next.timeSec)} < ${fmtDuration(data.bookThresholdSec)} threshold)`;
-    fromLevel(item, inst, st.next, tier, [idx < 0 ? 99 : idx], reason, 'upgrade');
+    fromLevel(item, inst, st.next, tier, isQueen ? [T0_QUEEN] : [idx < 0 ? 99 : idx], reason, 'upgrade');
   }
 
   // ── Town Hall + weapon ──
+  let thNext: LevelInfo | undefined;
   if (thInst && thItem && !thBusy) {
     handled.add(thInst.uid);
-    const next = levelInfo(thItem, lv.th + 1);
-    if (mode === 'rush' && next) fromLevel(thItem, thInst, next, T.thPath, [0, 0], 'Rush: Town Hall first, as soon as it is available', 'upgrade');
+    // The TH upgrade itself is pushed after the merge section: it waits for the TH gate (§6.3).
+    thNext = mode === 'rush' ? levelInfo(thItem, lv.th + 1) : undefined;
     const weapon = data.items.get(`${IDS.townHall}:w${lv.th}`);
     if (weapon) {
       const wl = thInst.weaponLevel ?? 1;
@@ -161,7 +171,7 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
           wn,
           T.weapon,
           [0, 1],
-          mode === 'rush' ? 'TH weapon (only when the TH itself cannot be upgraded)' : 'TH weapon',
+          mode === 'rush' ? 'TH weapon (only when the TH itself cannot be upgraded or is gated)' : 'TH weapon',
           'weapon',
           thInst.uid,
         );
@@ -201,13 +211,13 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
   data.merges.forEach((r, ri) => {
     const merged = data.byDataId.get(r.dataId)!;
     const owned = instances.filter((i) => i.dataId === r.dataId);
-    const tier = mode === 'rush' ? T.oldMerges : r.unlockTH === data.maxTH ? T.newMerges : T.oldMerges;
+    // Merged-defense upgrades past level 1 are not part of the TH gate: permanent-defense tier (LPT).
     const maxLv = maxLevelAt(merged, { th: lv.th });
     for (const inst of owned) {
       handled.add(inst.uid);
       if (busy.has(inst.uid) || inst.level >= maxLv) continue;
       const next = levelInfo(merged, inst.level + 1);
-      if (next) fromLevel(merged, inst, next, tier, [r.unlockTH, ri, 2, inst.level], `Merge path: ${merged.name} to max for TH${lv.th}`, 'upgrade');
+      if (next) fromLevel(merged, inst, next, T.defenses, [], 'Merged defense upgrade (permanent defense, longest first)', 'upgrade');
     }
     const ths = Object.keys(merged.countPerTH ?? {})
       .map(Number)
@@ -221,10 +231,11 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
   jobs.sort((a, b) => a.neededTH - b.neededTH || a.ri - b.ri);
 
   let mergeSeq = 0;
+  const gateOpen: string[] = []; // unfinished TH-gate items at the current TH
   for (const job of jobs) {
     const r = data.merges[job.ri];
     const merged = data.byDataId.get(r.dataId)!;
-    const tier = mode === 'rush' ? T.oldMerges : r.unlockTH === data.maxTH ? T.newMerges : T.oldMerges;
+    const tier = T.gate;
     const lookahead = job.neededTH > lv.th;
     const alloc: OwnedInstance[] = [];
     let complete = true;
@@ -238,6 +249,8 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
         alloc.push(p);
       }
     }
+    // A merge counts against the gate only if it can actually be performed (enough sources exist).
+    if (!lookahead && complete && (merged.levels[0].thRequired ?? 0) <= lv.th) gateOpen.push(merged.name);
     let ready = complete;
     for (const src of alloc) {
       const srcItem = data.items.get(src.itemKey)!;
@@ -250,7 +263,7 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
       if (src.level >= req) continue;
       const next = levelInfo(srcItem, src.level + 1);
       if (!next || (next.thRequired ?? 0) > lv.th) continue;
-      const why = `${lookahead ? 'TH-upgrade lookahead: ' : ''}merge for ${merged.name} (TH${job.neededTH}) needs ${srcItem.name} ${req}`;
+      const why = `${lookahead ? 'TH-upgrade lookahead: ' : 'TH gate: '}merge for ${merged.name} (TH${job.neededTH}) needs ${srcItem.name} ${req}`;
       fromLevel(srcItem, src, next, tier, [job.neededTH, job.ri, 0, -src.level], why, src.planned ? 'build' : 'upgrade');
     }
     const first = levelInfo(merged, merged.levels[0].level);
@@ -271,6 +284,15 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
         consumes: alloc.map((a) => a.uid),
       });
     }
+  }
+
+  // ── Town Hall (rush): only once the TH gate is clear — every available merge performed, every new building built ──
+  if (thInst && thItem && thNext) {
+    for (const p of planned) {
+      const it = data.items.get(p.itemKey)!;
+      if ((it.levels[0]?.thRequired ?? 0) <= lv.th) gateOpen.push(it.name);
+    }
+    if (!gateOpen.length) fromLevel(thItem, thInst, thNext, T.thPath, [0, 0], 'Rush: Town Hall upgrade, TH gate clear (all merges done, all new buildings built)', 'upgrade');
   }
 
   // ── Everything else ──
@@ -336,6 +358,30 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
     const next = levelInfo(sc, (inst.superchargeLevel ?? 0) + 1);
     if (!next || (next.thRequired ?? 0) > lv.th) continue;
     fromLevel(sc, inst, next, T.temporary, [], 'Supercharge (temporary tier), longest first', 'supercharge', inst.uid);
+  }
+
+  // Tier 0 (§6.2): every new building (incl. extra copies, missing merge sources, and merges whose sources
+  // are ready) goes ahead of the Queen. Among them: the tier the building normally belongs to, then longest first.
+  const normalTier = (item: Item): number => {
+    switch (item.category) {
+      case 'army':
+        return T.offense;
+      case 'resourceStorage':
+      case 'resourceCollector':
+        return T.resources;
+      case 'defense':
+      case 'trap':
+      case 'mergedDefense':
+        return T.defenses;
+      default:
+        return T.temporary;
+    }
+  };
+  for (const c of out) {
+    if (c.kind !== 'build' && c.kind !== 'merge') continue;
+    c.tier = T.newBuild;
+    c.order = [T0_BUILD, normalTier(c.item), -c.rawTimeSec, c.cost];
+    c.reason = `Tier 0: ${c.reason}`;
   }
 
   // Builder efficiency (§6.6): tiers 5–6 longest-processing-time first, cheaper on ties.

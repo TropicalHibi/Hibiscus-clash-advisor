@@ -174,18 +174,19 @@ interface Candidate {        // one possible next upgrade
 - **Max-TH mode:** player TH == max TH.
 - Detected automatically. When a new TH ships and data syncs, the mode flips back to rush with no code change.
 
-### 6.2 Tier 0 — Archer Queen (both modes)
-- If the Queen is not **book-ready** (§6.5) and not already upgrading, one builder is always on her. She outranks everything, including the TH.
+### 6.2 Tier 0 — New buildings + Archer Queen (both modes)
+- **New unbuilt buildings come first.** Any building where owned count < `availablePerTownHall` count at the current TH (any category, including extra copies). A merge whose sources are already at the required level counts as a new building. Among several new buildings, order by the tier the building would normally belong to (offense before resources before defenses), then longest first.
+- **Archer Queen:** if she is not **book-ready** (§6.5) and not already upgrading, she gets the next free builder after new buildings. She is always being upgraded otherwise and outranks the TH and everything below.
 
 ### 6.3 Rush mode tiers
 1. **Town Hall path**
    - Town Hall upgrade itself (as soon as it's available).
    - TH weapon levels.
-   - **Merge requirements**, ordered by the TH that needs them (soonest first):
-     - Source defenses up to the required level (§7).
-     - Building the merged defense.
-     - Upgrading merged defenses to max for current TH.
-   - **While the TH is upgrading:** keep working merge requirements, and immediately start on the **next** TH's merge requirements if any source upgrades are available at the current TH.
+   - **TH gate — everything that must be done before the next TH upgrade:**
+     - **Every available merge is performed:** source defenses at the required level (§7), then the merge itself. Applies to all merged defenses available at the current TH, not just ones new to it. Ordered by the TH that unlocked them (soonest first).
+     - **Every new building that can be built is built.** These are handled in Tier 0 (§6.2), so they're done before the gate is checked.
+     - Upgrading merged defenses past level 1 is **not** part of the gate; that goes in the permanent-defense tier.
+   - **While the TH is upgrading:** keep working the gate, and immediately start on the **next** TH's merge source upgrades if any are available at the current TH.
 2. **Offense, non-hero** — Laboratory, Army Camps, Barracks, Dark Barracks, Spell Factory, Dark Spell Factory, Clan Castle, Workshop, Blacksmith, Pet House, Hero Hall, Hero Banner.
 3. **Heroes** in configured order (default: Archer Queen > Grand Warden > Dragon Duke > Barbarian King > Royal Champion > Minion Prince), each only until book-ready. A hero capped by Hero Hall level is skipped (the next one in order is used).
 4. **Resources** — Storages (Gold, Elixir, Dark Elixir), then Collectors (Gold Mine, Elixir Collector, Dark Elixir Drill).
@@ -193,10 +194,10 @@ interface Candidate {        // one possible next upgrade
 6. **Temporary / last** — supercharges (defense and collector), crafted defenses, guardians. Builder-efficiency order.
 
 ### 6.4 Max-TH mode tiers
-0. Archer Queen (as above)
+0. New buildings, then Archer Queen (as above)
 1. Offense, non-hero
 2. Heroes (same rules)
-3. Merged defenses new to this TH — sources to required level, build, and upgrade merges to max
+3. TH gate items (same rules as rush tier 1): merge source upgrades so every available merge can be performed. New buildings are already in Tier 0. Merged-defense upgrades past level 1 go in tier 5.
 4. Resources (storages > collectors)
 5. Permanent defenses
 6. Temporary (supercharges, crafted defenses, guardians)
@@ -297,7 +298,7 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
 - Discrete-event simulation starting at "now" (export baseline + elapsed time).
 - Resources: N builders (+ Goblin if active), lab, pet house. In-progress upgrades occupy their slot until `remainingSec` elapses.
 - When a slot frees: pick the highest-priority eligible candidate for that queue (§6), apply Gold Pass boost to its time, occupy the slot, then mark the instance's new level as the next candidate.
-- Tier 0 rule: if the Queen is eligible and not upgrading, the first free builder takes her.
+- Tier 0 rule: free builders take new unbuilt buildings first; then, if the Queen is eligible and not upgrading, the next free builder takes her.
 - Active boosts and helpers (Builder's Apprentice, Lab Assistant) are Step 3. Until then, use raw remaining timers.
 
 ### 10.2 Gold Pass toggle

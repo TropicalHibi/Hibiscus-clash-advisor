@@ -1,6 +1,6 @@
 # Step 1 Report: CoC Upgrade Planner
 
-**Status:** Step 1 is built. `npm test` passes (44 tests, 4 files) and `npm run build` succeeds. The plan for your real export is at the bottom of this file. Design choices and assumptions are in `DECISIONS.md`.
+**Status:** Step 1 is built. `npm test` passes (49 tests, 4 files; 44 at the original Step 1 hand-off) and `npm run build` succeeds. The plan for your real export is at the bottom of this file. Design choices and assumptions are in `DECISIONS.md`.
 
 ## Start the site
 
@@ -74,7 +74,7 @@ Other commands:
 3. **Lab upgrades vs research:** the game won't let you upgrade the Laboratory or Pet House while research is running. The simulation doesn't enforce that (it does block research while the building upgrades). It doesn't affect you: both are maxed.
 4. **Goblin Builder/Researcher** only finishes its current job. The planner never gives it new work.
 5. **Gear-ups** (your Mortar has one) and **helpers** are not scheduled. The Alchemist helper (`93000003`) isn't in the data package yet, so it appears as a warning.
-6. **Max-TH reading of tiers:** only merges *new to TH18* (Super Wizard Tower) get tier 3. Ricochet Cannon, Multi-Archer Tower and Multi-Gear Tower upgrades fall into tier 5 (longest-first). That's my reading of SPEC §6.4; check it matches what you meant.
+6. ~~Max-TH reading of tiers~~: resolved by the SPEC revision. See "Update: TH gate" at the end of this file.
 
 ## Check in-game
 
@@ -139,6 +139,131 @@ Export taken 11/15/2026, 7:55:48 AM (22m ago) · now 11/15/2026, 8:18:06 AM
 
 == Resources needed (upgrades starting in the next 1d) ==
   DE                290K   first needed 8:18 AM (Royal Champion 38)
+  Ore (top 3 equipment): 360 shiny · 0 glowy · 0 starry
+    - Frozen Arrow 1→2: 120 shiny / 0 glowy / 0 starry
+    - Haste Vial 1→2: 120 shiny / 0 glowy / 0 starry
+    - Heroic Torch 1→2: 120 shiny / 0 glowy / 0 starry
+
+== Book-ready heroes (your call) ==
+  Grand Warden 77→78: 25.5M elixir, 8d (after current upgrade)
+  Dragon Duke 22→23: 440K DE, 8d (after current upgrade)
+
+== Walls ==
+  Overflow → walls: Lv 17→18 costs 7M gold or elixir each; 148 walls at Lv 17.
+
+== Lab (top 5) ==
+  Wizard 8→9 · 2d 12h · 4M elixir — Not seen in Legend I meta: shortest first (2d 12h)
+  Skeleton Spell 5→6 · 3d · 50K DE — Not seen in Legend I meta: shortest first (3d)
+  Miner 5→6 · 3d · 4.8M elixir — Not seen in Legend I meta: shortest first (3d)
+  Giant 9→10 · 3d · 5M elixir — Not seen in Legend I meta: shortest first (3d)
+  Flame Flinger 1→2 · 3d · 5.5M elixir — Not seen in Legend I meta: shortest first (3d)
+== Pet House (top 3) ==
+  Mighty Yak 1→2 · 1d · 40K DE — Not seen in Legend I meta: shortest first (1d)
+  Poison Lizard 2→3 · 1d 12h · 75K DE — Not seen in Legend I meta: shortest first (1d 12h)
+  Diggy 1→2 · 1d 12h · 90K DE — Not seen in Legend I meta: shortest first (1d 12h)
+
+== Warnings ==
+  - Unknown dataId 93000003 in "helpers" (not in game data 0.19.1); ignored.
+```
+
+---
+
+## Update: TH gate (SPEC §6.2–6.4, §10.1 revision)
+
+**Status:** `npm test` passes (49 tests: 5 new, 1 replaced, 2 updated) and `npm run build` succeeds.
+
+### What changed in the engine (`src/engine/tiers.ts`)
+- **Tier 0 = new buildings, then the Archer Queen (both modes).** Every unbuilt building now comes before the Queen, ordered offense → resources → defenses, then longest first. That includes extra copies, missing merge sources, and merges whose sources are maxed.
+- **The TH gate replaces "merge path".** Every available merge must be performed, old ones as well as new.
+  - Merge-source upgrades are rush tier 1 and max-TH tier 3.
+  - The merge itself is tier 0.
+  - Merged-defense upgrades past level 1 moved to tier 5 (permanent defenses, longest first).
+- **Rush mode: the Town Hall upgrade waits for the gate.** It only appears once every new building is built and every performable merge is done. A merge that lacks sources never blocks it. See `DECISIONS.md` for how I read "as soon as it's available".
+- Tier names changed: tier 0 "New buildings + Archer Queen"; rush tier 1 "Town Hall path + TH gate"; max-TH tier 3 "TH gate (merge sources)".
+
+### New tests (`tests/engine.test.ts`)
+- An unbuilt new building (extra X-Bow) outranks the Queen. It also keeps the TH gate closed.
+- Several new buildings are ordered offense → resources → defenses, then longest first.
+- A merge whose sources are maxed (2 spare Cannons at 21) lands in Tier 0, ahead of the Queen.
+- Max TH with an unmerged older merge (Ricochet Cannon, Cannons at 19): the Cannon upgrades are TH gate items in tier 3, and there's no merge candidate yet. Once the Cannons are at 21, the merge jumps to Tier 0.
+- Merged-defense upgrades past level 1 sit in tier 5 at TH17 (rush) and TH18 (max), mixed in with the other defenses longest first.
+- Rush mode: the Town Hall is not a candidate while a merge is still open. Once the gate is clear, it's back at the top of tier 1.
+
+### Before / after on your export (`npm run plan -- samples/myexport.json --at-export`, same timestamp for both)
+
+Your base has **no unbuilt buildings and no unperformed merges**, so Tier 0 and the TH gate are empty. The schedule, timeline, resources and wall line are **identical**. Only the reason on the Ricochet Cannon / Multi-Archer Tower upgrades changed. They were already in tier 5, and now they're there by rule rather than because they were "older merges".
+
+```diff
+@@ -10,11 +10,11 @@
+ == Top builder priorities right now ==
+   [T2 Heroes] Minion Prince 52 → 53 · 4d · 110K DE — Hero #6 in order; not book-ready (raw next level 4d < 8d threshold)
+   [T5 Permanent defenses] Firespitter 2 → 3 · 15d · 29M gold — Permanent defense, longest first (LPT)
+-  [T5 Permanent defenses] Multi-Archer Tower 1 → 2 · 8d · 13M gold — Merge path: Multi-Archer Tower to max for TH18
+-  [T5 Permanent defenses] Multi-Archer Tower 1 → 2 · 8d · 13M gold — Merge path: Multi-Archer Tower to max for TH18
+-  [T5 Permanent defenses] Ricochet Cannon 1 → 2 · 8d · 13M gold — Merge path: Ricochet Cannon to max for TH18
+-  [T5 Permanent defenses] Ricochet Cannon 1 → 2 · 8d · 13M gold — Merge path: Ricochet Cannon to max for TH18
+-  [T5 Permanent defenses] Ricochet Cannon 1 → 2 · 8d · 13M gold — Merge path: Ricochet Cannon to max for TH18
++  [T5 Permanent defenses] Multi-Archer Tower 1 → 2 · 8d · 13M gold — Merged defense upgrade (permanent defense, longest first)
++  [T5 Permanent defenses] Multi-Archer Tower 1 → 2 · 8d · 13M gold — Merged defense upgrade (permanent defense, longest first)
++  [T5 Permanent defenses] Ricochet Cannon 1 → 2 · 8d · 13M gold — Merged defense upgrade (permanent defense, longest first)
++  [T5 Permanent defenses] Ricochet Cannon 1 → 2 · 8d · 13M gold — Merged defense upgrade (permanent defense, longest first)
++  [T5 Permanent defenses] Ricochet Cannon 1 → 2 · 8d · 13M gold — Merged defense upgrade (permanent defense, longest first)
+   [T5 Permanent defenses] Skeleton Trap 4 → 5 · 7d · 18M gold — Permanent defense, longest first (LPT)
+   [T5 Permanent defenses] Skeleton Trap 4 → 5 · 7d · 18M gold — Permanent defense, longest first (LPT)
+   [T5 Permanent defenses] Skeleton Trap 4 → 5 · 7d · 18M gold — Permanent defense, longest first (LPT)
+```
+
+Full "after" output (as of now, Sunday 15 Nov 2026, 1:46 PM):
+
+```
+Export: samples\myexport.json
+
+CoC Upgrade Planner — TH18 (max TH18) · mode: MAX-TH · Hero Hall 12
+Builders: 6 · Gold Pass: none · book threshold 8d · data v0.19.1
+Export taken 11/15/2026, 7:55:48 AM (5h 50m ago) · now 11/15/2026, 1:46:15 PM
+
+== Now ==
+  B5: start Royal Champion → 38 (180K DE, 5d) — Hero #5 in order; not book-ready (raw next level 5d < 8d threshold)
+
+== Top builder priorities right now ==
+  [T2 Heroes] Minion Prince 52 → 53 · 4d · 110K DE — Hero #6 in order; not book-ready (raw next level 4d < 8d threshold)
+  [T5 Permanent defenses] Firespitter 2 → 3 · 15d · 29M gold — Permanent defense, longest first (LPT)
+  [T5 Permanent defenses] Multi-Archer Tower 1 → 2 · 8d · 13M gold — Merged defense upgrade (permanent defense, longest first)
+  [T5 Permanent defenses] Multi-Archer Tower 1 → 2 · 8d · 13M gold — Merged defense upgrade (permanent defense, longest first)
+  [T5 Permanent defenses] Ricochet Cannon 1 → 2 · 8d · 13M gold — Merged defense upgrade (permanent defense, longest first)
+  [T5 Permanent defenses] Ricochet Cannon 1 → 2 · 8d · 13M gold — Merged defense upgrade (permanent defense, longest first)
+  [T5 Permanent defenses] Ricochet Cannon 1 → 2 · 8d · 13M gold — Merged defense upgrade (permanent defense, longest first)
+  [T5 Permanent defenses] Skeleton Trap 4 → 5 · 7d · 18M gold — Permanent defense, longest first (LPT)
+  [T5 Permanent defenses] Skeleton Trap 4 → 5 · 7d · 18M gold — Permanent defense, longest first (LPT)
+  [T5 Permanent defenses] Skeleton Trap 4 → 5 · 7d · 18M gold — Permanent defense, longest first (LPT)
+
+== Timeline (next 1d) ==
+  B1 (Builder 1):
+    busy: Scattershot → 3, done Tue 9:27 AM (in 1d 19h)
+  B2 (Builder 2):
+    busy: Scattershot → 3, done Tue 9:25 AM (in 1d 19h)
+  B3 (Builder 3):
+    busy: Barbarian King → 82, done Mon 9:36 AM (in 19h 50m)
+    free Mon 9:36 AM → Barbarian King 83 (195K DE, 5d, done Sat 9:36 AM)
+  B4 (Builder 4):
+    busy: Grand Warden → 77, done 7:23 PM (in 5h 37m)
+    free 7:23 PM → Minion Prince 53 (110K DE, 4d, done Thu 7:23 PM)
+  B5 (Builder 5):
+    Royal Champion → 37 finished since the export
+    free 1:46 PM → Royal Champion 38 (180K DE, 5d, done Fri 1:46 PM)
+  B6 (Builder 6):
+    busy: Dragon Duke → 22, done Tue 1:36 PM (in 1d 23h)
+  LAB (Laboratory):
+    busy: Druid → 4, done Thu 1:41 AM (in 3d 11h)
+  PET (Pet House):
+    busy: Sneezy → 7, done Tue 12:24 PM (in 1d 22h)
+  GB (Goblin Builder):
+    busy: Multi-Archer Tower → 3, done Wed 9:49 PM (in 3d 8h)
+  GL (Goblin Researcher):
+    busy: Wall Breaker → 14, done Fri 1:13 AM (in 4d 11h)
+
+== Resources needed (upgrades starting in the next 1d) ==
+  DE                485K   first needed 1:46 PM (Royal Champion 38)
   Ore (top 3 equipment): 360 shiny · 0 glowy · 0 starry
     - Frozen Arrow 1→2: 120 shiny / 0 glowy / 0 starry
     - Haste Vial 1→2: 120 shiny / 0 glowy / 0 starry
