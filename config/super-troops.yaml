@@ -3,7 +3,7 @@
 # so army share codes can't be resolved for them from the data package alone.
 # A super troop's level is its base troop's level, so the planner credits super troop usage
 # to the base troop's lab upgrade. `base` is the clash-of-clans-data file id.
-# Checked against live API data by scripts/verify-super-troops.ts (see DECISIONS.md).
+# IDs are checked against the API's troop order by tests/meta.test.ts ("IDs agree with the order of /players/{tag} troops").
 4000026: { name: Super Barbarian, base: barbarian }
 4000027: { name: Super Archer, base: archer }
 4000028: { name: Super Wall Breaker, base: wall-breaker }

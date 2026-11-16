@@ -17,10 +17,11 @@ const flag = (name: string) => {
 };
 const positional = args.filter((a, i) => !a.startsWith('--') && !(i > 0 && VALUE_FLAGS.has(args[i - 1])));
 
-const candidates = [positional[0], 'samples/my-export.json', 'samples/myexport.json', 'tests/fixtures/export-th16.json'].filter(Boolean) as string[];
+// An explicit path must exist: never fall back to the private samples/ export on a typo.
+const candidates = positional[0] ? [positional[0]] : ['samples/my-export.json', 'samples/myexport.json', 'tests/fixtures/export-th16.json'];
 const file = candidates.map((f) => path.resolve(process.cwd(), f)).find((f) => fs.existsSync(f));
 if (!file) {
-  console.error('No export file found. Usage: npm run plan -- path/to/export.json');
+  console.error(positional[0] ? `File not found: ${positional[0]}` : 'No export file found. Usage: npm run plan -- path/to/export.json');
   process.exit(1);
 }
 

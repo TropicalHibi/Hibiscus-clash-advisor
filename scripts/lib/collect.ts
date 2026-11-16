@@ -50,6 +50,8 @@ export interface GatherOptions {
   maxPlayers: number;
   leagueTierId?: number;
   onLocation?: (info: { location: string; found: number; total: number; index: number; of: number }) => void;
+  /** A location whose rankings failed (after retries) and was skipped. */
+  onSkip?: (info: { location: string; error: string }) => void;
 }
 
 /** Legend I player tags from global + country rankings, deduped, capped at maxPlayers. */
@@ -71,8 +73,10 @@ export async function gatherPlayers(api: ApiClient, opts: GatherOptions): Promis
         if (tags.length >= opts.maxPlayers) break;
       }
     } catch (e) {
-      // A location without rankings (404) shouldn't stop the run.
-      if ((e as { status?: number }).status !== 404) throw e;
+      // One location failing (404, or 5xx / network after retries) shouldn't stop the run. A bad key does.
+      const status = (e as { status?: number }).status;
+      if (status === 401 || status === 403) throw e;
+      if (status !== 404) opts.onSkip?.({ location: src.name, error: (e as Error).message });
     }
     opts.onLocation?.({ location: src.name, found, total: tags.length, index: i + 1, of: sources.length });
   }

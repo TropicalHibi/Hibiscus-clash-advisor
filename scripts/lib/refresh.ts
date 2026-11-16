@@ -6,6 +6,10 @@ export const REFRESH_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 export interface RefreshState {
   /** When npm was last asked (successfully) for the newest clash-of-clans-data version. */
   lastDataCheck?: number;
+  /** Newest version that loaded and validated (written by `npm run sync`). */
+  lastGoodDataVersion?: string;
+  /** A version that failed to load; sync restored the last good one. Warned about on every start until fixed. */
+  dataFailure?: { version: string; reason: string; at: number };
 }
 
 export interface RefreshDeps {
@@ -14,7 +18,7 @@ export interface RefreshDeps {
   writeState(s: RefreshState): void;
   /** Installed clash-of-clans-data version, or undefined if not installed. */
   installedVersion(): string | undefined;
-  /** Newest published version (npm view). Throws when offline. */
+  /** Newest published version within the installed major (npm view). Throws when offline. */
   latestVersion(): string;
   /** Runs the full `npm run sync`. Throws on failure. */
   runSync(): void;
@@ -27,7 +31,7 @@ export interface RefreshDeps {
   log(line: string): void;
 }
 
-export type DataOutcome = 'checked-recently' | 'up-to-date' | 'synced' | 'failed';
+export type DataOutcome = 'checked-recently' | 'up-to-date' | 'synced' | 'known-bad' | 'failed';
 export type MetaOutcome = 'fresh' | 'no-token' | 'updated' | 'updated-with-failures' | 'failed';
 
 /** Numeric dotted-version compare ("0.19.1" < "0.20.0"); pre-release tags are ignored. */
@@ -56,6 +60,12 @@ const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
 export function refreshGameData(d: RefreshDeps): DataOutcome {
   const now = d.now();
   const state = d.readState();
+  const bad = state.dataFailure;
+  // Every start, until a sync succeeds: the site is running on the last known-good data.
+  if (bad)
+    d.log(
+      `[refresh] warning: clash-of-clans-data ${bad.version} can't be used (${oneLine(bad.reason, 'load failed')}); staying on ${d.installedVersion() ?? 'the previous version'}. Fix config/merges.yaml or the code, then run npm run sync.`,
+    );
   if (state.lastDataCheck !== undefined && now - state.lastDataCheck < REFRESH_MAX_AGE_MS) return 'checked-recently';
   let latest: string;
   try {
@@ -66,6 +76,11 @@ export function refreshGameData(d: RefreshDeps): DataOutcome {
     return 'failed';
   }
   const installed = d.installedVersion();
+  if (bad && latest === bad.version && isNewerVersion(latest, installed)) {
+    // Known to fail: don't reinstall it on every start. `npm run sync` by hand retries it after a fix.
+    d.writeState({ ...state, lastDataCheck: now });
+    return 'known-bad';
+  }
   if (!isNewerVersion(latest, installed)) {
     d.writeState({ ...state, lastDataCheck: now });
     d.log(`[refresh] game data up to date (clash-of-clans-data ${installed}).`);

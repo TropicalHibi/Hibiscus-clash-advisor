@@ -1,38 +1,17 @@
 // npm run probe — makes a handful of real API calls and saves REDACTED samples to tests/fixtures/api/.
 // Used once to confirm field names, the Legend I filter, battle-log depth and ranking pagination.
-// Redaction: player/clan tags become stable pseudonyms (#PLAYER1, #CLAN1 …), player/clan names are
-// replaced, badge/icon URLs dropped. The token is never written anywhere.
+// Redaction (scripts/lib/redact.ts): tags become stable pseudonyms (#PLAYER1, #CLAN1 …), other tag values,
+// names, badge/icon URLs and profile stats are removed. The token is never written anywhere.
 import fs from 'node:fs';
 import path from 'node:path';
 import { PROJECT_ROOT } from '../src/data/loadNode';
 import { ApiError, createClient, encTag, loadToken, type ApiBattle, type ApiLocation, type ApiPage, type ApiRankedPlayer } from './lib/api';
+import { createRedactor } from './lib/redact';
 
 const OUT = path.join(PROJECT_ROOT, 'tests', 'fixtures', 'api');
 fs.mkdirSync(OUT, { recursive: true });
 
-const tagMap = new Map<string, string>();
-const pseudo = (tag: string, kind: 'PLAYER' | 'CLAN') => {
-  const key = `${kind}:${tag}`;
-  if (!tagMap.has(key)) tagMap.set(key, `#${kind}${[...tagMap.keys()].filter((k) => k.startsWith(kind)).length + 1}`);
-  return tagMap.get(key)!;
-};
-
-function redact(x: unknown, parentKey = ''): unknown {
-  if (Array.isArray(x)) return x.map((v) => redact(v, parentKey));
-  if (!x || typeof x !== 'object') return x;
-  const o = x as Record<string, unknown>;
-  const isClan = parentKey === 'clan' || parentKey === 'opponentClan';
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(o)) {
-    if (k === 'badgeUrls' || k === 'iconUrls') continue;
-    if (k === 'tag' && typeof v === 'string') out[k] = pseudo(v, isClan ? 'CLAN' : 'PLAYER');
-    else if ((k === 'opponentPlayerTag' || k === 'attackerTag' || k === 'defenderTag') && typeof v === 'string') out[k] = pseudo(v, 'PLAYER');
-    else if (k === 'opponentName' && typeof v === 'string') out[k] = 'Redacted Opponent';
-    else if (k === 'name' && typeof o.tag === 'string') out[k] = isClan ? 'Redacted Clan' : 'Redacted Player';
-    else out[k] = redact(v, k);
-  }
-  return out;
-}
+const redact = createRedactor();
 
 function save(name: string, body: unknown): void {
   const file = path.join(OUT, name);

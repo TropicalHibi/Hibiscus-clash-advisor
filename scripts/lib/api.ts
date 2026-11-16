@@ -75,7 +75,7 @@ export function createClient(opts: ClientOptions) {
       if (res.ok) return (await res.json()) as T;
       const retryable = res.status === 429 || res.status >= 500;
       if (retryable && attempt < maxRetries) {
-        const waitMs = backoff(attempt);
+        const waitMs = retryAfterMs(res.headers?.get?.('retry-after'), attempt);
         opts.onRetry?.({ path: urlPath, status: res.status, attempt: attempt + 1, waitMs });
         await sleep(waitMs);
         continue;
@@ -104,6 +104,13 @@ export function createClient(opts: ClientOptions) {
 /** Exponential backoff: 1s, 2s, 4s, 8s, 16s (+ up to 250ms jitter), capped at 30s. */
 export function backoff(attempt: number): number {
   return Math.min(30_000, 1000 * 2 ** attempt) + Math.floor(Math.random() * 250);
+}
+
+/** Wait before a retry: the server's Retry-After (seconds) when given and longer than our backoff, capped at 60s. */
+export function retryAfterMs(header: string | null | undefined, attempt: number): number {
+  const base = backoff(attempt);
+  const sec = header ? Number(header) : NaN;
+  return Number.isFinite(sec) && sec > 0 ? Math.min(60_000, Math.max(base, sec * 1000)) : base;
 }
 
 export type ApiClient = ReturnType<typeof createClient>;
