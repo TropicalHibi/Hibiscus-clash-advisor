@@ -5,6 +5,7 @@ import type { Plan } from '../engine/plan';
 import { nextResearch, type QueueCandidate } from '../engine/queues';
 import type { MetaFile } from '../meta/meta';
 import type { LabKind } from '../state/settings';
+import { icon } from './images';
 import { esc } from './planView';
 
 export type PinList = 'lab' | 'petHouse' | 'blacksmith';
@@ -32,7 +33,7 @@ function row(c: QueueCandidate, i: number, list: PinList, sub: string): string {
   return `<li class="rank-item${c.pinned ? ' pinned' : ''}">
     <span class="rk">${i + 1}</span>
     <div class="body">
-      <div class="title"><b>${esc(c.item.name)}</b> ${c.instance.level}→${c.toLevel} <span class="small muted">${esc(sub)}</span></div>
+      <div class="title">${icon(c.item.key)}<b>${esc(c.item.name)}</b> ${c.instance.level}→${c.toLevel} <span class="small muted">${esc(sub)}</span></div>
       <div class="stats">${stats}</div>
       ${supers}
     </div>
@@ -74,7 +75,7 @@ export function nextInLab(p: Plan): string {
       return top.autoPick ? `top ${KIND_LABEL[k]} ${esc(top.item.name)} ${v(top)}` : `${KIND_LABEL[k]}s not auto-picked (weight 0)`;
     });
   const why = pick.pinned ? 'pinned' : `${KIND_LABEL[pick.labKind ?? 'troop']} · pick value <b>${v(pick)}</b> vs ${others.join(', ')}`;
-  return `<div class="card next-lab"><b>Next in lab:</b> <b>${esc(pick.item.name)}</b> ${pick.instance.level}→${pick.toLevel} (${why})${when}</div>`;
+  return `<div class="card next-lab"><b>Next in lab:</b> ${icon(pick.item.key, 20)}<b>${esc(pick.item.name)}</b> ${pick.instance.level}→${pick.toLevel} (${why})${when}</div>`;
 }
 
 export function renderLab(p: Plan, meta: MetaFile, heroName: (id: string) => string, weights: Record<LabKind, number> = { troop: 1, spell: 0.7, siege: 0.5 }): string {

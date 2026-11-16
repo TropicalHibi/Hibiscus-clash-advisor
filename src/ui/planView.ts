@@ -3,6 +3,7 @@ import type { Resource } from '../data/types';
 import { fmtClock, fmtCost, fmtDuration, fmtNum, RESOURCE_LABEL } from '../engine/format';
 import type { Plan } from '../engine/plan';
 import type { TimelineEntry } from '../engine/scheduler';
+import { icon } from './images';
 
 export function esc(s: string | number): string {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -23,6 +24,7 @@ export function renderPlan(p: Plan): string {
     <span><b>${p.builders}</b> builders</span>
     <span>Gold Pass: <b>${p.goldPass === 'max' ? 'Max' : 'None'}</b></span>
     <span class="muted">${baseline}</span>
+    ${p.helperLine ? `<span class="muted helpers">${esc(p.helperLine)}</span>` : ''}
   </div>`);
 
   // Now
@@ -37,7 +39,7 @@ export function renderPlan(p: Plan): string {
     out.push(`<div class="muted">Nothing is free right now.</div>`);
     if (next)
       out.push(
-        `<div class="now-item"><span class="slot">${esc(next.slotId)}</span><span class="what">Next: ${esc(next.itemName)} ${next.toLevel} at ${esc(at(next.start))}</span><span class="reason">${esc(next.reason)} · ${esc(fmtCost(next.cost, next.resource))}</span></div>`,
+        `<div class="now-item"><span class="slot">${esc(next.slotId)}</span><span class="what">${icon(next.itemKey)}Next: ${esc(next.itemName)} ${next.toLevel} at ${esc(at(next.start))}</span><span class="reason">${esc(next.reason)} · ${esc(fmtCost(next.cost, next.resource))}</span></div>`,
       );
   }
   out.push('</div>');
@@ -49,10 +51,12 @@ export function renderPlan(p: Plan): string {
     const idle = p.sim.idle.find((i) => i.slotId === s.id);
     out.push(`<div class="card slot-card"><h3><span>${esc(s.id)} · ${esc(s.label)}</span></h3><ol>`);
     for (const e of entries) {
-      if (e.inProgress) out.push(`<li class="busy">${esc(e.itemName)} → ${e.toLevel}<span class="t">${e.end === 0 ? 'finished since the export' : `busy until ${esc(at(e.end))} (${esc(fmtDuration(e.end))})`}</span></li>`);
+      const helped = e.helperSavedSec ? ` · helpers −${esc(fmtDuration(e.helperSavedSec))}` : '';
+      if (e.inProgress)
+        out.push(`<li class="busy">${icon(e.itemKey)}${esc(e.itemName)} → ${e.toLevel}<span class="t">${e.end === 0 ? 'finished since the export' : `busy until ${esc(at(e.end))} (${esc(fmtDuration(e.end))})`}${helped}</span></li>`);
       else
         out.push(
-          `<li><b>${esc(e.itemName)} ${e.toLevel}</b> · ${esc(fmtCost(e.cost, e.resource))}<span class="t">free ${esc(at(e.start))} → done ${esc(at(e.end))} (${esc(fmtDuration(e.end - e.start))})</span></li>`,
+          `<li>${icon(e.itemKey)}<b>${esc(e.itemName)} ${e.toLevel}</b> · ${esc(fmtCost(e.cost, e.resource))}<span class="t">free ${esc(at(e.start))} → done ${esc(at(e.end))} (${esc(fmtDuration(e.end - e.start))})${helped}</span></li>`,
         );
     }
     if (idle) out.push(`<li class="muted">Nothing eligible from ${esc(at(idle.at))}${s.goblin ? '' : ''}</li>`);
@@ -92,7 +96,7 @@ export function renderPlan(p: Plan): string {
   if (p.forecast.oreItems.length) {
     out.push('<div class="card small"><b>Ore picks</b> (top of the Blacksmith ranking: Legend I usage, pins first; unseen items cheapest first):<ul>');
     for (const c of p.forecast.oreItems)
-      out.push(`<li>${esc(c.item.name)} ${c.instance.level}→${c.toLevel}: ${c.ore?.shinyOre ?? 0} shiny · ${c.ore?.glowyOre ?? 0} glowy · ${c.ore?.starryOre ?? 0} starry</li>`);
+      out.push(`<li>${icon(c.item.key, 20)}${esc(c.item.name)} ${c.instance.level}→${c.toLevel}: ${c.ore?.shinyOre ?? 0} shiny · ${c.ore?.glowyOre ?? 0} glowy · ${c.ore?.starryOre ?? 0} starry</li>`);
     out.push('</ul></div>');
   }
 
@@ -103,7 +107,7 @@ export function renderPlan(p: Plan): string {
     out.push(`<div class="card"><p class="muted small" style="margin-top:0">Next level takes ≥ ${esc(fmtDuration(p.bookThresholdSec))} (the longest hero level in the data). These drop out of scheduling.</p><table><tbody>`);
     for (const b of p.bookReady)
       out.push(
-        `<tr><td>${esc(b.name)} ${b.level}→${b.toLevel}${b.afterCurrent ? ' <span class="muted small">(after current upgrade)</span>' : ''}</td><td class="num">${esc(fmtCost(b.cost, b.resource))}</td><td class="num">${esc(fmtDuration(b.timeSec))}</td></tr>`,
+        `<tr><td>${icon(b.itemKey, 20)}${esc(b.name)} ${b.level}→${b.toLevel}${b.afterCurrent ? ' <span class="muted small">(after current upgrade)</span>' : ''}</td><td class="num">${esc(fmtCost(b.cost, b.resource))}</td><td class="num">${esc(fmtDuration(b.timeSec))}</td></tr>`,
       );
     out.push('</tbody></table></div>');
   }
@@ -116,7 +120,7 @@ export function renderPlan(p: Plan): string {
   out.push('<h2>Builder priority list right now</h2><div class="card table-wrap"><table><thead><tr><th>Tier</th><th>Upgrade</th><th>Time</th><th>Cost</th></tr></thead><tbody>');
   for (const c of p.topCandidates)
     out.push(
-      `<tr><td class="small">T${c.tier} ${esc(p.tierNames[c.tier])}</td><td>${esc(c.item.name)} ${c.instance.planned ? '(new)' : c.instance.level}→${c.toLevel}<div class="muted small">${esc(c.reason)}</div></td><td class="num">${esc(fmtDuration(c.timeSec))}</td><td class="num">${esc(fmtCost(c.cost, c.resource))}</td></tr>`,
+      `<tr><td class="small">T${c.tier} ${esc(p.tierNames[c.tier])}</td><td><div class="with-ico">${icon(c.item.key)}<span>${esc(c.item.name)} ${c.instance.planned ? '(new)' : c.instance.level}→${c.toLevel}<div class="muted small">${esc(c.reason)}</div></span></div></td><td class="num">${esc(fmtDuration(c.timeSec))}</td><td class="num">${esc(fmtCost(c.cost, c.resource))}</td></tr>`,
     );
   out.push('</tbody></table></div>');
 
@@ -129,5 +133,5 @@ export function renderPlan(p: Plan): string {
 }
 
 function nowItem(e: TimelineEntry, label: string): string {
-  return `<div class="now-item"><span class="slot">${esc(e.slotId)}</span><span class="what">${esc(e.itemName)} → ${e.toLevel} <span class="muted small">${esc(fmtCost(e.cost, e.resource))} · ${esc(fmtDuration(e.end - e.start))}</span></span><span class="reason">${esc(label)}: ${esc(e.reason)}</span></div>`;
+  return `<div class="now-item"><span class="slot">${esc(e.slotId)}</span><span class="what">${icon(e.itemKey)}${esc(e.itemName)} → ${e.toLevel} <span class="muted small">${esc(fmtCost(e.cost, e.resource))} · ${esc(fmtDuration(e.end - e.start))}</span></span><span class="reason">${esc(label)}: ${esc(e.reason)}</span></div>`;
 }

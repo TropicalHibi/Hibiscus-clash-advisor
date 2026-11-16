@@ -2,12 +2,16 @@ import './style.css';
 import { loadGameDataBrowser } from './data/loadBrowser';
 import type { GameData } from './data/types';
 import { fmtClock } from './engine/format';
+import type { DataChangesFile } from './data/snapshot';
+import { buildEverything } from './engine/everything';
 import { buildPlan } from './engine/plan';
 import { detectMode } from './engine/tiers';
 import { coerceMeta, EMPTY_META, type MetaFile } from './meta/meta';
 import { parseExport, ExportParseError, type AccountState } from './state/parseExport';
-import { settingsFromYaml, type Settings } from './state/settings';
+import { DEFAULT_HERO_ORDER, moveHero, settingsFromYaml, type Settings } from './state/settings';
+import { renderEverything } from './ui/everythingView';
 import { renderLab, type PinList } from './ui/labView';
+import { icon } from './ui/images';
 import { esc, renderPlan } from './ui/planView';
 import { storage } from './ui/storage';
 import settingsYaml from '../config/settings.sample.yaml?raw';
@@ -16,6 +20,7 @@ const DEFAULTS = settingsFromYaml(settingsYaml);
 
 let data: GameData;
 let meta: MetaFile = EMPTY_META;
+let dataChanges: DataChangesFile | null = null;
 let settings: Settings = storage.loadSettings(DEFAULTS);
 let account: AccountState | null = null;
 let importedAt = 0;
@@ -40,7 +45,7 @@ function heroName(id: string): string {
 }
 
 // ── Tabs ──
-const TABS = ['plan', 'lab', 'import'];
+const TABS = ['plan', 'lab', 'everything', 'import'];
 function showTab(tab: string): void {
   if (!TABS.includes(tab)) tab = 'plan';
   document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
@@ -48,7 +53,37 @@ function showTab(tab: string): void {
   storage.saveTab(tab);
   if (tab === 'plan') renderPlanTab();
   else if (tab === 'lab') renderLabTab();
+  else if (tab === 'everything') renderEverythingTab();
   else renderImportTab();
+}
+
+// ── Everything tab (SPEC §11.4) ──
+// A full scheduler run to max: computed when the tab opens (not on the 60 s refresh; it changes slowly).
+function renderEverythingTab(): void {
+  const el = $('#tab-everything');
+  if (!account) {
+    el.innerHTML = `<div class="card empty"><p>No account loaded yet.</p><button class="btn" id="go-import-ev">Paste your export</button></div>`;
+    el.querySelector('#go-import-ev')?.addEventListener('click', () => showTab('import'));
+    return;
+  }
+  try {
+    el.innerHTML = renderEverything(buildEverything(data, accountWithBaseline(account), settings, meta, Math.floor(Date.now() / 1000)));
+  } catch (e) {
+    el.innerHTML = `<div class="card warn">Could not list the remaining upgrades: ${esc((e as Error).message)}</div>`;
+    console.error(e);
+  }
+}
+
+// ── "Game data updated" banner (SPEC §9): shown on the Plan tab for a new data version until dismissed ──
+function dataChangesBanner(): string {
+  const dc = dataChanges;
+  if (!dc || dc.version !== data.version || !dc.changes.length || storage.loadDataChangesSeen() === dc.version) return '';
+  return `<div class="card banner" id="data-banner">
+    <div class="row"><b>Game data updated: ${dc.changes.length} change${dc.changes.length === 1 ? '' : 's'}</b>
+      <span class="small muted">clash-of-clans-data ${esc(dc.previousVersion)} → ${esc(dc.version)}</span>
+      <button class="btn secondary small" id="dismiss-banner">Dismiss</button></div>
+    <details><summary class="small">Show changes</summary><ul class="small changes">${dc.changes.map((c) => `<li>${esc(c.text)}</li>`).join('')}</ul></details>
+  </div>`;
 }
 
 /** The account with a timer baseline (paste time when the export has no timestamp). */
@@ -102,7 +137,11 @@ function renderPlanTab(): void {
     const plan = buildPlan(data, acct, settings, meta, nowSec);
     if (!account.exportTimestamp) plan.warnings.unshift(`Export has no timestamp; timers count from the import at ${fmtClock(importedAt, nowSec)}.`);
     plan.warnings = plan.warnings.filter((w) => !w.startsWith('Export has no timestamp; timers count from the import time'));
-    el.innerHTML = renderPlan(plan);
+    el.innerHTML = dataChangesBanner() + renderPlan(plan);
+    el.querySelector('#dismiss-banner')?.addEventListener('click', () => {
+      if (dataChanges) storage.saveDataChangesSeen(dataChanges.version);
+      el.querySelector('#data-banner')?.remove();
+    });
   } catch (e) {
     el.innerHTML = `<div class="card warn">Could not build a plan: ${esc((e as Error).message)}</div>`;
     console.error(e);
@@ -141,6 +180,10 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
       <p class="small muted">Max applies the builder boost to builder upgrades (including supercharges) and the research boost to lab and pet upgrades. Running timers are never changed.</p>
     </div>
     <div class="card">
+      <label class="toggle"><input type="checkbox" id="sim-helpers" ${settings.simulateHelpers ? 'checked' : ''}> <b>Simulate helpers and boosts</b></label>
+      <p class="small muted">On: the Builder's Apprentice and Lab Assistant from your export each take their work rate (hours) off one job once a day: the job they're set to repeat on, else the builder job with the most time left / the running research. Active potions from the export speed up their queue. Off: raw timers only (to compare).</p>
+    </div>
+    <div class="card">
       <div><b>Lab pick weights</b> <span class="small muted">(score ÷ Legend I top of its kind × weight; 0 = never auto-pick that kind)</span></div>
       <div class="row" style="margin-top:6px">
         ${(['troop', 'spell', 'siege'] as const)
@@ -149,16 +192,18 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
       </div>
     </div>
     <div class="card">
-      <div><b>Hero order</b> <span class="small muted">(Archer Queen always gets Tier 0 until book-ready)</span></div>
+      <div><b>Hero order</b> <span class="small muted">(drag to reorder, or use ↑ / ↓)</span></div>
+      <p class="small muted">The order of the Heroes tier. The Archer Queen's Tier 0 rule (upgraded until book-ready, right after the Laboratory and new buildings) belongs to the Queen herself, wherever she sits in this list.</p>
       <ol class="hero-order">
         ${settings.heroOrder
           .map(
-            (id, i) => `<li><span class="n">${i + 1}</span><span class="name">${esc(heroName(id))}</span>
-          <button class="icon" data-move="${i}" data-dir="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move up">↑</button>
-          <button class="icon" data-move="${i}" data-dir="1" ${i === settings.heroOrder.length - 1 ? 'disabled' : ''} aria-label="Move down">↓</button></li>`,
+            (id, i) => `<li draggable="true" data-idx="${i}"><span class="grip" aria-hidden="true">⋮⋮</span><span class="n">${i + 1}</span>${icon(data.byId.get(id)?.key ?? '', 24)}<span class="name">${esc(heroName(id))}${id === 'archer-queen' ? ' <span class="small muted">· Tier 0</span>' : ''}</span>
+          <button class="icon" data-move="${i}" data-dir="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(heroName(id))} up">↑</button>
+          <button class="icon" data-move="${i}" data-dir="1" ${i === settings.heroOrder.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(heroName(id))} down">↓</button></li>`,
           )
           .join('')}
       </ol>
+      <div class="row"><button class="btn secondary" id="btn-hero-reset" ${settings.heroOrder.join() === DEFAULT_HERO_ORDER.join() ? 'disabled' : ''}>Reset hero order to default</button></div>
     </div>
     <div class="row"><button class="btn secondary" id="btn-reset">Reset settings to defaults</button></div>
   `;
@@ -201,17 +246,44 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
       storage.saveSettings(settings);
     }),
   );
+  el.querySelector<HTMLInputElement>('#sim-helpers')?.addEventListener('change', (ev) => {
+    settings = { ...settings, simulateHelpers: (ev.target as HTMLInputElement).checked };
+    storage.saveSettings(settings);
+  });
+  const setHeroOrder = (order: string[]) => {
+    settings = { ...settings, heroOrder: order };
+    storage.saveSettings(settings);
+    renderImportTab();
+  };
   el.querySelectorAll<HTMLButtonElement>('[data-move]').forEach((b) =>
     b.addEventListener('click', () => {
       const i = Number(b.dataset.move);
-      const j = i + Number(b.dataset.dir);
-      const order = [...settings.heroOrder];
-      [order[i], order[j]] = [order[j], order[i]];
-      settings = { ...settings, heroOrder: order };
-      storage.saveSettings(settings);
-      renderImportTab();
+      setHeroOrder(moveHero(settings.heroOrder, i, i + Number(b.dataset.dir)));
     }),
   );
+  // Drag to reorder (desktop). Touch devices use the ↑ / ↓ buttons.
+  let dragFrom = -1;
+  el.querySelectorAll<HTMLLIElement>('.hero-order li').forEach((li) => {
+    li.addEventListener('dragstart', (ev) => {
+      dragFrom = Number(li.dataset.idx);
+      li.classList.add('dragging');
+      ev.dataTransfer?.setData('text/plain', String(dragFrom));
+      if (ev.dataTransfer) ev.dataTransfer.effectAllowed = 'move';
+    });
+    li.addEventListener('dragend', () => li.classList.remove('dragging'));
+    li.addEventListener('dragover', (ev) => {
+      ev.preventDefault();
+      li.classList.add('drop-target');
+    });
+    li.addEventListener('dragleave', () => li.classList.remove('drop-target'));
+    li.addEventListener('drop', (ev) => {
+      ev.preventDefault();
+      const from = dragFrom >= 0 ? dragFrom : Number(ev.dataTransfer?.getData('text/plain'));
+      dragFrom = -1;
+      setHeroOrder(moveHero(settings.heroOrder, from, Number(li.dataset.idx)));
+    });
+  });
+  el.querySelector('#btn-hero-reset')?.addEventListener('click', () => setHeroOrder([...DEFAULT_HERO_ORDER]));
   el.querySelector('#btn-reset')!.addEventListener('click', () => {
     storage.clearSettings();
     settings = DEFAULTS;
@@ -219,12 +291,20 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
   });
 }
 
+/** public/data-changes.json, or null when it's missing or malformed. */
+function coerceDataChanges(j: unknown): DataChangesFile | null {
+  const o = j as Partial<DataChangesFile> | null;
+  if (!o || typeof o.version !== 'string' || !Array.isArray(o.changes)) return null;
+  const changes = o.changes.filter((c) => c && typeof c.text === 'string');
+  return { version: o.version, previousVersion: typeof o.previousVersion === 'string' ? o.previousVersion : '?', date: typeof o.date === 'string' ? o.date : '', changes };
+}
+
 function renderFooter(): void {
   const metaText =
     meta.generatedAt && meta.attacks > 0
       ? `Legend I meta: ${esc(new Date(meta.generatedAt).toLocaleString())} · ${meta.attacks.toLocaleString()} attacks, ${meta.players.toLocaleString()} players`
       : 'Legend I meta: none yet';
-  $('#footer').innerHTML = `Game data: clash-of-clans-data v${esc(data.version)} · max TH ${data.maxTH} · ${metaText}<br>
+  $('#footer').innerHTML = `Game data: clash-of-clans-data v${esc(data.version)}${dataChanges?.version === data.version && dataChanges.date ? ` (synced ${esc(dataChanges.date)})` : ''} · max TH ${data.maxTH} · ${metaText}<br>
     Update with <code>npm run sync</code> (game data) and <code>npm run meta</code> (Legend I meta).`;
 }
 
@@ -240,6 +320,12 @@ async function init(): Promise<void> {
     if (res.ok) meta = coerceMeta(await res.json());
   } catch {
     meta = EMPTY_META;
+  }
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL}data-changes.json`, { cache: 'no-store' });
+    if (res.ok) dataChanges = coerceDataChanges(await res.json());
+  } catch {
+    dataChanges = null;
   }
   loadAccount();
   renderFooter();

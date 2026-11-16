@@ -6,6 +6,7 @@ const K = {
   importedAt: 'cocPlanner.importedAt',
   settings: 'cocPlanner.settings',
   tab: 'cocPlanner.tab',
+  dataChangesSeen: 'cocPlanner.dataChangesSeen',
 };
 
 function get(key: string): string | null {
@@ -68,6 +69,13 @@ export const storage = {
   },
   clearSettings(): void {
     del(K.settings);
+  },
+  /** Game-data version whose "data updated" banner was dismissed. */
+  loadDataChangesSeen(): string | null {
+    return get(K.dataChangesSeen);
+  },
+  saveDataChangesSeen(version: string): void {
+    set(K.dataChangesSeen, version);
   },
   loadTab(): string | null {
     return get(K.tab);
