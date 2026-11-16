@@ -116,7 +116,12 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
   }
 
   const warnings = [...dataIssues(data), ...account.warnings, ...sim.warnings];
-  for (const u of account.unresolved) warnings.push(`Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${data.version}); ignored.`);
+  for (const u of account.unresolved)
+    warnings.push(
+      u.upgrading
+        ? `Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${data.version}): its running upgrade still occupies a slot until it finishes.`
+        : `Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${data.version}); ignored.`,
+    );
   if (!account.exportTimestamp) warnings.push('Export has no timestamp; timers count from the import time.');
 
   const lab = researchCandidates(data, state, 'lab', settings, meta, boosts.research);

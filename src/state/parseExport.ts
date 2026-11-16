@@ -5,6 +5,57 @@ import { IDS, levelsOf } from './levels';
 export interface Unresolved {
   section: string;
   dataId: number;
+  /** True when the entry has a running timer (it still occupies a slot: see AccountState.unknownJobs). */
+  upgrading?: boolean;
+}
+
+/**
+ * A running upgrade on an item the game data doesn't know yet (e.g. a building from a newer patch).
+ * It still occupies its builder / lab / pet slot until its timer runs out (SPEC §3.2, §10.1).
+ */
+export interface UnknownJob {
+  dataId: number;
+  section: string;
+  queue: 'builder' | 'lab' | 'petHouse';
+  /** Level before the upgrade (0 = under construction). */
+  level: number;
+  /** Seconds left at the export time. */
+  remainingSec: number;
+  goblin: boolean;
+  helperRecurrent: boolean;
+  helperTimerSec?: number;
+}
+
+/** Which slot a running upgrade in an export section occupies. Equipment and helpers have no timers. */
+const SECTION_QUEUE: Record<string, UnknownJob['queue'] | undefined> = {
+  buildings: 'builder',
+  traps: 'builder',
+  heroes: 'builder',
+  guardians: 'builder',
+  'buildings.types.modules': 'builder',
+  units: 'lab',
+  troops: 'lab',
+  siege_machines: 'lab',
+  spells: 'lab',
+  pets: 'petHouse',
+};
+
+/** Unknown-id entries with a timer → UnknownJob(s), one per `cnt` like known items. */
+function unknownJobs(section: string, e: any): UnknownJob[] {
+  const queue = SECTION_QUEUE[section];
+  if (!queue || typeof e?.timer !== 'number' || e.timer <= 0) return [];
+  const cnt = typeof e.cnt === 'number' && e.cnt > 0 ? e.cnt : 1;
+  const job: UnknownJob = {
+    dataId: e.data,
+    section,
+    queue,
+    level: typeof e.lvl === 'number' ? e.lvl : 0,
+    remainingSec: e.timer,
+    goblin: e.extra === true,
+    helperRecurrent: e.helper_recurrent === true || e.recurrent_helper === true,
+    ...(typeof e.helper_timer === 'number' && e.helper_timer > 0 ? { helperTimerSec: e.helper_timer } : {}),
+  };
+  return Array.from({ length: cnt }, () => ({ ...job }));
 }
 
 /**
@@ -15,17 +66,20 @@ export interface Unresolved {
 export interface Boosts {
   builderPotionSec: number;
   researchPotionSec: number;
+  /** Pet Potion (Pet House only). Key `pet_boost` is assumed (not in coc.py). */
+  petPotionSec: number;
   builderSnackSec: number;
   researchSnackSec: number;
   clockTowerSec: number;
   clockTowerCooldownSec: number;
 }
 
-export const NO_BOOSTS: Boosts = { builderPotionSec: 0, researchPotionSec: 0, builderSnackSec: 0, researchSnackSec: 0, clockTowerSec: 0, clockTowerCooldownSec: 0 };
+export const NO_BOOSTS: Boosts = { builderPotionSec: 0, researchPotionSec: 0, petPotionSec: 0, builderSnackSec: 0, researchSnackSec: 0, clockTowerSec: 0, clockTowerCooldownSec: 0 };
 
 const BOOST_KEYS: Record<string, keyof Boosts | 'helperCooldown'> = {
   builder_boost: 'builderPotionSec',
   lab_boost: 'researchPotionSec',
+  pet_boost: 'petPotionSec',
   builder_consumable: 'builderSnackSec',
   lab_consumable: 'researchSnackSec',
   clocktower_boost: 'clockTowerSec',
@@ -54,6 +108,8 @@ export interface AccountState {
   instances: OwnedInstance[];
   walls: { level: number; count: number }[];
   unresolved: Unresolved[];
+  /** Running upgrades on unknown ids: they occupy slots in the scheduler. */
+  unknownJobs: UnknownJob[];
   /** Parsed active boosts (all 0 when the export's `boosts` is empty). */
   boosts: Boosts;
   /** The raw `boosts` object, as exported. */
@@ -116,6 +172,12 @@ export function parseExport(input: string | object, data: GameData): AccountStat
   const instances: OwnedInstance[] = [];
   const walls: { level: number; count: number }[] = [];
   const unresolved: Unresolved[] = [];
+  const unknown: UnknownJob[] = [];
+  const noteUnknown = (section: string, e: any) => {
+    const jobs = unknownJobs(section, e);
+    unresolved.push({ section, dataId: e.data, ...(jobs.length ? { upgrading: true } : {}) });
+    unknown.push(...jobs);
+  };
   const seq = new Map<string, number>();
   const nextUid = (base: string) => {
     const n = (seq.get(base) ?? 0) + 1;
@@ -145,7 +207,7 @@ export function parseExport(input: string | object, data: GameData): AccountStat
           for (const m of t.modules ?? []) {
             const key = `${t.data}:m${m.data}`;
             if (!data.items.has(key)) {
-              unresolved.push({ section: 'buildings.types.modules', dataId: m.data });
+              noteUnknown('buildings.types.modules', m);
               continue;
             }
             instances.push({
@@ -164,7 +226,7 @@ export function parseExport(input: string | object, data: GameData): AccountStat
 
       const item = data.byDataId.get(dataId);
       if (!item) {
-        unresolved.push({ section, dataId });
+        noteUnknown(section, e);
         continue;
       }
       const lvl: number = typeof e.lvl === 'number' ? e.lvl : 0;
@@ -216,6 +278,7 @@ export function parseExport(input: string | object, data: GameData): AccountStat
     instances,
     walls,
     unresolved,
+    unknownJobs: unknown,
     boosts,
     rawBoosts: raw.boosts ?? {},
     helpers,

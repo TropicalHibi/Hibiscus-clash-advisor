@@ -77,9 +77,25 @@ interface Job {
   start: number;
   end: number;
   lockUid: string;
-  /** Instance being upgraded (helper recurrent assignment is per instance). */
-  inst?: OwnedInstance;
   entry: TimelineEntry;
+  /** A helper is set to repeat on this job's instance (export `helper_recurrent`). */
+  recurrent: boolean;
+  /** Export `helper_timer`: seconds left of a helper's hour on this job at the export time. */
+  helperTimerSec?: number;
+  apply: () => void;
+}
+
+/** A job already running at the export time (known item, or an id the game data doesn't know yet). */
+interface Running {
+  q: SlotQueue;
+  goblin: boolean;
+  lockUid: string;
+  remainingSec: number;
+  itemKey: string;
+  itemName: string;
+  toLevel: number;
+  recurrent: boolean;
+  helperTimerSec?: number;
   apply: () => void;
 }
 
@@ -100,7 +116,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
   const helperInfo = on ? helpersFor(data, account, elapsedSec) : { helpers: [] as HelperSpec[], warnings: [] as string[] };
   warnings.push(...helperInfo.warnings);
   const activeBoosts = on ? describeBoosts(account, elapsedSec) : [];
-  const clockOf = (q: SlotQueue): WorkClock => (q === 'builder' ? clocks.builder : clocks.research);
+  const clockOf = (q: SlotQueue): WorkClock => (q === 'builder' ? clocks.builder : q === 'lab' ? clocks.lab : clocks.pet);
   const instances: OwnedInstance[] = account.instances.map((i) => ({ ...i }));
   const state: EngineState = { instances, busy: new Set() };
   let nowState: EngineState | undefined;
@@ -115,17 +131,54 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
   const jobs: Job[] = [];
   const slotBusy = (s: Slot) => jobs.some((j) => j.slot === s);
 
-  // In-progress upgrades occupy their slot until their (raw) remaining time elapses.
-  let goblinB = 0;
-  let goblinL = 0;
+  // In-progress upgrades occupy their slot until their remaining time elapses: known items, and running
+  // upgrades on ids the game data doesn't know yet (they still hold a builder / the lab / the pet house).
+  const running: Running[] = [];
   for (const inst of instances) {
     if (inst.upgradingTo === undefined) continue;
     const item = data.items.get(inst.itemKey);
     if (!item) continue;
     const q: SlotQueue | undefined = item.queue === 'builder' ? 'builder' : item.queue === 'lab' ? 'lab' : item.queue === 'petHouse' ? 'petHouse' : undefined;
     if (!q) continue;
+    const target = inst;
+    running.push({
+      q,
+      goblin: !!inst.goblin,
+      lockUid: lockOf(inst),
+      remainingSec: inst.remainingSec ?? 0,
+      itemKey: item.key,
+      itemName: item.name,
+      toLevel: inst.upgradingTo,
+      recurrent: !!inst.helperRecurrent,
+      helperTimerSec: inst.helperTimerSec,
+      apply: () => {
+        target.level = target.upgradingTo ?? target.level;
+        delete target.upgradingTo;
+        delete target.remainingSec;
+      },
+    });
+  }
+  (account.unknownJobs ?? []).forEach((u, i) =>
+    running.push({
+      q: u.queue,
+      goblin: u.goblin,
+      lockUid: `unknown:${u.dataId}#${i + 1}`,
+      remainingSec: u.remainingSec,
+      itemKey: `unknown:${u.dataId}`,
+      itemName: `Unknown item ${u.dataId} (not in game data yet)`,
+      toLevel: u.level + 1,
+      recurrent: u.helperRecurrent,
+      helperTimerSec: u.helperTimerSec,
+      apply: () => {},
+    }),
+  );
+
+  let goblinB = 0;
+  let goblinL = 0;
+  for (const r of running) {
+    const q = r.q;
     let slot: Slot | undefined;
-    if (inst.goblin && q !== 'petHouse') {
+    if (r.goblin && q !== 'petHouse') {
       const id = q === 'builder' ? `GB${++goblinB > 1 ? goblinB : ''}` : `GL${++goblinL > 1 ? goblinL : ''}`;
       slot = { id, queue: q, goblin: true, label: q === 'builder' ? 'Goblin Builder' : 'Goblin Researcher' };
       slots.push(slot);
@@ -138,10 +191,9 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
         warnings.push(`More in-progress ${q} upgrades than slots; added ${slot.id}. Check builder count.`);
       }
     }
-    const lockUid = lockOf(inst);
+    const lockUid = r.lockUid;
     // The export's timer counts from the export time (t = −elapsed); boosts active then speed it up.
-    const end = clockOf(q).end(-elapsedSec, inst.remainingSec ?? 0);
-    const target = inst;
+    const end = clockOf(q).end(-elapsedSec, r.remainingSec);
     state.busy.add(lockUid);
     const entry: TimelineEntry = {
       slotId: slot.id,
@@ -149,9 +201,9 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       start: 0,
       end,
       rawTimeSec: 0,
-      itemKey: item.key,
-      itemName: item.name,
-      toLevel: inst.upgradingTo,
+      itemKey: r.itemKey,
+      itemName: r.itemName,
+      toLevel: r.toLevel,
       cost: 0,
       resource: 'gold',
       reason: 'Already upgrading (paid)',
@@ -159,19 +211,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       inProgress: true,
     };
     timeline.push(entry);
-    jobs.push({
-      slot,
-      start: -elapsedSec,
-      end,
-      lockUid,
-      inst: target,
-      entry,
-      apply: () => {
-        target.level = target.upgradingTo ?? target.level;
-        delete target.upgradingTo;
-        delete target.remainingSec;
-      },
-    });
+    jobs.push({ slot, start: -elapsedSec, end, lockUid, entry, recurrent: r.recurrent, helperTimerSec: r.helperTimerSec, apply: r.apply });
   }
 
   // ── Helpers (Builder's Apprentice → a builder job, Lab Assistant → the running research) ──
@@ -192,14 +232,14 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
   // builder job with the most time left, the Assistant the running research. Never a Goblin job.
   const helperTarget = (h: HelperSpec, t: number): Job | undefined => {
     const running = jobs.filter((j) => j.slot.queue === h.queue && !j.slot.goblin && j.start <= t && j.end > t);
-    const recurrent = running.find((j) => j.inst?.helperRecurrent);
+    const recurrent = running.find((j) => j.recurrent);
     if (recurrent) return recurrent;
     return running.sort((a, b) => b.end - a.end || (a.slot.id < b.slot.id ? -1 : 1))[0];
   };
   for (const h of helperInfo.helpers) {
     // A helper already at work at the export time (helper_timer on the item) adds the rest of its hour.
     for (const j of jobs) {
-      const left = j.inst?.helperTimerSec;
+      const left = j.helperTimerSec;
       if (!left || j.slot.queue !== h.queue || j.slot.goblin) continue;
       const remaining = clockOf(j.slot.queue).remaining(-elapsedSec, j.end);
       helpJob(j, h.workRate, -elapsedSec, Math.min(h.workRate * left, (remaining * h.workRate) / (1 + h.workRate)));
@@ -283,7 +323,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       inProgress: false,
     };
     timeline.push(entry);
-    jobs.push({ slot, start: t, end, lockUid, inst: t0, entry, apply });
+    jobs.push({ slot, start: t, end, lockUid, entry, recurrent: !!t0.helperRecurrent, apply });
     return true;
   };
 
@@ -296,7 +336,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
     if (!target) return false;
     target.upgradingTo = c.toLevel;
     state.busy.add(target.uid);
-    const end = clocks.research.end(t, c.timeSec);
+    const end = clockOf(q).end(t, c.timeSec);
     const entry: TimelineEntry = {
       slotId: slot.id,
       lockUid: target.uid,
@@ -318,8 +358,8 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       start: t,
       end,
       lockUid: target.uid,
-      inst: target,
       entry,
+      recurrent: !!target.helperRecurrent,
       apply: () => {
         target.level = c.toLevel;
         delete target.upgradingTo;
@@ -377,6 +417,7 @@ function describeBoosts(account: AccountState, elapsedSec: number): string[] {
   };
   add('Builder Potion', b.builderPotionSec);
   add('Research Potion', b.researchPotionSec);
+  add('Pet Potion', b.petPotionSec);
   add('Builder Bite', b.builderSnackSec);
   add('Study Soup', b.researchSnackSec);
   return out;
