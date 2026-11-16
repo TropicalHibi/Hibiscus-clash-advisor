@@ -238,22 +238,22 @@ One line each: decision, then why. The owner asked for no questions, so these ar
 ## What the real export says (`samples/myexport.json`)
 - **`boosts` is `{}`**: no potion, snack or clock tower was running, so its real shape is still unseen. I support the keys coc.py's `Boosts` parser reads (`builder_boost`, `lab_boost`, `builder_consumable`, `lab_consumable`, `clocktower_boost`, `clocktower_cooldown`, `helper_cooldown`, all seconds). *Why:* that's the only documented shape. Any other key, a non-number value or a non-object `boosts` gives a Plan-tab warning, never an error.
 - **Helpers:** `helpers` = Builder's Apprentice L8, Lab Assistant L7, Prospector L2, Alchemist L1, each with `helper_cooldown: 8426` (≈2 h 20 m). *Reading:* one shared cooldown, like coc.py (it copies any helper's `helper_cooldown` into one shared field). With several values, I take the largest.
-- **The recurrent flag is `helper_recurrent`** in the real export (on Grand Warden, which was upgrading, and on Archer, which wasn't researching). coc.py documents `recurrent_helper`. Both are accepted.
+- **The recurrent flag is `helper_recurrent`** in the real export: on Grand Warden (the Builder's Apprentice) and on Druid (4000123, the Lab Assistant). coc.py documents `recurrent_helper`. Both are accepted. *(Corrected: this line first said Archer for the Lab Assistant; the owner confirmed Druid.)*
 - **No `helper_timer`** in the real export. Supported as coc.py documents it: seconds left of a helper's work hour on that upgrade.
 - Prospector L2 isn't in the data (which only has L1). Harmless: it doesn't affect timing.
 
 ## Boosts (`src/engine/boosts.ts`)
 - **A work clock per queue** (builders, research) maps wall time ↔ work done. A boost window adds `(multiplier − 1)` work per second while it lasts, counted from the export time. *Why:* one exact, piecewise-linear model that handles running jobs, new jobs and boosts that ran out between the export and now. With no boosts it reduces to `end = start + time`, so nothing else changed.
-- **Multipliers:** Builder Potion ×10, Research Potion ×24 (lab **and** pet house), Builder Bite ×2, Study Soup ×4, all in `BOOST_MULTIPLIER`. *Why:* the potion values are well known; the snack values and the potion's pet-house effect are my best guess (listed under "Check in-game").
+- **Multipliers** *(superseded by "Follow-up: helpers, boosts, unknown jobs": the Research Potion is Laboratory only, the Pet House has its own Pet Potion, and the Bite is +1× additive)*: Builder Potion ×10, Research Potion ×24 (lab **and** pet house), Builder Bite ×2, Study Soup ×4, all in `BOOST_MULTIPLIER`. *Why:* the potion values are well known; the snack values and the potion's pet-house effect are my best guess (listed under "Check in-game").
 - **Clock Tower:** parsed and ignored. *Why:* it only boosts the Builder Base, which v1 ignores.
 - Export `timer` values are taken as remaining **work** time, and a boost active at the export speeds them up from then on. Goblin jobs are boosted too (potions boost every builder).
 - Simultaneous boosts on one queue add their extras (potion + snack). Unverified.
 
 ## Helpers
-- **Work model:** each helper works one hour a day (1 h + 23 h rest, `HELPER_PERIOD_SEC`). In that hour its job runs at `1 + workRate` speed, so it gains `workRate` hours, or less if the job finishes inside the hour. `workRate` comes from the helper's level in `other/helpers` (Apprentice L8 = 8 h, Assistant L7 = 7 h). *Why:* matches the data's `workRate` field and the in-game "×N for 1 hour" description.
-- **Timing:** first work hour = export time + `helper_cooldown` (or now, without a cooldown), then every 24 h. Work hours between the export and now are applied to the jobs running then, in time order, before the simulation starts. *Why:* the export can be a day old (the real one was 1 d 9 h old).
+- **Work model** *(cycle superseded by the follow-up: a shared 23-hour cycle)*: each helper works one hour a day (1 h + 23 h rest, `HELPER_PERIOD_SEC`). In that hour its job runs at `1 + workRate` speed, so it gains `workRate` hours, or less if the job finishes inside the hour. `workRate` comes from the helper's level in `other/helpers` (Apprentice L8 = 8 h, Assistant L7 = 7 h). *Why:* matches the data's `workRate` field and the in-game "×N for 1 hour" description.
+- **Timing** *(superseded by the follow-up: every 23 h, not 24 h)*: first work hour = export time + `helper_cooldown` (or now, without a cooldown), then every 24 h. Work hours between the export and now are applied to the jobs running then, in time order, before the simulation starts. *Why:* the export can be a day old (the real one was 1 d 9 h old).
 - **Assignment rule:** (1) the job on the instance the export marks recurrent, while it's running; (2) otherwise the Apprentice takes the **builder job with the most time left**, and the Lab Assistant takes **the running Laboratory research**; (3) never a Goblin job. The Assistant never helps the Pet House. *Why:* the spec's default rule, with the export's own assignment first. A Goblin job ends on its own and frees no slot, so helping it gains nothing.
-- **A recurrent target that isn't upgrading** (the real export's Archer) falls back to rule (2). *Why:* in-game the helper would otherwise idle; falling back is the useful plan. Listed under "Check in-game".
+- **A recurrent target that isn't upgrading** falls back to rule (2). *Why:* in-game the helper would otherwise idle; falling back is the useful plan. Listed under "Check in-game". (This doesn't affect the owner's plan today: both repeat targets, Grand Warden and Druid, are upgrading.)
 - **The recurrent flag stays with the instance**, so it carries over to that hero or building's next upgrade in the simulation. *Why:* "recurrent" reads as "keep helping this one".
 - A helper level the data doesn't know uses the highest known level at or below it, with a warning.
 - **One "Simulate helpers and boosts" toggle** (default on) covers both. *Why:* off must equal the old behaviour exactly (raw timers), and a test checks that.
@@ -303,3 +303,37 @@ One line each: decision, then why. The owner asked for no questions, so these ar
 
 ## CI
 - Pages workflow actions bumped to their current majors (`actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5`). All run on Node 24 (upload-pages-artifact is a composite over `upload-artifact@v7`). The first run after the bump passed (build + deploy), with no Node 20 deprecation annotation.
+
+
+# Decisions (follow-up: helpers, boosts, unknown jobs)
+
+Rules 2, 3 and 5 below come from the owner. Everything else is my call, logged here.
+
+## Running upgrades on unknown ids
+- **An export entry with a `timer` whose dataId isn't in the game data still occupies its slot** until the timer runs out (boosted by any active potion like any job). It shows in the timeline as `Unknown item <dataId> (not in game data yet)`. *Why:* the slot is really busy in-game. Before, the parser dropped the entry and the planner offered that builder a new upgrade (the owner's B6 with new building 1000106 at level 0).
+- **Which slot comes from the export section:** buildings, traps, heroes, guardians and crafted-defense modules → a builder; units, troops, spells and siege machines → the lab; pets → the pet house; `extra: true` → a goblin slot (as for known items). Equipment and helpers have no timers.
+- One job per `cnt`, like known items. `helper_recurrent` and `helper_timer` on an unknown entry are honoured, so a helper can be assigned to it. When it finishes, nothing is applied (there's no item to level up), and the slot takes the next upgrade.
+- The warning for such an id says its upgrade still occupies a slot; unknown ids without a timer keep the old "ignored" warning. `AccountState.unknownJobs` holds them; `Unresolved.upgrading` marks them.
+- **Builder count is unchanged** (huts + B.O.B). The owner's 6 builders were right; only the sixth job was missing.
+
+## Helpers
+- **Cycle = 23 hours** (`HELPER_PERIOD_SEC`), shared by all helpers and starting when a helper is assigned. The next work hour is the end of the export's shared `helper_cooldown`, then every 23 h. *Why:* the owner's rule.
+- **Level L saves L hours per work hour** (unchanged formula). For a job that finishes inside the hour, the saving is proportional (it finishes after r / (1 + L) of the hour, as before). *Why:* "L× speed for 1 hour = L hours saved" fixes the full-hour saving at L hours; the short-job case keeps the existing continuous formula.
+- **Potions don't speed up the helper's work:** the helper's L hours are added in *work* units on top of the queue's boosted progress, never multiplied by it. A test checks that potion + Apprentice L8 in the same hour saves 9 + 8 hours, not 80. This was already the model; it's now stated in SPEC and tested.
+
+## Boosts
+- **Builder Potion** = `builder_boost` seconds left, builders ×10. **Builder Bite** = +1×, stacking additively: potion + bite = ×11, bite alone ×2. (The old constant 2 already meant +1× extra; now it's documented and tested.)
+- **`clocktower_cooldown` is a cooldown, never applied.** The Clock Tower boost is Builder Base only and never applied either. Neither appears in the summary's boost list.
+- **Research Potion = ×24, Laboratory only.** The lab and the pet house now have separate work clocks.
+- **Pet Potion = ×24, Pet House only.** *Assumption:* its export key is `pet_boost` (not in coc.py; follows the `builder_boost` / `lab_boost` pattern). Any other key still produces an "unknown boost" warning, so a different real name will show up.
+- **Study Soup** stays ×4, Laboratory only (still unverified).
+
+## Display
+- **A finish time more than 6 days away shows the date:** "Tue Nov 24, 9:24 AM". Within 6 days it's the weekday ("Wed 11:40 PM"); today, the clock only. *Why:* the owner's rule; a weekday alone is ambiguous past a week. It applies everywhere `fmtClock` is used (Plan tab, CLI, forecast "needed by").
+
+## Wording fix
+- The Lab Assistant's repeat target in the owner's export is **Druid (4000123)**, not Archer. REPORT and DECISIONS are corrected. Both repeat targets (Grand Warden, Druid) are upgrading, so the "recurrent target not upgrading" fallback doesn't affect the current plan.
+
+## Tests
+- `tests/followup.test.ts` covers: an unknown level-0 building holding a builder (nothing "Now"), unknown research / pet / goblin jobs in their slots, unknown ids without a timer, the real export (B6 busy, when present), the 23-hour cycle, potion + Apprentice, potion + bite = ×11, the clock tower cooldown, Research Potion vs Pet Potion, and dates past 6 days.
+- Updated: three helper tests now expect the second work hour that a 23-hour cycle puts inside the 24-hour window; the boost-keys test includes `petPotionSec`. The two real-export tests now check that every unresolved id is truly missing from the data and that each running one became a slot-holding job: the new export contains ids newer than data 0.19.1 (building 1000106, equipment 90000062 and 90000063).

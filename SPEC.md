@@ -72,8 +72,9 @@ A local website that reads a Clash of Clans account export and tells the player 
 - Player copies it from in-game settings and pastes it into the site.
 - Shape (from coc.py 4.0 `AccountData` parser): top-level sections are lists — `buildings`, `traps`, `heroes`, `troops`, `spells`, `pets`, `equipment`, `guardians`, `helpers`, `decorations`, `obstacles`, etc. Sections ending in `2` (e.g. `buildings2`) are Builder Base → ignore in v1.
 - Item fields: `data` (dataId), `lvl`, `cnt` (number of instances at that level), `timer` (seconds remaining if upgrading), `extra` (true = Goblin Builder), `helper_timer` (seconds left of a helper's work hour on this upgrade), and the recurrent-helper flag. The real export spells it **`helper_recurrent`**; coc.py documents `recurrent_helper`. Both are accepted.
-- `helpers` section: `{ data, lvl, helper_cooldown }`. All helpers share one cooldown (seconds until they can work again), as in coc.py.
-- Top-level `boosts` object, keys as in coc.py's `Boosts` (seconds remaining at the export time): `builder_boost` (Builder Potion), `lab_boost` (Research Potion), `builder_consumable` (Builder Bite), `lab_consumable` (Study Soup), `clocktower_boost`, `clocktower_cooldown`, `helper_cooldown`. The real export had `boosts: {}`. Unknown keys or shapes produce a Plan-tab warning, never an error.
+- `helpers` section: `{ data, lvl, helper_cooldown }`. All helpers share one cooldown (seconds until they can be assigned again), as in coc.py.
+- **Unknown ids:** an entry whose dataId isn't in the game data is a Plan-tab warning. If it has a `timer`, it still **occupies its slot** until the timer runs out, and the timeline shows it as `Unknown item <dataId> (not in game data yet)`. Buildings, traps, heroes, guardians and crafted-defense modules hold a builder; units, spells and sieges the lab; pets the pet house; with `extra: true`, a goblin slot. Example: a new building from a patch newer than the data, under construction at level 0.
+- Top-level `boosts` object, keys as in coc.py's `Boosts` (seconds at the export time): `builder_boost` (seconds of Builder Potion left), `lab_boost` (Research Potion), `builder_consumable` (Builder Bite), `lab_consumable` (Study Soup), `clocktower_boost`, `clocktower_cooldown` (a **cooldown**, not an active boost), `helper_cooldown`. The Pet Potion's key isn't documented; `pet_boost` is assumed. Seen in a real export: `{"builder_boost": 3578, "clocktower_cooldown": 16501}`. Unknown keys or shapes produce a Plan-tab warning, never an error.
 - **No resource amounts** — that's why the forecast reports totals needed, not a deficit.
 - **Verify on first real export:** is there a top-level timestamp? If yes, timers count down from it. If not, use the paste time as the baseline and show "imported at HH:MM".
 - Builder count = Builder's Huts (Σ `cnt`) + B.O.B's Hut in `buildings`. Goblins are never counted as schedulable slots (§10.1).
@@ -364,9 +365,14 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 - Research slots never wait for a Laboratory / Pet House building upgrade, and those upgrades never wait for research (§6.6).
 - The lab slot starts the first pinned or auto-pickable item of the lab queue (§6.7); with nothing auto-pickable it stays idle.
 - **Active boosts and helpers** (setting `simulateHelpers`, default on; off = raw timers as before):
-  - **Boosts** run from the export time. Builder Potion = builders ×10, Research Potion = lab + pet house ×24, Builder Bite ×2, Study Soup ×4 (the snack values are assumptions; all live in `BOOST_MULTIPLIER`). They apply to running and new jobs while active, including Goblin jobs. The Clock Tower is Builder Base only and is ignored. Export timers are taken as remaining *work* time.
-  - **Helpers:** the Builder's Apprentice (builder jobs) and the Lab Assistant (Laboratory research, not pets) each work one hour a day (1 h work + 23 h rest). In that hour the job runs at 1 + `workRate` speed, so it gains `workRate` hours (less if it finishes inside the hour). `workRate` comes from the helper's level in `other/helpers`; an unknown higher level uses the highest known level and shows a warning.
-  - **When:** the first work hour is when the shared `helper_cooldown` ends (counted from the export; no cooldown = now), then every 24 h. Hours between the export and now apply to jobs that were running then. `helper_timer` on an upgrade = a helper already working on it: it adds the rest of that hour.
+  - **Boosts** run from the export time and apply to running and new jobs while active, including Goblin jobs and running upgrades on unknown ids. Constants live in `BOOST_MULTIPLIER`.
+    - Builder Potion = builders ×10. Builder Bite = +1×, stacking additively (potion + bite = ×11, bite alone ×2).
+    - Research Potion = **Laboratory only**, ×24. Study Soup ×4, Laboratory only (assumed).
+    - The Pet House has its **own Pet Potion** (×24). The Research Potion never speeds up the Pet House.
+    - The Clock Tower (boost and `clocktower_cooldown`) is Builder Base only and is never applied; a cooldown is never an active boost.
+    - Export timers are taken as remaining *work* time.
+  - **Helpers:** the Builder's Apprentice (builder jobs) and the Lab Assistant (Laboratory research, not pets) each work for one hour per cycle. **Level L = L× speed for that hour = L hours saved** (`workRate` = L from `other/helpers`), less if the job finishes inside the hour. The helper's gain is added on top of the queue's own progress: a Builder Potion or Builder Bite **never speeds up the Apprentice's own work** (potion + Apprentice L8 in the same hour = 9 + 8 extra hours, not 80). An unknown higher level uses the highest known level and shows a warning.
+  - **When:** the helpers share one **23-hour cycle** that starts when a helper is assigned. The next work hour is when the export's shared `helper_cooldown` ends (counted from the export; no cooldown = now), then every 23 h. Hours between the export and now apply to jobs that were running then. `helper_timer` on an upgrade = a helper already working on it: it adds the rest of that hour.
   - **Which job:** the job on the instance the export marks recurrent, if it's running. Otherwise the Apprentice takes the builder job with the most time left, and the Assistant takes the running research. Never a Goblin job (it frees no slot).
   - The Alchemist and Prospector don't affect timing.
 
@@ -377,7 +383,7 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 
 ### 10.3 Forecast output (next 24h)
 - Sum cost by resource for every upgrade that **starts** within 24h in the simulation.
-- Show a per-slot timeline: `B2 free 11:40 PM → Cannon 21 (3.0M gold)`.
+- Show a per-slot timeline: `B2 free 11:40 PM → Cannon 21 (3.0M gold)`. Times show the clock today, the weekday within 6 days ("Wed 11:40 PM"), and the date beyond that ("Tue Nov 24, 9:24 AM").
 - Show "needed by" times so the player knows which resource to farm first.
 - Ore: sum ore for the top-N blacksmith picks (N configurable, default 3), counting only each piece's **next** level.
 - Already-running upgrades are not counted (already paid).

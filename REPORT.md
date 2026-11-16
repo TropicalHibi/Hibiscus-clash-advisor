@@ -795,8 +795,8 @@ Before this fix, the priority list at the same moment would have left out BK 83 
 - The card now says the Archer Queen's Tier 0 rule belongs to the Queen herself, wherever she sits in the list, and her row is marked "· Tier 0". A test moves her to last place and checks that she still gets Tier 0, and that the custom order changes the other heroes' order.
 
 ### 4. Active boosts and helpers in the scheduler (SPEC §10.1)
-- **Boosts** from the export speed up their queue while they last: Builder Potion ×10 for builders, Research Potion ×24 for the lab and pet house, Builder Bite ×2, Study Soup ×4. The Clock Tower is Builder Base only, so it's ignored. An unknown boost shows a warning, not a crash.
-- **Helpers:** once a day, the Builder's Apprentice takes its level in hours off one builder job, and the Lab Assistant does the same for the running research (L8 = 8 h, L7 = 7 h, from the game data). They help the job the export says they repeat on, if it's running. Otherwise the Apprentice takes the builder job with the most time left and the Assistant takes the research. They never help a Goblin job. Helper hours that passed since the export count too.
+- **Boosts** *(rules corrected in "Follow-up: helpers, boosts, unknown jobs" below)* from the export speed up their queue while they last: Builder Potion ×10 for builders, Research Potion ×24 for the lab and pet house, Builder Bite ×2, Study Soup ×4. The Clock Tower is Builder Base only, so it's ignored. An unknown boost shows a warning, not a crash.
+- **Helpers** *(cycle corrected to 23 h in the follow-up below)*: once a day, the Builder's Apprentice takes its level in hours off one builder job, and the Lab Assistant does the same for the running research (L8 = 8 h, L7 = 7 h, from the game data). They help the job the export says they repeat on, if it's running. Otherwise the Apprentice takes the builder job with the most time left and the Assistant takes the research. They never help a Goblin job. Helper hours that passed since the export count too.
 - **Alchemist:** `config/id-overrides.yaml` maps `93000003 → alchemist`, so its unknown-ID warning is gone. It doesn't affect timing.
 - **New setting "Simulate helpers and boosts"** (on by default). Off = exactly the old raw timers, so you can compare. The Plan tab summary names your helpers and their next work hour, and timeline rows show `helpers −8h` where a helper helped. `npm run plan -- <file> --no-helpers` does the same in the terminal.
 
@@ -811,7 +811,7 @@ Before this fix, the priority list at the same moment would have left out BK 83 
 ## What your real export says about boosts and helpers
 - **`boosts` is empty (`{}`):** nothing was running when you exported, so the real shape is still unseen. The planner reads the keys the coc.py parser documents (`builder_boost`, `lab_boost`, `builder_consumable`, `lab_consumable`, `clocktower_boost`, `clocktower_cooldown`, `helper_cooldown`).
 - **Helpers:** Builder's Apprentice L8, Lab Assistant L7, Prospector L2, Alchemist L1. Each has `helper_cooldown: 8426` (≈2 h 20 m until they could work again), which I read as one shared cooldown.
-- **The repeat flag is called `helper_recurrent`** in your file (coc.py calls it `recurrent_helper`; both work). It's on **Grand Warden** (upgrading then) and on **Archer** (not researching). There's no `helper_timer` field (a helper mid-hour) in your file.
+- **The repeat flag is called `helper_recurrent`** in your file (coc.py calls it `recurrent_helper`; both work). It's on **Grand Warden** (the Builder's Apprentice) and on **Druid** (4000123, the Lab Assistant). There's no `helper_timer` field (a helper mid-hour) in your file. *(Corrected: an earlier version of this report said the Lab Assistant was on Archer.)*
 
 ## Plan before / after with helpers (your export, `npm run plan -- samples/myexport.json`, Mon 16 Nov 4:57 PM, export 1 d 9 h old)
 
@@ -842,7 +842,7 @@ Before this fix, the priority list at the same moment would have left out BK 83 
 What happened:
 - Sunday's work hour went to Grand Warden (the repeat target), which finished earlier.
 - Monday's went to Dragon Duke: Grand Warden was done, so it fell back to the builder job with the most time left. DD now frees up 8 h earlier and takes the 15-day Firespitter, which gets Tuesday's hour.
-- The Lab Assistant's repeat target (Archer) isn't researching, so it helped Druid on all three days (3 × 7 h).
+- The Lab Assistant is set to repeat on Druid, which was researching, so it helped Druid on all three days (3 × 7 h).
 - "Now", the top priorities, the 24 h totals (685K DE, 52M gold) and the walls line are unchanged.
 
 **Long run** (Everything tab, everything left at TH18):
@@ -870,9 +870,9 @@ Everything tab for your account (helpers on): Heroes 49 upgrades (286d raw / 229
 The images are lazy-loaded, so a page only downloads the icons on screen. The Everything tab's sections start closed, so their icons load when you open one. *(Superseded: the follow-up below resizes every icon, and the build is now 2.0 MB.)*
 
 ## Check in-game
-- [ ] **Helper time savings:** does the Builder's Apprentice L8 take 8 h off an upgrade per day, and the Lab Assistant L7 7 h? Is it really one work hour every 24 h, and do all helpers share one cooldown?
-- [ ] **Repeat target not upgrading:** your Lab Assistant is set to repeat on Archer, which isn't researching. The planner assumes it then helps the running research. In-game, does it do that, or does it sit idle?
-- [ ] **Boosts:** next time you export with a potion or snack running, send the `boosts` part so I can confirm the key names. Also check: Builder Bite ×2 and Study Soup ×4 (my guesses); does the Research Potion also speed up the Pet House? Is an export `timer` real seconds left, or does it already include a running potion?
+- [x] ~~Helper time savings / cycle~~ → confirmed by you: L hours saved, shared 23-hour cycle (follow-up below).
+- [ ] **Repeat target not upgrading:** when a helper's repeat target isn't upgrading, the planner assumes it helps the default job instead (Apprentice: the builder job with the most time left; Assistant: the running research). In-game, does it do that, or does it sit idle? (Your Lab Assistant repeats on Druid, which is researching, so this doesn't affect your plan today.)
+- [ ] **Boosts:** ~~key names, Bite, Research Potion on pets~~ → answered in the follow-up below. Still open: Study Soup ×4 (my guess), the Pet Potion's export key (assumed `pet_boost`), and whether an export `timer` already includes a running potion.
 - [ ] **Hero Hall 13 / new data:** run `npm run dev` (or `npm run sync`). Check that the printed diff and the Plan-tab banner make sense, then commit `public/data-changes.json` with `package.json` / `package-lock.json`.
 - [x] ~~Icons: 16 items show their name only~~ → fixed by the sharp follow-up: all items have an icon.
 - [ ] Not changed, but noticed: timeline end times show only the weekday ("done Wed 9:25 AM" for a 15-day job lands two weeks later). Say if you want dates there.
@@ -901,3 +901,43 @@ The images are lazy-loaded, so a page only downloads the icons on screen. The Ev
 The 1 MB of JS is the bundled game data (REVIEW finding 16, left for v2), not images.
 
 **Also fixed:** every build printed a Vite warning about extensionless imports in `vite.config.ts`'s import chain. They now use `.ts` extensions.
+
+
+## Follow-up: helpers, boosts, unknown jobs
+
+**Status:** all five fixes are done, with tests. `npm test` passes (**245 tests in 16 files**) and `npm run build` succeeds. SPEC §3.2, §10.1 and §10.3 are updated; the reasoning is in DECISIONS.md under "follow-up: helpers, boosts, unknown jobs".
+
+**What changed:**
+1. **Running upgrades on unknown ids hold their slot.** Any export entry with a `timer` keeps its builder / lab / pet slot (or goblin slot) busy until the timer ends, even when the game data doesn't know the id yet. The timeline shows it as "Unknown item <dataId> (not in game data yet)". In your export that's building **1000106** (level 0, under construction), so all 6 builders are busy and nothing is offered on B6.
+2. **Helpers:** a shared **23-hour** cycle (it was 24 h), starting from the export's `helper_cooldown`. Level L saves L hours. A Builder Potion or Bite running in the same hour adds its own progress but never multiplies the Apprentice's.
+3. **Boosts:**
+   - Builder Potion ×10, plus Builder Bite at +1× (both together = ×11).
+   - `clocktower_cooldown` is never applied.
+   - The Research Potion speeds up the **Laboratory only**. The Pet House has its own Pet Potion (×24); I assumed its export key is `pet_boost`.
+4. **Wording:** your Lab Assistant is on **Druid (4000123)**, not Archer. Fixed above and in DECISIONS.md.
+5. **Dates:** finish times more than 6 days away now show the date, e.g. "Tue Nov 24, 9:24 AM".
+
+**Your new export** (`npm run plan -- samples/myexport.json --at-export`, Mon 16 Nov 5:16 PM). The summary now reads `Helpers: Builder's Apprentice L8 (−8h/day), Lab Assistant L7 (−7h/day); next work hour Tue 10:19 AM · Boosts: Builder Potion 59m left`.
+
+```diff
+ == Now ==
+-  B6: start Barbarian King → 83 (195K DE, 4d 15h) — Hero #4 in order; not book-ready (raw next level 5d < 8d threshold)
++  No builder/lab/pet slot is free right now.
+```
+
+```diff
+   B6 (Builder 6):
+-    free 5:16 PM → Barbarian King 83 (195K DE, 4d 15h, done Sat 8:19 AM)
++    busy: Unknown item 1000106 (not in game data yet) → 1, done Tue 3:00 PM (in 21h 44m)
++    free Tue 3:00 PM → Scattershot 4 (11.5M gold, 8d, done Wed Nov 25, 3:00 PM)
+   PET (Pet House):
+-    free Tue 9:24 AM → Frosty 11 (200K DE, 7d, done Tue 9:24 AM)
++    free Tue 9:24 AM → Frosty 11 (200K DE, 7d, done Tue Nov 24, 9:24 AM)
+```
+
+- 1000106's 30.7 h timer ends after 21 h 44 m, because the running Builder Potion speeds it up like any builder job.
+- Barbarian King now starts on B4 at 11:51 PM. The heroes and defenses on B1, B2 and B5 shift by one slot accordingly.
+- Grand Warden (Apprentice, −8 h) and Druid (Lab Assistant, −7 h) get their work hour at Tue 10:19 AM. The next one, 23 h later, falls outside the 24 h window.
+- New warnings: 1000106 "still occupies a slot", and two unknown equipment ids (90000062, 90000063), ignored. Data 0.19.1 doesn't have them yet; the next `npm run sync` should bring them in.
+
+**Still to check in-game:** the Pet Potion's export key (assumed `pet_boost`; an unknown key would show a warning), Study Soup ×4, and whether a helper whose repeat target isn't upgrading helps another job or sits idle.
