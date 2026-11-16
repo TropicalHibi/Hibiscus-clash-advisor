@@ -478,6 +478,8 @@ function superchargeDrafts(c: Ctx): Draft[] {
 interface GenOpts {
   /** Builder time reduction (0–1). */
   builderBoost: number;
+  /** Never offer the Town Hall upgrade (Everything tab: what's left at the current TH). */
+  noTownHall?: boolean;
 }
 
 /**
@@ -499,7 +501,7 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
   const drafts: Draft[] = [...heroDrafts(c), ...th.drafts, ...merges.drafts, ...genericDrafts(c, all, handled), ...superchargeDrafts(c)];
 
   // Rush: the TH upgrade only once the TH gate is clear — every performable merge done, every new building built.
-  if (th.thInst && th.thNext) {
+  if (th.thInst && th.thNext && !opts.noTownHall) {
     const gateOpen = [...merges.gateOpen];
     for (const p of planned) if ((data.items.get(p.itemKey)!.levels[0]?.thRequired ?? 0) <= lv.th) gateOpen.push(p.itemKey);
     if (!gateOpen.length) {

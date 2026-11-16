@@ -1,4 +1,4 @@
-// npm run plan -- <export.json> [--gold-pass max] [--hours 24] [--at-export]
+// npm run plan -- <export.json> [--gold-pass max] [--hours 24] [--at-export] [--no-helpers]
 // Prints the plan for an export file in the terminal.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,6 +29,7 @@ const data = loadGameDataNode();
 const settings = settingsFromYaml(readConfig('settings.sample.yaml'));
 if (flag('--gold-pass') === 'max') settings.goldPass = 'max';
 if (flag('--hours')) settings.forecast.windowHours = Number(flag('--hours'));
+if (args.includes('--no-helpers')) settings.simulateHelpers = false;
 const meta = coerceMeta(JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, 'public', 'meta.json'), 'utf8')));
 
 const account = parseExport(fs.readFileSync(file, 'utf8'), data);

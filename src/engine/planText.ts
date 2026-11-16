@@ -9,6 +9,7 @@ export function planToText(p: Plan): string {
 
   L.push(`CoC Upgrade Planner — TH${p.townHall} (max TH${p.maxTH}) · mode: ${p.mode === 'rush' ? 'RUSH' : 'MAX-TH'} · Hero Hall ${p.heroHall}`);
   L.push(`Builders: ${p.builders} · Gold Pass: ${p.goldPass} · book threshold ${fmtDuration(p.bookThresholdSec)} · data v${p.dataVersion}`);
+  if (p.helperLine) L.push(`Helpers: ${p.helperLine}`);
   if (p.exportTimestamp)
     L.push(`Export taken ${new Date(p.exportTimestamp * 1000).toLocaleString()} (${fmtDuration(p.sim.elapsedSec)} ago) · now ${new Date(p.nowSec * 1000).toLocaleString()}`);
   L.push('');
@@ -31,8 +32,9 @@ export function planToText(p: Plan): string {
     L.push(`  ${s.id} (${s.label}):`);
     if (!entries.length) L.push('    idle — nothing eligible');
     for (const e of entries) {
-      if (e.inProgress) L.push(e.end === 0 ? `    ${e.itemName} → ${e.toLevel} finished since the export` : `    busy: ${e.itemName} → ${e.toLevel}, done ${at(e.end)} (in ${fmtDuration(e.end)})`);
-      else L.push(`    free ${at(e.start)} → ${e.itemName} ${e.toLevel} (${fmtCost(e.cost, e.resource)}, ${fmtDuration(e.end - e.start)}, done ${at(e.end)})`);
+      const helped = e.helperSavedSec ? ` · helpers −${fmtDuration(e.helperSavedSec)}` : '';
+      if (e.inProgress) L.push(e.end === 0 ? `    ${e.itemName} → ${e.toLevel} finished since the export${helped}` : `    busy: ${e.itemName} → ${e.toLevel}, done ${at(e.end)} (in ${fmtDuration(e.end)})${helped}`);
+      else L.push(`    free ${at(e.start)} → ${e.itemName} ${e.toLevel} (${fmtCost(e.cost, e.resource)}, ${fmtDuration(e.end - e.start)}, done ${at(e.end)})${helped}`);
     }
   }
   for (const i of p.sim.idle) L.push(`  ! ${i.slotId} has nothing eligible from ${at(i.at)}`);

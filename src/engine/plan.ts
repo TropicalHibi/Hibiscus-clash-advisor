@@ -6,13 +6,16 @@ import type { MetaFile } from '../meta/meta';
 import type { AccountState } from '../state/parseExport';
 import type { LabKind, Settings } from '../state/settings';
 import { heroStatus } from './book';
+import { nextHelperTime } from './boosts';
 import { HOUR } from './constants';
+import { fmtClock } from './format';
 import { forecast, wallDump, type Forecast, type WallDump } from './forecast';
 import { equipmentCandidates, labSections, researchCandidates, type QueueCandidate } from './queues';
 import { boostsFor, simulate, type SimResult, type TimelineEntry } from './scheduler';
 import { builderCandidates, detectMode, TIER_NAMES, type Candidate, type Mode } from './tiers';
 
 export interface BookReadyHero {
+  itemKey: string;
   name: string;
   level: number;
   toLevel: number;
@@ -44,6 +47,10 @@ export interface Plan {
   heroHall: number;
   builders: number;
   goldPass: Settings['goldPass'];
+  /** "Simulate helpers" setting (helpers + active boosts applied). */
+  simulateHelpers: boolean;
+  /** One line about helpers and boosts for the summary ("Builder's Apprentice L8 (8h/day) …"). */
+  helperLine: string;
   bookThresholdSec: number;
   dataVersion: string;
   exportTimestamp?: number;
@@ -64,6 +71,20 @@ export interface Plan {
   warnings: string[];
 }
 
+/** Summary of the helpers and boosts the scheduler applied. */
+export function helperLine(account: AccountState, sim: SimResult, nowSec: number, on: boolean): string {
+  const timeHelpers = account.helpers.filter((h) => h.id === 'builders-apprentice' || h.id === 'lab-assistant');
+  if (!on) return timeHelpers.length ? 'not simulated (Settings → Simulate helpers and boosts is off)' : '';
+  const parts: string[] = [];
+  if (sim.helpers.length) {
+    const next = Math.min(...sim.helpers.map((h) => h.firstAt));
+    const when = next > 0 ? `next work hour ${fmtClock(nowSec + nextHelperTime(sim.helpers[0], 0), nowSec)}` : 'working once a day from now';
+    parts.push(`${sim.helpers.map((h) => `${h.name} L${h.level} (−${h.workRate}h/day)`).join(', ')}; ${when}`);
+  }
+  if (sim.activeBoosts.length) parts.push(`Boosts: ${sim.activeBoosts.join(', ')}`);
+  return parts.join(' · ');
+}
+
 export function buildPlan(data: GameData, account: AccountState, settings: Settings, meta: MetaFile, nowSec: number): Plan {
   const windowSec = settings.forecast.windowHours * HOUR;
   const sim = simulate(data, account, settings, meta, { nowSec, horizonSec: windowSec });
@@ -82,6 +103,7 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
     const st = heroStatus(item, lvl, lvNow.heroHall, data.bookThresholdSec);
     if (st.kind === 'bookReady')
       bookReady.push({
+        itemKey: item.key,
         name: item.name,
         level: lvl,
         toLevel: st.next.level,
@@ -93,7 +115,7 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
       });
   }
 
-  const warnings = [...dataIssues(data), ...sim.warnings];
+  const warnings = [...dataIssues(data), ...account.warnings, ...sim.warnings];
   for (const u of account.unresolved) warnings.push(`Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${data.version}); ignored.`);
   if (!account.exportTimestamp) warnings.push('Export has no timestamp; timers count from the import time.');
 
@@ -108,6 +130,8 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
     heroHall: lvNow.heroHall,
     builders: account.builders,
     goldPass: settings.goldPass,
+    simulateHelpers: settings.simulateHelpers,
+    helperLine: helperLine(account, sim, nowSec, settings.simulateHelpers),
     bookThresholdSec: data.bookThresholdSec,
     dataVersion: data.version,
     exportTimestamp: account.exportTimestamp,

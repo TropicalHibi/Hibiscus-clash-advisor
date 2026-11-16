@@ -3,7 +3,8 @@ import type { GameData, OwnedInstance, Resource } from '../data/types';
 import type { MetaFile } from '../meta/meta';
 import type { AccountState } from '../state/parseExport';
 import type { Settings } from '../state/settings';
-import { GOLD_PASS_MAX_BOOST } from './constants';
+import { clocksFor, helperGain, helpersFor, nextHelperTime, PLAIN_CLOCKS, type HelperSpec, type QueueClocks, type WorkClock } from './boosts';
+import { GOLD_PASS_MAX_BOOST, HELPER_PERIOD_SEC } from './constants';
 import { fmtDuration } from './format';
 import { nextResearch, researchCandidates } from './queues';
 
@@ -27,6 +28,10 @@ export interface TimelineEntry {
   /** Seconds from "now". In-progress jobs start at 0. */
   start: number;
   end: number;
+  /** Unboosted data time of the level (new jobs only; 0 for in-progress jobs). */
+  rawTimeSec?: number;
+  /** Seconds the helpers took off this job (Builder's Apprentice / Lab Assistant). */
+  helperSavedSec?: number;
   itemKey: string;
   itemName: string;
   toLevel: number;
@@ -41,8 +46,10 @@ export interface TimelineEntry {
 export interface SimOptions {
   /** Unix seconds for "now". */
   nowSec: number;
-  /** Simulate starts up to this many seconds from now. */
+  /** Simulate starts up to this many seconds from now (Infinity = until nothing is left). */
   horizonSec: number;
+  /** Never start a Town Hall upgrade (Everything tab: everything left at the current TH). */
+  freezeTownHall?: boolean;
 }
 
 export interface SimResult {
@@ -58,13 +65,21 @@ export interface SimResult {
   /** Slots that had nothing eligible to start at some point, with the time it happened. */
   idle: { slotId: string; at: number }[];
   finalInstances: OwnedInstance[];
+  /** Helpers applied in this run (empty when "Simulate helpers" is off). */
+  helpers: HelperSpec[];
+  /** Active boosts applied in this run, as short labels (e.g. "Builder Potion 42m left"). */
+  activeBoosts: string[];
   warnings: string[];
 }
 
 interface Job {
   slot: Slot;
+  start: number;
   end: number;
   lockUid: string;
+  /** Instance being upgraded (helper recurrent assignment is per instance). */
+  inst?: OwnedInstance;
+  entry: TimelineEntry;
   apply: () => void;
 }
 
@@ -79,6 +94,13 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
   if (ahead > FUTURE_TOLERANCE_SEC)
     warnings.push(`The export timestamp is ${fmtDuration(ahead)} in the future; check the device clock. Timers are counted from now.`);
   const elapsedSec = account.exportTimestamp ? Math.max(0, opts.nowSec - account.exportTimestamp) : 0;
+  // Active boosts and helpers (SPEC §10.1), behind the "Simulate helpers" setting.
+  const on = settings.simulateHelpers;
+  const clocks: QueueClocks = on ? clocksFor(account, elapsedSec) : PLAIN_CLOCKS;
+  const helperInfo = on ? helpersFor(data, account, elapsedSec) : { helpers: [] as HelperSpec[], warnings: [] as string[] };
+  warnings.push(...helperInfo.warnings);
+  const activeBoosts = on ? describeBoosts(account, elapsedSec) : [];
+  const clockOf = (q: SlotQueue): WorkClock => (q === 'builder' ? clocks.builder : clocks.research);
   const instances: OwnedInstance[] = account.instances.map((i) => ({ ...i }));
   const state: EngineState = { instances, busy: new Set() };
   let nowState: EngineState | undefined;
@@ -117,24 +139,16 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       }
     }
     const lockUid = lockOf(inst);
-    const end = Math.max(0, (inst.remainingSec ?? 0) - elapsedSec);
+    // The export's timer counts from the export time (t = −elapsed); boosts active then speed it up.
+    const end = clockOf(q).end(-elapsedSec, inst.remainingSec ?? 0);
     const target = inst;
     state.busy.add(lockUid);
-    jobs.push({
-      slot,
-      end,
-      lockUid,
-      apply: () => {
-        target.level = target.upgradingTo ?? target.level;
-        delete target.upgradingTo;
-        delete target.remainingSec;
-      },
-    });
-    timeline.push({
+    const entry: TimelineEntry = {
       slotId: slot.id,
       lockUid,
       start: 0,
       end,
+      rawTimeSec: 0,
       itemKey: item.key,
       itemName: item.name,
       toLevel: inst.upgradingTo,
@@ -143,14 +157,76 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       reason: 'Already upgrading (paid)',
       kind: 'inProgress',
       inProgress: true,
+    };
+    timeline.push(entry);
+    jobs.push({
+      slot,
+      start: -elapsedSec,
+      end,
+      lockUid,
+      inst: target,
+      entry,
+      apply: () => {
+        target.level = target.upgradingTo ?? target.level;
+        delete target.upgradingTo;
+        delete target.remainingSec;
+      },
     });
   }
+
+  // ── Helpers (Builder's Apprentice → a builder job, Lab Assistant → the running research) ──
+  const setEnd = (j: Job, end: number, saved: number) => {
+    j.end = end;
+    j.entry.end = end;
+    if (saved > 0) j.entry.helperSavedSec = (j.entry.helperSavedSec ?? 0) + saved;
+  };
+  const helpJob = (j: Job, workRate: number, t: number, gainOverride?: number) => {
+    const clock = clockOf(j.slot.queue);
+    const left = clock.remaining(t, j.end);
+    const gain = gainOverride ?? helperGain(workRate, left);
+    if (gain <= 0) return;
+    const end = clock.end(t, left - gain);
+    setEnd(j, end, j.end - end);
+  };
+  // Assignment rule: the job the export marks recurrent if it's running; else the Apprentice takes the
+  // builder job with the most time left, the Assistant the running research. Never a Goblin job.
+  const helperTarget = (h: HelperSpec, t: number): Job | undefined => {
+    const running = jobs.filter((j) => j.slot.queue === h.queue && !j.slot.goblin && j.start <= t && j.end > t);
+    const recurrent = running.find((j) => j.inst?.helperRecurrent);
+    if (recurrent) return recurrent;
+    return running.sort((a, b) => b.end - a.end || (a.slot.id < b.slot.id ? -1 : 1))[0];
+  };
+  for (const h of helperInfo.helpers) {
+    // A helper already at work at the export time (helper_timer on the item) adds the rest of its hour.
+    for (const j of jobs) {
+      const left = j.inst?.helperTimerSec;
+      if (!left || j.slot.queue !== h.queue || j.slot.goblin) continue;
+      const remaining = clockOf(j.slot.queue).remaining(-elapsedSec, j.end);
+      helpJob(j, h.workRate, -elapsedSec, Math.min(h.workRate * left, (remaining * h.workRate) / (1 + h.workRate)));
+    }
+  }
+  // Work hours between the export and now help the jobs that were running then.
+  const pastHours = helperInfo.helpers
+    .flatMap((h) => {
+      const out: { h: HelperSpec; at: number }[] = [];
+      for (let at = nextHelperTime(h, -elapsedSec); at < 0; at += HELPER_PERIOD_SEC) out.push({ h, at });
+      return out;
+    })
+    .sort((a, b) => a.at - b.at);
+  for (const { h, at } of pastHours) {
+    const j = helperTarget(h, at);
+    if (j) helpJob(j, h.workRate, at);
+  }
+  const helperNext = new Map<HelperSpec, number>();
+  for (const h of helperInfo.helpers) helperNext.set(h, nextHelperTime(h, 0));
+  // A job whose (helped / boosted) timer ran out before now finishes at t = 0.
+  for (const j of jobs) if (j.end < 0) setEnd(j, 0, 0);
 
   let newSeq = 0;
   const findInst = (uid: string) => instances.find((i) => i.uid === uid);
 
   const startBuilder = (slot: Slot, t: number): boolean => {
-    const cands = builderCandidates(data, state, settings, { builderBoost: boosts.builder });
+    const cands = builderCandidates(data, state, settings, { builderBoost: boosts.builder, noTownHall: opts.freezeTownHall });
     const c = cands.find((x) => !state.busy.has(x.lockUid) && !(x.consumes ?? []).some((u) => state.busy.has(u)));
     if (!c) return false;
     let target: OwnedInstance | undefined;
@@ -189,12 +265,13 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       };
     }
     state.busy.add(lockUid);
-    jobs.push({ slot, end: t + c.timeSec, lockUid, apply });
-    timeline.push({
+    const end = clocks.builder.end(t, c.timeSec);
+    const entry: TimelineEntry = {
       slotId: slot.id,
       lockUid,
       start: t,
-      end: t + c.timeSec,
+      end,
+      rawTimeSec: c.rawTimeSec,
       itemKey: c.item.key,
       itemName: c.item.name,
       toLevel: c.toLevel,
@@ -204,7 +281,9 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       tier: c.tier,
       kind: c.kind,
       inProgress: false,
-    });
+    };
+    timeline.push(entry);
+    jobs.push({ slot, start: t, end, lockUid, inst: t0, entry, apply });
     return true;
   };
 
@@ -217,20 +296,13 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
     if (!target) return false;
     target.upgradingTo = c.toLevel;
     state.busy.add(target.uid);
-    jobs.push({
-      slot,
-      end: t + c.timeSec,
-      lockUid: target.uid,
-      apply: () => {
-        target.level = c.toLevel;
-        delete target.upgradingTo;
-      },
-    });
-    timeline.push({
+    const end = clocks.research.end(t, c.timeSec);
+    const entry: TimelineEntry = {
       slotId: slot.id,
       lockUid: target.uid,
       start: t,
-      end: t + c.timeSec,
+      end,
+      rawTimeSec: c.rawTimeSec,
       itemKey: c.item.key,
       itemName: c.item.name,
       toLevel: c.toLevel,
@@ -239,6 +311,19 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       reason: c.reason,
       kind: 'upgrade',
       inProgress: false,
+    };
+    timeline.push(entry);
+    jobs.push({
+      slot,
+      start: t,
+      end,
+      lockUid: target.uid,
+      inst: target,
+      entry,
+      apply: () => {
+        target.level = c.toLevel;
+        delete target.upgradingTo;
+      },
     });
     return true;
   };
@@ -265,12 +350,34 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       }
       if (ok) idleNoted.delete(slot.id);
     }
+    // Helpers whose work hour starts now (after new jobs started, so a job starting now can be helped).
+    for (const [h, at] of helperNext) {
+      if (at > t) continue;
+      const j = helperTarget(h, t);
+      if (j) helpJob(j, h.workRate, t);
+      helperNext.set(h, at + HELPER_PERIOD_SEC);
+    }
     // A zero-time job finishes immediately; loop again at the same t.
     if (jobs.some((j) => j.end <= t)) continue;
     if (!jobs.length) break;
-    t = Math.min(...jobs.map((j) => j.end));
+    t = Math.min(...jobs.map((j) => j.end), ...helperNext.values());
   }
 
   nowState ??= { instances: instances.map((i) => ({ ...i })), busy: new Set(state.busy) };
-  return { slots, timeline, elapsedSec, nowState, idle, finalInstances: instances, warnings };
+  return { slots, timeline, elapsedSec, nowState, idle, finalInstances: instances, helpers: helperInfo.helpers, activeBoosts, warnings };
+}
+
+/** Short labels for the boosts still running at "now". The Clock Tower is Builder Base only. */
+function describeBoosts(account: AccountState, elapsedSec: number): string[] {
+  const b = account.boosts;
+  const out: string[] = [];
+  const add = (name: string, sec: number) => {
+    const left = sec - elapsedSec;
+    if (left > 0) out.push(`${name} ${fmtDuration(left)} left`);
+  };
+  add('Builder Potion', b.builderPotionSec);
+  add('Research Potion', b.researchPotionSec);
+  add('Builder Bite', b.builderSnackSec);
+  add('Study Soup', b.researchSnackSec);
+  return out;
 }

@@ -3,8 +3,9 @@
 # localStorage. Delete local data in the UI to reset to this file.
 
 goldPass: none            # none | max
+simulateHelpers: true     # apply Builder's Apprentice / Lab Assistant and active boosts from the export
 
-heroOrder:                # tier 3 order; Archer Queen also gets tier 0
+heroOrder:                # heroes tier order; the Archer Queen's Tier 0 rule is tied to her, not to slot 1
   - archer-queen
   - grand-warden
   - dragon-duke
