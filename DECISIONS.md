@@ -213,7 +213,7 @@ One line each: decision, then why. The user asked for no questions, so these are
 - `tests/pages.test.ts` checks the base per mode and that the workflow's `run:` steps are exactly `npm ci`, `npm test`, `npm run build:pages`, with no refresh/meta/sync/token. *Why:* keeps "no token in CI" from drifting.
 
 ## Workflow
-- **One `build` job (ci → test → build:pages → upload artifact) and a `deploy` job** using the official `actions/upload-pages-artifact@v3` / `actions/deploy-pages@v4`. Tests run before the build in the same job, so a failure means no artifact and no deploy.
+- **One `build` job (ci → test → build:pages → upload artifact) and a `deploy` job** using the official `actions/upload-pages-artifact` / `actions/deploy-pages` (now v5 / v5, with `actions/checkout@v7` and `actions/setup-node@v7`, all on the Node 24 runtime). Tests run before the build in the same job, so a failure means no artifact and no deploy.
 - **Node 24** in CI. *Why:* matches the local major (v26 isn't an LTS on setup-node yet; 24 is the active LTS) and is new enough for Vite 8 / TypeScript 7.
 - Plain `npm ci` (install scripts allowed). *Why:* `predev` only runs on `npm run dev`; blocking install scripts could break esbuild/rolldown binaries for no gain.
 - `workflow_dispatch` added. *Why:* lets the site be redeployed from the Actions tab without a dummy commit.
