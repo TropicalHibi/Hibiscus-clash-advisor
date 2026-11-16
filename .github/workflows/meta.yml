@@ -1,0 +1,149 @@
+# Daily Legend I meta (SPEC §8.4). Logs in to developer.clashofclans.com with the COC_DEV_EMAIL /
+# COC_DEV_PASSWORD secrets to get an API key for this runner's IP (key name "hibiscus-ci"; no other key
+# is touched), collects Legend I battle logs, rebuilds public/meta.json and deploys it.
+#   battles.jsonl lives on the `meta-data` branch: one gzipped file, one force-pushed commit (no history
+#   growth), pruned to the 14-day window, player tags pseudonymized (the repo is public).
+#   A failed or too-thin run never replaces a better meta.json; it opens/updates the "Meta update failed"
+#   issue. The next clean run closes it.
+name: Daily Legend I meta
+
+on:
+  schedule:
+    - cron: '7 11 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit meta.json to main, force-push meta-data
+  issues: write # report failures
+  actions: write # start the Pages workflow
+
+concurrency:
+  group: meta
+  cancel-in-progress: false
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - id: install
+        run: npm ci
+
+      - id: restore
+        name: Restore battles.jsonl from the meta-data branch
+        run: |
+          mkdir -p data/meta
+          if git ls-remote --exit-code --heads origin meta-data > /dev/null; then
+            git fetch --depth 1 origin meta-data
+            git show FETCH_HEAD:battles.jsonl.gz | gunzip > data/meta/battles.jsonl
+            echo "Restored $(wc -l < data/meta/battles.jsonl) rows from meta-data."
+          else
+            echo "No meta-data branch yet: starting with an empty battles.jsonl."
+          fi
+
+      # Login → collect → prune to 14 days → aggregate → decide. Prints no secret; masks the token.
+      - id: meta
+        name: Log in, collect and aggregate (npm run meta logic)
+        env:
+          COC_DEV_EMAIL: ${{ secrets.COC_DEV_EMAIL }}
+          COC_DEV_PASSWORD: ${{ secrets.COC_DEV_PASSWORD }}
+        run: npx tsx scripts/meta-ci.ts run --out "$RUNNER_TEMP/meta-ci.json"
+
+      - id: commit
+        name: Commit public/meta.json (only if changed)
+        if: steps.meta.outputs.commit == 'true'
+        env:
+          GENERATED_AT: ${{ steps.meta.outputs.generatedAt }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/meta.json
+          if git diff --cached --quiet; then
+            echo "meta.json unchanged; nothing to commit."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "meta: $GENERATED_AT"
+          git pull --rebase -X theirs origin main
+          git push origin HEAD:main
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # Pushes made with GITHUB_TOKEN don't trigger other workflows; a workflow_dispatch does.
+      - id: deploy
+        name: Deploy (start the Pages workflow on main)
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main
+
+      - id: store
+        name: Store the pruned battles.jsonl on meta-data (single commit)
+        if: always() && steps.meta.outputs.store == 'true'
+        env:
+          ROWS: ${{ steps.meta.outputs.rows }}
+          GENERATED_AT: ${{ steps.meta.outputs.generatedAt }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          gzip -9 -c data/meta/battles.jsonl > "$RUNNER_TEMP/battles.jsonl.gz"
+          blob=$(git hash-object -w "$RUNNER_TEMP/battles.jsonl.gz")
+          readme=$(printf '%s\n' "# meta-data" "" "Legend League I attacks of the last 14 days (battles.jsonl, gzipped), written by" ".github/workflows/meta.yml. Player tags are pseudonyms. Force-pushed as a single commit every day." | git hash-object -w --stdin)
+          tree=$(printf '100644 blob %s\tREADME.md\n100644 blob %s\tbattles.jsonl.gz\n' "$readme" "$blob" | git mktree)
+          commit=$(git commit-tree "$tree" -m "meta-data: $ROWS rows (14-day window) at $GENERATED_AT")
+          git push --force origin "$commit:refs/heads/meta-data"
+          echo "meta-data: $ROWS rows, $(du -h "$RUNNER_TEMP/battles.jsonl.gz" | cut -f1) gzipped"
+
+      - name: Report the failure as an issue
+        if: failure() || steps.meta.outputs.issue == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COC_DEV_EMAIL: ${{ secrets.COC_DEV_EMAIL }}
+          COC_DEV_PASSWORD: ${{ secrets.COC_DEV_PASSWORD }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          INSTALL: ${{ steps.install.outcome }}
+          RESTORE: ${{ steps.restore.outcome }}
+          META: ${{ steps.meta.outcome }}
+          COMMIT: ${{ steps.commit.outcome }}
+          DEPLOY: ${{ steps.deploy.outcome }}
+          STORE: ${{ steps.store.outcome }}
+          PUSHED: ${{ steps.commit.outputs.pushed }}
+        run: |
+          if [ "$INSTALL" = failure ]; then step="npm ci"
+          elif [ "$RESTORE" = failure ]; then step="restore battles.jsonl from meta-data"
+          elif [ "$META" = failure ]; then step=""   # the result file names the step
+          elif [ "$COMMIT" = failure ]; then step="commit public/meta.json"
+          elif [ "$DEPLOY" = failure ]; then step="start the Pages workflow"
+          elif [ "$STORE" = failure ]; then step="store battles.jsonl on meta-data"
+          else step=""; fi
+          notcommitted=""; [ "$PUSHED" = true ] || notcommitted="--not-committed"
+          if ! npx tsx scripts/meta-ci.ts issue --result "$RUNNER_TEMP/meta-ci.json" ${step:+--step "$step"} --run-url "$RUN_URL" $notcommitted \
+               --title-out "$RUNNER_TEMP/title.txt" --body-out "$RUNNER_TEMP/body.md"; then
+            echo "Meta update failed" > "$RUNNER_TEMP/title.txt"
+            printf 'The daily Legend I meta update failed at **%s**. public/meta.json was not changed.\n\nRun: %s\n' "${step:-unknown step}" "$RUN_URL" > "$RUNNER_TEMP/body.md"
+          fi
+          title="$(cat "$RUNNER_TEMP/title.txt")"
+          num="$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
+                 --jq "map(select(.title == \"$title\")) | .[0].number // empty")"
+          if [ -n "$num" ]; then
+            gh issue edit "$num" --body-file "$RUNNER_TEMP/body.md"
+            gh issue comment "$num" --body "Again: $RUN_URL"
+          else
+            gh issue create --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          fi
+
+      - name: Close the failure issue after a clean run
+        if: success() && steps.meta.outputs.issue != 'true' && steps.meta.outputs.status != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          num="$(gh issue list --state open --search '"Meta update failed" in:title' --json number,title \
+                 --jq 'map(select(.title == "Meta update failed")) | .[0].number // empty')"
+          if [ -n "$num" ]; then gh issue close "$num" --comment "Recovered: $RUN_URL"; fi
