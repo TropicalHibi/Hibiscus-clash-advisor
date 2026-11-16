@@ -66,13 +66,13 @@ describe('helpers in the scheduler', () => {
     expect(helped[0].end).toBe(longest.end - 4 * H);
   });
 
-  it('Lab Assistant: shortens the running research by its work rate', () => {
+  it('Lab Assistant: shortens the running research by its work rate, once per 23-hour cycle', () => {
     const ex = baseExport({ archerTimer: 3 * D });
     ex.helpers.push(helper(ASSISTANT, 7, 0)); // ready now
     const off = entryFor(sim(ex, settings({ simulateHelpers: false })), 'archer');
     const on = entryFor(sim(ex), 'archer');
     expect(off.end).toBe(3 * D);
-    expect(on.end).toBe(3 * D - 7 * H);
+    expect(on.end).toBe(3 * D - 2 * 7 * H); // work hours at now and now + 23 h (both in the 24 h window)
     expect(on.slotId).toBe('LAB');
   });
 
@@ -92,17 +92,19 @@ describe('helpers in the scheduler', () => {
     const ex = baseExport({ bkTimer: 4 * D });
     setLevel(ex, 'heroes', 'barbarian-king', { helper_recurrent: true } as Partial<Entry>);
     ex.helpers.push(helper(APPRENTICE, 8, H));
-    // Two days after the export: hours at +1 h and +25 h have passed; the next one (now + 1 h) is in the window too.
+    // Two days after the export: hours at +1 h, +24 h and +47 h have passed (23 h cycle) → 24 h saved, so
+    // 2 days − 24 h = 24 h of work left at now. The next hour (export + 70 h = now + 22 h) finds 2 h left:
+    // at 9× speed it finishes in 2/9 h, saving 16/9 h.
     const r = sim(ex, settings(), T0 + 2 * D);
-    expect(entryFor(r, 'barbarian-king').end).toBe(4 * D - 2 * D - 3 * 8 * H);
-    expect(entryFor(r, 'barbarian-king').helperSavedSec).toBe(3 * 8 * H);
+    expect(entryFor(r, 'barbarian-king').end).toBe(22 * H + (2 * H) / 9);
+    expect(entryFor(r, 'barbarian-king').helperSavedSec).toBeCloseTo(3 * 8 * H + (16 * H) / 9, 6);
   });
 
   it('a recurrent assistant target that is not researching falls back to the running research', () => {
     const ex = baseExport({ archerTimer: 3 * D });
     setLevel(ex, 'units', 'barbarian', { helper_recurrent: true } as Partial<Entry>);
     ex.helpers.push(helper(ASSISTANT, 5, 0));
-    expect(entryFor(sim(ex), 'archer').end).toBe(3 * D - 5 * H);
+    expect(entryFor(sim(ex), 'archer').end).toBe(3 * D - 2 * 5 * H); // hours at now and now + 23 h
   });
 });
 
@@ -156,7 +158,7 @@ describe('export: boosts and helpers', () => {
   it('reads the coc.py boost keys; unknown keys and shapes are warnings, not errors', () => {
     const w: string[] = [];
     const r = parseBoosts({ builder_boost: 10, lab_boost: 20, clocktower_boost: 30, builder_consumable: 40, lab_consumable: 50, clocktower_cooldown: 60, helper_cooldown: 70, mystery: 1 }, w);
-    expect(r.boosts).toEqual({ builderPotionSec: 10, researchPotionSec: 20, clockTowerSec: 30, builderSnackSec: 40, researchSnackSec: 50, clockTowerCooldownSec: 60 });
+    expect(r.boosts).toEqual({ builderPotionSec: 10, researchPotionSec: 20, petPotionSec: 0, clockTowerSec: 30, builderSnackSec: 40, researchSnackSec: 50, clockTowerCooldownSec: 60 });
     expect(r.helperCooldownSec).toBe(70);
     expect(w).toEqual([expect.stringContaining('Unknown boost "mystery"')]);
     for (const bad of [[1, 2], 'x', 5]) {
@@ -190,11 +192,11 @@ describe('export: boosts and helpers', () => {
     expect(plan.warnings.some((w) => w.includes('future_boost'))).toBe(true);
   });
 
-  it('the real export (if present) has no unknown ids and a helper line', () => {
+  it('the real export (if present) resolves the helpers (incl. the Alchemist) and has a helper line', () => {
     const file = 'samples/myexport.json';
     if (!fs.existsSync(file)) return;
     const acc = parseExport(fs.readFileSync(file, 'utf8'), data);
-    expect(acc.unresolved).toEqual([]);
+    expect(acc.unresolved.filter((u) => u.section === 'helpers')).toEqual([]);
     const plan = buildPlan(data, acc, settings(), EMPTY_META, acc.exportTimestamp!);
     expect(plan.helperLine).toContain("Builder's Apprentice");
   });

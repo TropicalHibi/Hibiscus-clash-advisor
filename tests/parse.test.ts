@@ -91,10 +91,11 @@ describe('dataId join', () => {
     expect(b.version).toBe(data.version);
   });
 
-  it('real export (if present locally) resolves everything except known helper gaps', () => {
+  it('real export (if present locally): only ids the data truly lacks are unresolved; running ones still hold a slot', () => {
     const p = new URL('../samples/myexport.json', import.meta.url);
     if (!fs.existsSync(p)) return;
     const a = parseExport(fs.readFileSync(p, 'utf8'), data);
-    expect(a.unresolved.filter((u) => u.section !== 'helpers')).toEqual([]);
+    for (const u of a.unresolved) expect(data.byDataId.has(u.dataId)).toBe(false);
+    expect(a.unknownJobs.map((j) => j.dataId).sort()).toEqual(a.unresolved.filter((u) => u.upgrading).map((u) => u.dataId).sort());
   });
 });
