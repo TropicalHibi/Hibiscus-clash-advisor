@@ -161,3 +161,41 @@ One line each: decision, then why.
   - **"Next in lab"** names `plan.lab[0]`, its kind and pick value, and the best unpinned candidate of each other kind with its value. When the pick is pinned it says "pinned". When the Laboratory is busy it adds "starts when X finishes (in …)".
 - Plan reasons for lab items append `· lab pick 0.50 (1.00 of top siege × 0.5)`.
 - **SPEC Step 3:** item images were added to the plan only. Nothing is built yet.
+
+# Decisions (review fixes, REVIEW.md)
+
+One line each: decision, then why. Finding numbers refer to REVIEW.md.
+
+## Rules from the user (not findings)
+- **Laboratory upgrade is Tier 0, first** (Lab → new buildings → Queen), both modes. It never holds the TH gate; the Pet House stays in the offense tier. *Why:* the user's rule; lab levels gate every research.
+- **Finding 2 is not a bug: research and Laboratory / Pet House upgrades run in parallel.** The old "no research while the building upgrades" block is removed; nothing blocks the other way either. *Why:* that's the in-game behaviour, per the user. The committed fixture now starts the Lab upgrade and keeps researching.
+
+## Engine
+- **#1 Required merge-source level = the source's max level at the merge's unlock TH** (`maxLevelAt(source, { th: unlockTH })`). A merge holds the TH gate only if enough sources exist **and** each can reach that level at the current TH. *Why:* the user's decision; levels a newer TH adds can no longer deadlock the rush TH. Today's values are unchanged (Cannon/AT 21, Wizard Tower 17).
+- **A started merge counts as built for the gate** (unchanged rule, now in SPEC): in the TH19 test the TH starts alongside the two Super Wizard Tower merges. *Why:* consistent with "a building under construction counts as built".
+- **#3 Weight 0:** lab candidates of that kind get `autoPick: false`, sort after every auto-pickable item, and are skipped by `nextResearch()` (scheduler, forecast, "Next in lab"). **Pins override weight 0.** *Why:* "never auto-picked, still listed" from the user; a pin is an explicit request, so it wins.
+- **#4** The merge-consumption check runs in the browser (`dataIssues()`, cached per data object) and its errors are Plan-tab warnings. Planned copies are never generated for an item with `countAfterMerges` but no recipe. *Why:* the user's decision; raw counts would ask for buildings that were merged away.
+- **#5 Supercharge eligibility:** base at `maxLevelAt(base, { th })` (and > 0), supercharge level `thRequired ≤ TH`.
+- **#6 "Now" state:** `simulate()` returns `nowState` (jobs due at t = 0 applied, nothing new started). `buildPlan` builds the top priorities, lab / pets / equipment, book-ready list and the TH / Hero Hall levels from it. "Next in lab" only says "starts when …" for a job still running (`end > 0`).
+- **#8** The lookahead keys on `thInst.upgradingTo` (the TH itself). The weapon still shares the TH lock for candidacy.
+- **#10** An export timestamp > 5 min (`FUTURE_TOLERANCE_SEC`) in the future → plan warning. Timers still count from "now". The fixture's `T0` moved to 1 790 000 000 (21 Sep 2026); only its timestamp changed.
+- **#14** Removed `bookThreshold()`, `metaScore()`, `superchargeUpgrading`, `'hero-banner'` and `'laboratory'` in `OFFENSE_ORDER`. The engine reads `recipe.unlockTH`. `IDS` + `levelsOf` moved to `src/state/levels.ts`, and `parseExport` uses `levelsOf`. *Why:* one derivation of TH / Hero Hall / lab / pet / blacksmith levels.
+- **#15** `builderCandidates` = `heroDrafts`, `townHallDrafts`, `plannedBuildings`, `mergePlan`, `genericDrafts`, `superchargeDrafts`. Each emits a semantic `Group`; `place()` maps it to tier + order once (LPT for tiers 5–6 inside `place()`). No candidate's tier is overwritten later.
+- **#17** Unknown cost-resource strings are still counted as gold, but now produce a `GameData.warnings` entry, shown on the Plan tab and by sync.
+- Book-ready entries carry `timeSec` (Gold-Pass time when on) and `rawTimeSec`. *Why:* spec ambiguity 12, as decided by the user.
+- `TimelineEntry` gained `lockUid`. *Why:* the "one upgrade per lock" test checks every lock, not just the TH (#18).
+
+## Tooling
+- **#7 Validation that blocks** a new data version: `normalize` throws, no TH levels/items, or `checkLevels` errors. Merge consumption and hero caps stay warnings. *Why:* SPEC §9 says validation warnings don't block the site; the site handles stale merges itself (#4). Blocking on merges would also hold back a TH19 release until `merges.yaml` is edited.
+- **#7 Major pin:** sync and refresh ask `npm view "clash-of-clans-data@<N+1.0.0" version --json` (N = installed major) and install that exact version. *Why:* a caret range on 0.x would block minor releases (`^0.19.1` = `<0.20.0`); an explicit `<N+1` keeps every 0.x minor but never jumps to 1.0.
+- **#7 State:** `lastGoodDataVersion` and `dataFailure {version, reason, at}` live in the existing git-ignored `data/refresh-state.json`. sync exits 1 when it restored or failed, so the refresh prints its one-line warning; the refresh then warns on every start while `dataFailure` is set, and doesn't reinstall that same version each start (a newer release, or `npm run sync` by hand, retries). *Why:* "keep warning on every start until fixed" without a slow reinstall on every `npm run dev`.
+- Sync logic in `scripts/lib/sync.ts`; Node side effects for sync and refresh in `scripts/lib/nodeDeps.ts` with injectable `execSync`/`spawnSync`. *Why:* the wiring (timeouts, exit codes) is now tested.
+- **#9** Instead of re-aging the run state: when a run state is too old to resume (> 24 h) but written within 7 days, its unfetched players go first in the next run's player list (capped at `maxPlayers`). *Why:* the predev cadence starts the next run ~24 h later, so re-aging alone would still drop them.
+- Meta run logic moved to `scripts/lib/metaRun.ts` (paths, API client, clock injected). The non-TTY output now prints only the final progress line per phase. *Why:* resume, carry-over, pruning and exit codes are testable; output is unchanged on a terminal.
+- **#12** A rankings location that fails after retries is skipped (`onSkip` logged); 401/403 still abort. `Retry-After` (seconds) is used when longer than our backoff, capped at 60 s.
+- **#11** Redaction moved to `scripts/lib/redact.ts`: any string value matching `^#[0-9A-Z]{3,}$` that isn't a pseudonym becomes `#REDACTED`; `*LeagueGroupTag` keys are dropped; a full player profile (has `achievements`) gets its stats zeroed and its achievements reduced to name + village. Idempotent, so the committed fixtures were re-redacted in place with no API call. *Note:* the old tag is still in git history; rewriting history needs the user's go-ahead.
+- **#13** `npm run plan -- <path>` with a missing path errors; the samples/fixture fallbacks only apply with no argument.
+- Settings from localStorage are merged per nested object (`forecast`, `lab`, `lab.kindWeights`, pins) over the YAML defaults. *Why:* settings saved before a field existed fell back to hard-coded weights (a missing test from REVIEW).
+
+## Skipped
+- **#16 bundle size:** not done (v2), as instructed.

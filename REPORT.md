@@ -663,3 +663,106 @@ Earlier versions for comparison: plain usage share gave Archer 12 → 13 → 14;
 
 - [ ] **Your spells barely register.** Your best spell upgrade is Poison at 0.26 of the top spell. The spells Legend I leans on (Totem, Rage, Revive, Freeze, Invisibility) aren't among your current upgrades: they're maxed for your lab level or not unlocked. With weight 0.7, spells won't be picked for a long time. Raise the spell weight in Settings if you want Poison sooner.
 - [ ] **Dragon twice in a row (25 days)**, as asked (repeats allowed). Pin Dragon Rider or Sky Wagon to break it up.
+
+---
+
+# Review fixes (REVIEW.md)
+
+**Status:** findings 1, 3–15 and 17–19 are fixed. Finding 16 (bundle size) is skipped for v2, as asked. Finding 2 turned out not to be a bug and was replaced by the parallel-research rule below. `npm test` passes (**182 tests in 10 files**, up from 115; one weak test was replaced by a stronger one) and `npm run build` succeeds. SPEC.md has the new rules and resolves all 13 "Spec ambiguities". The reasoning is in DECISIONS.md under "review fixes".
+
+## New rules
+- **Laboratory first.** Tier 0 is now Laboratory upgrade → new unbuilt buildings → Archer Queen, in both modes. The Lab upgrade never holds the TH gate. The Pet House stays in the offense tier.
+- **Research runs alongside building upgrades.** The Laboratory and the Pet House can upgrade while research runs, and research keeps going during their upgrades. The scheduler no longer blocks either.
+
+## What changed per finding
+
+| # | Change |
+|---|---|
+| 1 | A merge now needs its sources at their max level **at the merge's unlock TH**, so a newer TH adding source levels can't raise the bar. A merge only holds the TH gate if its sources can actually reach that level at your TH. Test: the TH19 scenario from the review (Wizard Tower 18 added) now merges the Super Wizard Towers and upgrades the TH. Before, it never upgraded the TH. |
+| 2 | Not a bug (see "Research runs alongside building upgrades" above). Tested for both buildings. |
+| 3 | A lab kind with weight 0 is never started automatically (scheduler, forecast, "Next in lab"). It stays listed in its Lab tab section, at the bottom of the queue order, marked "not auto-picked". A pin still overrides it. |
+| 4 | The merge-consumption check runs in the browser and shows a Plan-tab warning. The planner never suggests building copies of a merge source that `merges.yaml` doesn't explain. |
+| 5 | Supercharges are offered when the base is at its max **for your TH**, so a TH19 level no longer removes TH18 supercharges. |
+| 6 | Top builder priorities, the lab / pet / equipment lists, "Next in lab" and the book-ready list now use the state at "now", so upgrades that finished since the export are counted. |
+| 7 | `npm run sync` installs the newest release **within the current major** and checks it. If it won't load, sync puts back the last known-good version and records the failure. `npm run dev` then warns on every start until a sync succeeds, without reinstalling the bad version each time. |
+| 8 | A TH weapon upgrade no longer starts the next-TH merge prep; only a Town Hall upgrade does. |
+| 9 | Players a meta run couldn't fetch are retried first by the next run (within 7 days), so "the next run retries them" is now true. |
+| 10 | An export timestamp more than 5 minutes in the future gives a clock warning. The test fixture is now dated 21 Sep 2026 (only its timestamp changed). |
+| 11 | Fixture redaction drops league group tags, any other tag value and player profile stats. The committed `player.json` was re-redacted without any API call, and a test scans every fixture for leftover tags. **The old tag `#8UG890J` is still in git history.** Removing it needs a history rewrite and force-push, which I didn't do without asking. |
+| 12 | A rankings location that keeps failing is skipped (401/403 still stop the run). The server's `Retry-After` is honoured. |
+| 13 | `npm run plan -- <path>` with a missing file now errors instead of planning `samples/`. |
+| 14 | Dead code removed. Building levels are derived in one place. The engine uses the recipe's unlock TH. |
+| 15 | `builderCandidates` is split into small generators. Each candidate gets its final tier once, in one function. |
+| 17 | An unknown cost resource in the data shows a warning. `super-troops.yaml` points at the real check. |
+| 18 | The book threshold is tested against a modified data copy (a 9-day level raises it to 9d). "One upgrade at a time" is checked for every building lock over 30 days. Gold Pass is tested on research, pet and supercharge jobs. |
+| 19 | Both UI test suites run on a fixed clock. |
+
+**Spec ambiguities**, as now written in SPEC.md:
+1. The TH waits for the gate.
+2. The required source level is taken at the unlock TH.
+3. Weight 0 = listed, never auto-picked, pins override.
+4. Research runs in parallel with building upgrades.
+5. Ranked lists reflect "now".
+6. The lookahead runs only while the Town Hall itself upgrades, covers TH+1, ranks after the current gate, and never holds it.
+7. Supercharge needs the base at its max for your TH.
+8. Builders = huts + B.O.B.
+9. Merges rank as defenses inside Tier 0.
+10. The TH weapon is tier 5 at max TH.
+11. Meta staleness = last aggregation, and partial failures are retried.
+12. The book-ready list shows Gold-Pass time when the toggle is on.
+13. Ore counts the next level only.
+
+**New tests** (68), covering:
+- `tests/engine-rules.test.ts`: Tier 0 order in both modes; parallel research for the Lab and the Pet House; TH19 deadlock; unreachable sources; busy merge sources; gate order; weight 0; unknown merges; supercharges; "now" lists; TH weapon in both modes; clock skew; custom hero order; crafted-module lock; every-lock check; horizon edge; Gold Pass; book threshold vs data; wall dump; equipment order; pins across meta files.
+- `tests/tooling.test.ts`: every sync branch; refresh warnings; the real Node wiring with fake npm; meta run (clean, exit 2 + carry-over, resume, `--fresh`, maxPlayers change, prune/dedupe, 403 abort); API retries, `Retry-After`, skipped locations; redaction.
+- `tests/edges.test.ts`: aggregation window edges; empty armies; future timestamps; a siege in both the home army and the Clan Castle; encoded and repeated army codes; validation that must fail; throwing localStorage; old saved settings.
+- `tests/ui.test.ts`: an export without a timestamp.
+
+## Plan before / after
+
+**Your export** (`npm run plan -- samples/myexport.json --at-export`): **identical** before and after. Your Laboratory is maxed, nothing is unbuilt and every merge is done, so none of the new rules change your builders, lab, pets, resources or walls.
+
+As of now (16 Nov, 4:13 PM, export 1d 8h old), finding 6 shows. The priority list now includes the heroes whose upgrades finished since the export, matching "Now". Grand Warden is listed as book-ready at 77→78 without "(after current upgrade)", because that upgrade is done:
+
+```
+== Now ==
+  B3: start Barbarian King → 83 (195K DE, 5d) — Hero #4 in order; not book-ready (raw next level 5d < 8d threshold)
+  B4: start Royal Champion → 38 (180K DE, 5d) — Hero #5 in order; not book-ready (raw next level 5d < 8d threshold)
+  B5: start Minion Prince → 53 (110K DE, 4d) — Hero #6 in order; not book-ready (raw next level 4d < 8d threshold)
+
+== Top builder priorities right now ==
+  [T2 Heroes] Barbarian King 82 → 83 · 5d · 195K DE — …
+  [T2 Heroes] Royal Champion 37 → 38 · 5d · 180K DE — …
+  [T2 Heroes] Minion Prince 52 → 53 · 4d · 110K DE — …
+  [T5 Permanent defenses] Firespitter 2 → 3 · 15d · 29M gold — Permanent defense, longest first (LPT)
+
+== Book-ready heroes (your call) ==
+  Grand Warden 77→78: 25.5M elixir, 8d
+  Dragon Duke 22→23: 440K DE, 8d (after current upgrade)
+```
+
+Before this fix, the priority list at the same moment would have left out BK 83 and RC 38, because it still treated them as upgrading.
+
+**Committed fixture** (`npm run plan -- tests/fixtures/export-th16.json --at-export`, TH16 rush). Besides the new date, the Laboratory moves to Tier 0, ahead of the Town Hall. The Lab upgrade starts while Balloon 4 keeps researching, which is now allowed. 24h totals are unchanged (75M elixir, 16M gold, 30K DE), and only their order changed because elixir is now needed first.
+
+```diff
+ == Now ==
+-  B4: start Town Hall → 17 (16M gold, 10d) — Rush: Town Hall upgrade, TH gate clear (…)
+-  B5: start Laboratory → 14 (13M elixir, 9d) — Offense building (non-hero)
++  B4: start Laboratory → 14 (13M elixir, 9d) — Tier 0: Laboratory upgrade first (research speed and new lab levels)
++  B5: start Town Hall → 17 (16M gold, 10d) — Rush: Town Hall upgrade, TH gate clear (…)
+   B6: start Barracks → 18 (15M elixir, 9d) — Offense building (non-hero)
+   PET: start L.A.S.S.I → 3 (30K DE, 1d 12h) — …
+
+ == Top builder priorities right now ==
++  [T0 Laboratory + new buildings + Archer Queen] Laboratory 13 → 14 · 9d · 13M elixir — Tier 0: …
+   [T1 Town Hall path + TH gate] Town Hall 16 → 17 · 10d · 16M gold — …
+-  [T2 Offense] Laboratory 13 → 14 · 9d · 13M elixir — Offense building (non-hero)
+   [T2 Offense] Barracks 17 → 18 · 9d · 15M elixir — …
+```
+
+## Check
+- [ ] **Laboratory first:** on a rushed account the Lab now beats the Town Hall and the Queen for the first free builder. Agree in practice?
+- [ ] **Weight 0 + pins:** a pinned item is researched even if its kind's weight is 0. Say if you'd rather weight 0 win.
+- [ ] **What blocks a data update:** only data that can't be loaded or has broken levels. A merge `merges.yaml` doesn't know yet installs anyway and shows a Plan-tab warning. Say if you'd rather that block the update too.
+- [ ] **Git history:** say if you want `#8UG890J` removed from history (it needs a force-push to `main`).

@@ -67,7 +67,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 - Top-level `boosts` object: builder boost, lab boost, clock tower, etc.
 - **No resource amounts** — that's why the forecast reports totals needed, not a deficit.
 - **Verify on first real export:** is there a top-level timestamp? If yes, timers count down from it. If not, use the paste time as the baseline and show "imported at HH:MM".
-- Builder count = number of Builder's Huts in `buildings`. Goblins are never counted as schedulable slots (§10.1).
+- Builder count = Builder's Huts (Σ `cnt`) + B.O.B's Hut in `buildings`. Goblins are never counted as schedulable slots (§10.1).
 
 ### 3.3 Official API — meta pipeline only
 - Base URL `https://api.clashofclans.com/v1`, bearer token from `.env` (`COC_API_TOKEN`). In v1 the key is locked to the player's home IP.
@@ -179,45 +179,48 @@ interface Candidate {        // one possible next upgrade
 - **Max-TH mode:** player TH == max TH.
 - Detected automatically. When a new TH ships and data syncs, the mode flips back to rush with no code change.
 
-### 6.2 Tier 0 — New buildings + Archer Queen (both modes)
-- **New unbuilt buildings come first.** Any building where owned count < `availablePerTownHall` count at the current TH (any category, including extra copies). A merge whose sources are already at the required level counts as a new building. Among several new buildings, order by the tier the building would normally belong to (offense before resources before defenses), then longest first.
-- **Archer Queen:** if she is not **book-ready** (§6.5) and not already upgrading, she gets the next free builder after new buildings. She is always being upgraded otherwise and outranks the TH and everything below.
+### 6.2 Tier 0 — Laboratory, new buildings, Archer Queen (both modes)
+Tier 0 order: **Laboratory upgrade → new unbuilt buildings → Archer Queen.** Applies in rush and max-TH mode.
+- **Laboratory upgrade ranks above everything.** Whenever the Laboratory has a next level available at the current TH and isn't already upgrading, it takes the next free builder. It never counts against the TH gate. (The Pet House stays in the offense tier.)
+- **New unbuilt buildings come next.** Any building where owned count < `availablePerTownHall` count at the current TH (any category, including extra copies). A merge whose sources are already at the required level counts as a new building. Among several new buildings, order by the tier the building would normally belong to (offense before resources before defenses; merges and missing merge sources count as defenses), then longest first.
+- **Archer Queen:** if she is not **book-ready** (§6.5) and not already upgrading, she gets the next free builder after the Laboratory and new buildings. She is always being upgraded otherwise and outranks the TH and everything below.
 
 ### 6.3 Rush mode tiers
 1. **Town Hall path**
-   - Town Hall upgrade itself (as soon as it's available).
-   - TH weapon levels.
+   - Town Hall upgrade itself, **as soon as the TH gate is clear** (below). Until then it isn't a candidate.
+   - TH weapon levels. The weapon shares the Town Hall's builder lock, so it is only picked while the TH itself can't be upgraded (gated or maxed for now).
    - **TH gate — everything that must be done before the next TH upgrade:**
-     - **Every available merge is performed:** source defenses at the required level (§7), then the merge itself. Applies to all merged defenses available at the current TH, not just ones new to it. Ordered by the TH that unlocked them (soonest first).
-     - **Every new building that can be built is built.** These are handled in Tier 0 (§6.2), so they're done before the gate is checked.
+     - **Every available merge is performed:** source defenses at the required level (§7), then the merge itself. Applies to all merged defenses available at the current TH, not just ones new to it. Ordered by the TH that unlocked them (soonest first), then `merges.yaml` order. A merge holds the gate only if it can actually be performed at the current TH: enough source buildings exist and every one of them can reach the required level at this TH. A started merge counts as done.
+     - **Every new building that can be built is built.** These are handled in Tier 0 (§6.2), so they're done before the gate is checked. A building under construction counts as built.
      - Upgrading merged defenses past level 1 is **not** part of the gate; that goes in the permanent-defense tier.
-   - **While the TH is upgrading:** keep working the gate, and immediately start on the **next** TH's merge source upgrades if any are available at the current TH.
-2. **Offense, non-hero** — Laboratory, Army Camps, Barracks, Dark Barracks, Spell Factory, Dark Spell Factory, Clan Castle, Workshop, Blacksmith, Pet House, Hero Hall, Hero Banner.
+   - **While the Town Hall itself is upgrading** (not while only its weapon is): keep working the gate, and immediately start on the **next** TH's (TH+1 only) merge source upgrades if any are available at the current TH. These lookahead items rank in tier 1 after the current TH's gate items and never hold the gate.
+2. **Offense, non-hero** — Army Camps, Barracks, Dark Barracks, Spell Factory, Dark Spell Factory, Clan Castle, Workshop, Blacksmith, Pet House, Hero Hall. (The Laboratory is Tier 0. The Hero Banner has no levels in the data.)
 3. **Heroes** in configured order (default: Archer Queen > Grand Warden > Dragon Duke > Barbarian King > Royal Champion > Minion Prince), each only until book-ready. A hero capped by Hero Hall level is skipped (the next one in order is used).
 4. **Resources** — Storages (Gold, Elixir, Dark Elixir), then Collectors (Gold Mine, Elixir Collector, Dark Elixir Drill).
 5. **Permanent defenses** (incl. traps, X-Bow, Inferno, Eagle, Scattershot, Spell Tower, Monolith, etc.) — builder-efficiency order (§6.6).
-6. **Temporary / last** — supercharges (defense and collector), crafted defenses, guardians. Builder-efficiency order.
+6. **Temporary / last** — supercharges (defense and collector), crafted defenses, guardians. Builder-efficiency order. A supercharge is offered when its base building is at its **max level for the current TH** and the supercharge level's `townHallRequired` ≤ TH (so a newer TH adding base levels doesn't remove supercharges for players below it).
 
 ### 6.4 Max-TH mode tiers
-0. New buildings, then Archer Queen (as above)
+0. Laboratory upgrade, then new buildings, then Archer Queen (as above)
 1. Offense, non-hero
 2. Heroes (same rules)
 3. TH gate items (same rules as rush tier 1): merge source upgrades so every available merge can be performed. New buildings are already in Tier 0. Merged-defense upgrades past level 1 go in tier 5.
 4. Resources (storages > collectors)
-5. Permanent defenses
+5. Permanent defenses, including TH weapon levels if the max TH has a weapon
 6. Temporary (supercharges, crafted defenses, guardians)
 
 ### 6.5 Hero book threshold
 - `BOOK_THRESHOLD = max(timeSec)` across **all hero levels in the data** (currently 8d).
 - Compare the hero's **raw** next-level time to the threshold. Gold Pass scales both sides equally, so the raw comparison is correct in either toggle state.
-- A hero whose next level's raw time ≥ threshold is **book-ready**. It drops out of scheduling and shows on a "Book-ready — your call" list with cost/time.
+- A hero whose next level's raw time ≥ threshold is **book-ready**. It drops out of scheduling and shows on a "Book-ready — your call" list with cost/time. The listed time is Gold-Pass boosted when the toggle is on (the threshold comparison itself stays raw).
 - The threshold must not be hard-coded. If a patch adds longer hero levels, it updates on sync.
 
 ### 6.6 Within-tier ordering
 - Tiers 1–3: the order defined above (merge order, building list order, hero order).
 - Tier 4: storages before collectors; within each, lowest level first.
 - **Tiers 5–6 (builder efficiency):** longest-time-first (LPT). This minimizes total time to finish the tier across N builders. Tie-break: cheaper first.
-- Each building instance can only have one upgrade at a time. A hero being upgraded can't be picked again.
+- Each building instance can only have one upgrade at a time. A hero being upgraded can't be picked again. Crafted-defense modules share their crafted defense's lock (one module at a time).
+- **Research and building upgrades run fully in parallel.** The Laboratory can be upgraded while research runs, and research continues during a Laboratory upgrade; the same holds for the Pet House and pet research. Neither blocks the other in the scheduler.
 - Resources are **not** a scheduling constraint in v1 (player resources unknown).
 
 ### 6.7 Lab queue
@@ -225,8 +228,9 @@ interface Candidate {        // one possible next upgrade
 - **Lab tab: three sections — Troops, Spells, Sieges** — each ordered by its own meta score (§8.3) descending: troops and spells by share of housing space, sieges by usage share. **Unused items are still listed at the bottom of each section** (not greyed out), ordered by shortest time.
 - **Lab queue pick (scheduler + 24h forecast):** normalize within kind, then weight:
   - `normScore = score ÷ top score of its kind`, where the top is the highest score of any unit of that kind in the Legend I meta (so each kind's Legend I #1 = 1.0; the player's best upgrade of a kind can be < 1.0).
-  - `pickValue = normScore × kindWeight`, weights from settings `lab.kindWeights` (defaults: troops 1.0, spells 0.7, sieges 0.5; 0 = never auto-pick that kind).
-  - The next lab upgrade is the highest `pickValue` across all three kinds. Ties: higher `normScore`, then shortest time. Unused items (value 0) come last, shortest first.
+  - `pickValue = normScore × kindWeight`, weights from settings `lab.kindWeights` (defaults: troops 1.0, spells 0.7, sieges 0.5).
+  - **Weight 0 = never auto-pick that kind:** the scheduler and the 24h forecast never start an item of that kind on their own. Such items stay listed in their Lab tab section and sit at the bottom of the lab queue order. A pin overrides it (a pinned item is researched whatever its kind's weight).
+  - The next lab upgrade is the highest `pickValue` across the kinds with weight > 0. Ties: used before unused, then higher `normScore`, then shortest time. Unused items (value 0) come last among them, shortest first.
   - Consecutive levels of the same unit are allowed (no repeat penalty).
 - Player can pin overrides (move item to top of its section and of the lab queue, in pin order). Pinned items stay pinned until unpinned.
 - **"Next in lab" line** at the top of the Lab tab: the pick, its kind, and its `pickValue` vs the top pick of the other two kinds (or "pinned"); if the lab is busy, when it starts.
@@ -245,8 +249,10 @@ One list (no kinds, no weights): meta score (usage share) descending, unused at 
 `config/merges.yaml` holds the recipes. Everything else is derived from data:
 - **Unlock TH** = merged defense's first `availablePerTownHall` entry (or level 1 `townHallRequired`).
 - **Count needed per TH** = merged defense's `availablePerTownHall[].count`.
-- **Required source level** = max level of the source defense in the data. Cannon and Archer Tower max out before they are fully merged.
+- **Required source level** = the source defense's **max level at the merge's unlock TH**. Cannon and Archer Tower max out before they are fully merged. Levels a later TH adds to a source never raise the requirement for an older merge.
 - **Source consumption check:** for each source, `count − countAfterMerges` at a TH must equal Σ(recipe inputs × merged count) across recipes using it. If it doesn't, the validation test fails. That means a new merge needs adding to `merges.yaml`.
+  - The same check runs **in the browser** and shows a warning on the Plan tab until `merges.yaml` is fixed.
+  - Until then, the planner **never suggests building copies** of an item that has `countAfterMerges` but no recipe (its raw count would ask for buildings that were merged away).
 
 Current recipes (derived from TH17/18 counts — see `merges.yaml`):
 - Ricochet Cannon = 2 Cannon (TH16)
@@ -264,8 +270,9 @@ Current recipes (derived from TH17/18 counts — see `merges.yaml`):
 3. For each player: `GET /players/{tag}/battlelog`. Keep entries where `attack === true && battleType.toLowerCase() === 'legend'`.
 4. **No Town Hall filter.** Legend I attackers are effectively max TH, and a troop used by a lower-TH Legend I player is still a valid recommendation.
 5. Dedupe key: `playerTag + battleTimestamp`. Append new rows to `data/meta/battles.jsonl`: `{ tag, ts, stars, destruction, armyShareCode }`.
-6. Throttle (~10 req/s, configurable). Retry 429/5xx with exponential backoff. Log progress.
+6. Throttle (~10 req/s, configurable). Retry 429/5xx/network errors with exponential backoff, using the server's `Retry-After` when it is longer (capped at 60 s). 401/403 abort the run. A location whose rankings keep failing is skipped and logged. Log progress.
 7. Run **daily** (battle logs only reach back ~2 days). Automated by the `npm run dev` refresh (§9a), never by an OS scheduler. No patch-triggered runs.
+8. **Resumable:** an interrupted run resumes within 24 h. Players a run couldn't fetch are retried first by the next run (if it starts within 7 days), so partial failures aren't lost to the daily cadence.
 
 ### 8.2 Parse `armyShareCode`
 Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The payload may be a full link (`...?army=<payload>`) or raw.
@@ -297,7 +304,10 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
 
 ## 9. Game-data sync (`npm run sync`)
 
-1. `npm update clash-of-clans-data` (or install latest). Record version.
+1. Install the newest `clash-of-clans-data` **within the current major** (never jump a major automatically). Record the version.
+   - Load and validate it. If it can't be used (normalize throws, or levels are broken), **restore the last known-good version**, record the failure in `data/refresh-state.json`, and exit non-zero.
+   - The `npm run dev` refresh (§9a) warns about the recorded failure on every start until a sync succeeds.
+   - Merge-consumption and hero-cap findings are warnings, not failures (the site warns about merges itself, §7).
 2. Normalize into the `Item` model; write `data/snapshots/<date>_<version>.json`.
 3. Diff vs the previous snapshot and print human-readable changes, e.g. `Archer Tower 21: 18d → 16d`, `Gold Mine 17: 8.0M → 7.2M`, `NEW: Hero Hall 13`.
 4. Run validation tests; print warnings (don't block the site):
@@ -313,9 +323,10 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
 The player never uses Windows Task Scheduler (or cron). Freshness comes from starting the site:
 
 - `npm run dev` runs a `predev` refresh (`scripts/refresh.ts`) before Vite starts:
-  1. **Game data:** if the last check was >24h ago (`data/refresh-state.json`, git-ignored), ask npm for the newest `clash-of-clans-data`; if it is newer than the installed one, run the full `npm run sync`.
-  2. **Meta:** if `public/meta.json` (`generatedAt`) is >24h old or missing **and** `.env` has `COC_API_TOKEN`, run `npm run meta`.
-  3. **Any failure** (offline, 403, no token, sync error) prints a **one-line warning** and the site starts anyway. A failed check is retried on the next start.
+  1. **Game data:** if the last check was >24h ago (`data/refresh-state.json`, git-ignored), ask npm for the newest `clash-of-clans-data` within the installed major; if it is newer than the installed one, run the full `npm run sync`. A version that sync already recorded as unusable isn't reinstalled on every start; a newer release, or `npm run sync` by hand after a fix, retries.
+  2. **Meta:** if `public/meta.json` (`generatedAt`) is >24h old or missing **and** `.env` has `COC_API_TOKEN`, run `npm run meta`. Staleness means "last aggregation" (`generatedAt`), so `npm run meta -- --aggregate-only` also resets the 24 h clock.
+  3. **Any failure** (offline, 403, no token, sync error) prints a **one-line warning** and the site starts anyway. A failed check is retried on the next start. A meta run where some players failed counts as updated; those players are retried by the next run (§8.1).
+  4. While sync has a recorded data failure, **every start** prints a one-line warning that the site is running on the last known-good data.
 - `npm run dev:fast` skips the refresh.
 
 ---
@@ -323,10 +334,13 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 ## 10. Scheduler & 24h forecast
 
 ### 10.1 Scheduler
-- Discrete-event simulation starting at "now" (export baseline + elapsed time).
+- Discrete-event simulation starting at "now" (export baseline + elapsed time). An export timestamp more than 5 minutes in the future is treated as "now" and reported as clock skew.
+- **Ranked lists reflect "now":** the top builder priorities, lab / pet / equipment lists, "Next in lab" and the book-ready list use the state at "now", with every job that finished since the export applied.
 - Resources: N builders, lab, pet house. **Goblin Builder / Goblin Researcher are never scheduled:** an in-progress Goblin job (`extra: true`) runs out its timer, but the Goblin is never given a new suggestion. In-progress upgrades occupy their slot until `remainingSec` elapses.
 - When a slot frees: pick the highest-priority eligible candidate for that queue (§6), apply Gold Pass boost to its time, occupy the slot, then mark the instance's new level as the next candidate.
-- Tier 0 rule: free builders take new unbuilt buildings first; then, if the Queen is eligible and not upgrading, the next free builder takes her.
+- Tier 0 rule: free builders take the Laboratory upgrade first (if available and not already upgrading), then new unbuilt buildings; then, if the Queen is eligible and not upgrading, the next free builder takes her.
+- Research slots never wait for a Laboratory / Pet House building upgrade, and those upgrades never wait for research (§6.6).
+- The lab slot starts the first pinned or auto-pickable item of the lab queue (§6.7); with nothing auto-pickable it stays idle.
 - Active boosts and helpers (Builder's Apprentice, Lab Assistant) are Step 3. Until then, use raw remaining timers.
 
 ### 10.2 Gold Pass toggle
@@ -338,7 +352,7 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 - Sum cost by resource for every upgrade that **starts** within 24h in the simulation.
 - Show a per-slot timeline: `B2 free 11:40 PM → Cannon 21 (3.0M gold)`.
 - Show "needed by" times so the player knows which resource to farm first.
-- Ore: sum ore for the top-N blacksmith picks (N configurable, default 3).
+- Ore: sum ore for the top-N blacksmith picks (N configurable, default 3), counting only each piece's **next** level.
 - Already-running upgrades are not counted (already paid).
 
 ### 10.4 Wall dump line
