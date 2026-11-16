@@ -6,7 +6,14 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 const html = fs.readFileSync(path.resolve('index.html'), 'utf8');
 const fixture = fs.readFileSync(path.resolve('tests/fixtures/export-th16.json'), 'utf8');
-const meta = fs.readFileSync(path.resolve('public/meta.json'), 'utf8');
+// Controlled meta (Balloon heavily used, Super Archer credited to Archer) so the UI test doesn't depend on the last meta run.
+const meta = JSON.stringify({
+  generatedAt: '2026-11-16T12:00:00.000Z', windowDays: 14, halfLifeDays: 5, attacks: 1234, players: 99,
+  units: {
+    '4000005': { name: 'Balloon', usage: 0.42, threeStarRate: 0.81, avgQty: 6, kind: 'troop' },
+    '4000027': { name: 'Super Archer', usage: 0.1, threeStarRate: 0.7, avgQty: 3, kind: 'superTroop', baseId: 4000001 },
+  },
+});
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
@@ -54,5 +61,31 @@ describe('UI', () => {
     max.checked = true;
     max.dispatchEvent(new Event('change'));
     expect(JSON.parse(localStorage.getItem('cocPlanner.settings')!).goldPass).toBe('max');
+  });
+
+  it('footer shows the meta date and attack count', () => {
+    expect(document.querySelector('#footer')!.textContent).toContain('1,234 attacks');
+  });
+
+  it('Lab / Pets / Equipment tab ranks by usage, keeps unused items listed, and pins persist', () => {
+    (document.querySelector('[data-tab="lab"]') as HTMLButtonElement).click();
+    const tab = document.querySelector('#tab-lab') as HTMLElement;
+    expect(tab.hidden).toBe(false);
+    expect(tab.textContent).toContain('Laboratory');
+    expect(tab.textContent).toContain('Pet House');
+    expect(tab.textContent).toContain('Blacksmith');
+    const titles = () => [...tab.querySelectorAll('.rank-list')[0].querySelectorAll('.title b')].map((b) => b.textContent);
+    expect(titles()[0]).toBe('Archer'); // credited with Super Archer's 10% (Balloon is busy in this fixture)
+    expect(tab.textContent).toContain('Includes Super Archer 10%');
+    expect(tab.textContent).toContain('Not seen in Legend I'); // unused items still listed
+    expect(titles()).toContain('Barbarian');
+
+    const pin = tab.querySelector('[data-pin="lab"][data-id="barbarian"]') as HTMLButtonElement;
+    pin.click();
+    expect(titles()[0]).toBe('Barbarian');
+    expect(JSON.parse(localStorage.getItem('cocPlanner.settings')!).lab.pinned).toEqual(['barbarian']);
+    (tab.querySelector('[data-pin="lab"][data-id="barbarian"]') as HTMLButtonElement).click();
+    expect(titles()[0]).toBe('Archer');
+    expect(JSON.parse(localStorage.getItem('cocPlanner.settings')!).lab.pinned).toEqual([]);
   });
 });

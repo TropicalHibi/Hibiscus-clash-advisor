@@ -1,7 +1,7 @@
 // Lab, Pet House and Blacksmith ordering (SPEC §6.7–6.9).
 import { levelInfo, maxLevelAt } from '../data/normalize';
 import type { GameData, Item, OreCost, OwnedInstance, Resource } from '../data/types';
-import { metaScore, type MetaFile } from '../meta/meta';
+import { metaStats, type MetaFile } from '../meta/meta';
 import type { Settings } from '../state/settings';
 import { fmtDuration } from './format';
 import { levelsOf, type EngineState } from './tiers';
@@ -17,6 +17,8 @@ export interface QueueCandidate {
   ore?: OreCost;
   usage: number;
   threeStarRate?: number;
+  /** Super troops whose usage is credited to this base troop. */
+  supers?: { name: string; usage: number }[];
   pinned: boolean;
   reason: string;
 }
@@ -43,7 +45,10 @@ function rank(list: QueueCandidate[], pins: string[], unusedKey: (c: QueueCandid
 
 function reasonFor(c: QueueCandidate, unusedText: string): string {
   if (c.pinned) return 'Pinned';
-  if (c.usage > 0) return `Legend I usage ${(c.usage * 100).toFixed(1)}%`;
+  if (c.usage > 0) {
+    const sup = c.supers?.length ? ` (incl. ${c.supers.map((x) => `${x.name} ${(x.usage * 100).toFixed(1)}%`).join(', ')})` : '';
+    return `Legend I usage ${(c.usage * 100).toFixed(1)}%${sup}`;
+  }
   return unusedText;
 }
 
@@ -66,7 +71,7 @@ export function researchCandidates(
     if (inst.level >= max) continue;
     const next = levelInfo(item, inst.level + 1);
     if (!next) continue;
-    const u = meta.units[String(item.dataId)];
+    const ms = metaStats(meta, item.dataId);
     out.push({
       item,
       instance: inst,
@@ -75,14 +80,15 @@ export function researchCandidates(
       timeSec: Math.round(next.timeSec * (1 - boost)),
       cost: next.cost,
       resource: next.resource,
-      usage: metaScore(meta, item.dataId),
-      threeStarRate: u?.threeStarRate,
+      usage: ms.usage,
+      threeStarRate: ms.threeStarRate,
+      supers: ms.supers,
       pinned: pins.includes(item.id),
       reason: '',
     });
   }
   const ranked = rank(out, pins, (c) => [c.rawTimeSec, c.cost]);
-  for (const c of ranked) c.reason = reasonFor(c, `Not seen in Legend I meta: shortest first (${fmtDuration(c.timeSec)})`);
+  for (const c of ranked) c.reason = reasonFor(c, `${meta.attacks ? 'Not seen in Legend I meta' : 'No meta data yet'}: shortest first (${fmtDuration(c.timeSec)})`);
   return ranked;
 }
 
@@ -98,7 +104,7 @@ export function equipmentCandidates(data: GameData, instances: OwnedInstance[], 
     if (inst.level >= max) continue;
     const next = levelInfo(item, inst.level + 1);
     if (!next) continue;
-    const u = meta.units[String(item.dataId)];
+    const ms = metaStats(meta, item.dataId);
     out.push({
       item,
       instance: inst,
@@ -108,14 +114,15 @@ export function equipmentCandidates(data: GameData, instances: OwnedInstance[], 
       cost: next.cost,
       resource: next.resource,
       ore: next.ore,
-      usage: metaScore(meta, item.dataId),
-      threeStarRate: u?.threeStarRate,
+      usage: ms.usage,
+      threeStarRate: ms.threeStarRate,
+      supers: ms.supers,
       pinned: pins.includes(item.id),
       reason: '',
     });
   }
   // Unused fallback: cheapest first (rarest ore weighs most).
   const ranked = rank(out, pins, (c) => [c.ore?.starryOre ?? 0, c.ore?.glowyOre ?? 0, c.ore?.shinyOre ?? 0]);
-  for (const c of ranked) c.reason = reasonFor(c, 'Not seen in Legend I meta: cheapest first');
+  for (const c of ranked) c.reason = reasonFor(c, `${meta.attacks ? 'Not seen in Legend I meta' : 'No meta data yet'}: cheapest first`);
   return ranked;
 }

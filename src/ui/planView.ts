@@ -90,7 +90,7 @@ export function renderPlan(p: Plan): string {
     out.push('</tbody></table></div>');
   }
   if (p.forecast.oreItems.length) {
-    out.push('<div class="card small"><b>Ore picks</b> (ranked; fallback cheapest-first until the meta pipeline ships):<ul>');
+    out.push('<div class="card small"><b>Ore picks</b> (top of the Blacksmith ranking: Legend I usage, pins first; unseen items cheapest first):<ul>');
     for (const c of p.forecast.oreItems)
       out.push(`<li>${esc(c.item.name)} ${c.instance.level}→${c.toLevel}: ${c.ore?.shinyOre ?? 0} shiny · ${c.ore?.glowyOre ?? 0} glowy · ${c.ore?.starryOre ?? 0} starry</li>`);
     out.push('</ul></div>');

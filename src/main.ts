@@ -7,6 +7,7 @@ import { detectMode } from './engine/tiers';
 import { coerceMeta, EMPTY_META, type MetaFile } from './meta/meta';
 import { parseExport, ExportParseError, type AccountState } from './state/parseExport';
 import { settingsFromYaml, type Settings } from './state/settings';
+import { renderLab, type PinList } from './ui/labView';
 import { esc, renderPlan } from './ui/planView';
 import { storage } from './ui/storage';
 import settingsYaml from '../config/settings.sample.yaml?raw';
@@ -39,14 +40,50 @@ function heroName(id: string): string {
 }
 
 // ── Tabs ──
+const TABS = ['plan', 'lab', 'import'];
 function showTab(tab: string): void {
-  if (tab !== 'plan' && tab !== 'import') tab = 'plan';
+  if (!TABS.includes(tab)) tab = 'plan';
   document.querySelectorAll<HTMLButtonElement>('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
-  $('#tab-plan').hidden = tab !== 'plan';
-  $('#tab-import').hidden = tab !== 'import';
+  for (const t of TABS) $(`#tab-${t}`).hidden = t !== tab;
   storage.saveTab(tab);
   if (tab === 'plan') renderPlanTab();
+  else if (tab === 'lab') renderLabTab();
   else renderImportTab();
+}
+
+/** The account with a timer baseline (paste time when the export has no timestamp). */
+function accountWithBaseline(a: AccountState): AccountState {
+  return a.exportTimestamp ? a : { ...a, exportTimestamp: importedAt };
+}
+
+// ── Lab / Pets / Equipment tab ──
+function renderLabTab(): void {
+  const el = $('#tab-lab');
+  if (!account) {
+    el.innerHTML = `<div class="card empty"><p>No account loaded yet.</p><button class="btn" id="go-import-lab">Paste your export</button></div>`;
+    el.querySelector('#go-import-lab')?.addEventListener('click', () => showTab('import'));
+    return;
+  }
+  try {
+    const plan = buildPlan(data, accountWithBaseline(account), settings, meta, Math.floor(Date.now() / 1000));
+    el.innerHTML = renderLab(plan, meta, heroName);
+  } catch (e) {
+    el.innerHTML = `<div class="card warn">Could not rank upgrades: ${esc((e as Error).message)}</div>`;
+    console.error(e);
+    return;
+  }
+  el.querySelectorAll<HTMLButtonElement>('[data-pin]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const list = b.dataset.pin as PinList;
+      const id = b.dataset.id!;
+      const pins = settings[list].pinned;
+      // Newest pin goes first; unpinning removes it.
+      const next = pins.includes(id) ? pins.filter((x) => x !== id) : [id, ...pins];
+      settings = { ...settings, [list]: { pinned: next } };
+      storage.saveSettings(settings);
+      renderLabTab();
+    }),
+  );
 }
 
 // ── Plan tab ──
@@ -60,7 +97,7 @@ function renderPlanTab(): void {
   }
   const nowSec = Math.floor(Date.now() / 1000);
   // No timestamp in the export → timers count down from the paste time (SPEC §3.2).
-  const acct: AccountState = account.exportTimestamp ? account : { ...account, exportTimestamp: importedAt };
+  const acct = accountWithBaseline(account);
   try {
     const plan = buildPlan(data, acct, settings, meta, nowSec);
     if (!account.exportTimestamp) plan.warnings.unshift(`Export has no timestamp; timers count from the import at ${fmtClock(importedAt, nowSec)}.`);
@@ -163,9 +200,12 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
 }
 
 function renderFooter(): void {
-  const metaDate = meta.generatedAt ? new Date(meta.generatedAt).toLocaleString() : 'none yet (stub)';
-  $('#footer').innerHTML = `Game data: clash-of-clans-data v${esc(data.version)} · max TH ${data.maxTH} · Meta: ${esc(metaDate)}<br>
-    Update with <code>npm run sync</code> (game data) and <code>npm run meta</code> (Legend I meta, Step 2).`;
+  const metaText =
+    meta.generatedAt && meta.attacks > 0
+      ? `Legend I meta: ${esc(new Date(meta.generatedAt).toLocaleString())} · ${meta.attacks.toLocaleString()} attacks, ${meta.players.toLocaleString()} players`
+      : 'Legend I meta: none yet';
+  $('#footer').innerHTML = `Game data: clash-of-clans-data v${esc(data.version)} · max TH ${data.maxTH} · ${metaText}<br>
+    Update with <code>npm run sync</code> (game data) and <code>npm run meta</code> (Legend I meta).`;
 }
 
 async function init(): Promise<void> {
@@ -188,9 +228,12 @@ async function init(): Promise<void> {
   // "Now" moves: refresh the plan every minute and when the page regains focus.
   setInterval(() => {
     if (!$('#tab-plan').hidden) renderPlanTab();
+    else if (!$('#tab-lab').hidden) renderLabTab();
   }, 60_000);
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && !$('#tab-plan').hidden) renderPlanTab();
+    if (document.hidden) return;
+    if (!$('#tab-plan').hidden) renderPlanTab();
+    else if (!$('#tab-lab').hidden) renderLabTab();
   });
 }
 
