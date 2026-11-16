@@ -2,6 +2,7 @@
 // Paths, API client and clock are injected so resume, pruning, dedupe and exit codes can be tested.
 import fs from 'node:fs';
 import path from 'node:path';
+import { parse as parseYaml } from 'yaml';
 import { aggregate, rowKey, type BattleRow, type Catalog } from '../../src/meta/aggregate';
 import { ApiError, type ApiClient } from './api';
 import { fetchPlayerAttacks, gatherPlayers, pool } from './collect';
@@ -19,6 +20,19 @@ export interface MetaConf {
   windowDays: number;
   halfLifeDays: number;
   requestsPerSecond: number;
+}
+
+/** `meta:` settings from config/settings.sample.yaml, with defaults. */
+export function metaConfFrom(settingsYaml: string, leagueTierDefault: number): MetaConf {
+  const cfg = ((parseYaml(settingsYaml) ?? {}) as { meta?: Record<string, unknown> }).meta ?? {};
+  const num = (v: unknown, d: number) => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : d);
+  return {
+    leagueTierId: num(cfg.leagueTierId, leagueTierDefault),
+    maxPlayers: num(cfg.maxPlayers, 1000),
+    windowDays: num(cfg.windowDays, 14),
+    halfLifeDays: num(cfg.halfLifeDays, 5),
+    requestsPerSecond: num(cfg.requestsPerSecond, 10),
+  };
 }
 
 export interface RunState {
@@ -43,6 +57,15 @@ export interface MetaRunOptions {
   api?: ApiClient;
   catalog: Catalog;
   dataVersion: string;
+  /** Drop rows older than this many days (default PRUNE_DAYS = 60; the CI Action uses the 14-day window). */
+  pruneDays?: number;
+  /**
+   * Rewrites each new row's player tag before it's stored and deduped (CI: a pseudonym, because the
+   * meta-data branch is public). The same mapping must be used for every run sharing a battles.jsonl.
+   */
+  tagMap?: (tag: string) => string;
+  /** Don't carry over failed players / resume (CI: no run state survives between runs). */
+  noRunState?: boolean;
   now?: () => number;
   log?: (line: string) => void;
   /** In-place progress line (TTY); falls back to occasional log lines. */
@@ -58,6 +81,11 @@ export interface MetaRunResult {
   rows: number;
   pruned: number;
   summary: string[];
+  /** Collection stats (undefined for --aggregate-only). */
+  stats?: { gathered: number; fetched: number; failed: number; newRows: number };
+  /** Attacks / players in the written meta.json. */
+  attacks: number;
+  players: number;
 }
 
 const fmtTime = (ms: number) => {
@@ -108,13 +136,14 @@ export async function runMeta(o: MetaRunOptions): Promise<MetaRunResult> {
   if (!o.aggregateOnly) {
     if (!o.api) throw new Error('runMeta: an API client is required unless aggregateOnly');
     run = await collect(o.api, o, stateFile, battles, now, log, progress);
-    if (!run.failed.length) fs.rmSync(stateFile, { force: true });
+    if (!run.failed.length || o.noRunState) fs.rmSync(stateFile, { force: true });
   }
 
-  // ── Prune (> 60 days) and dedupe again (an interrupted run can append a row twice) ──
+  // ── Prune (> pruneDays) and dedupe again (an interrupted run can append a row twice) ──
   const nowMs = now();
   const all = readRows(battles);
-  const cutoff = nowMs - PRUNE_DAYS * 86_400_000;
+  const pruneDays = o.pruneDays ?? PRUNE_DAYS;
+  const cutoff = nowMs - pruneDays * 86_400_000;
   const seen = new Set<string>();
   const rows = all.filter((r) => {
     const k = rowKey(r);
@@ -141,7 +170,7 @@ export async function runMeta(o: MetaRunOptions): Promise<MetaRunResult> {
     L.push(`New rows:             ${s.newRows} · duplicates skipped: ${s.duplicates}`);
     L.push(`API requests:         ${run.requests} this session`);
   }
-  L.push(`battles.jsonl:        ${rows.length} rows${pruned ? ` (${pruned} older than ${PRUNE_DAYS} days or duplicate removed)` : ''}`);
+  L.push(`battles.jsonl:        ${rows.length} rows${pruned ? ` (${pruned} older than ${pruneDays} days or duplicate removed)` : ''}`);
   L.push(
     `Aggregated:           ${result.meta.attacks} attacks by ${result.meta.players} players in the last ${o.conf.windowDays} days (half-life ${o.conf.halfLifeDays}d)${result.emptyArmies ? `, ${result.emptyArmies} empty armies skipped` : ''}`,
   );
@@ -167,6 +196,9 @@ export async function runMeta(o: MetaRunOptions): Promise<MetaRunResult> {
     rows: rows.length,
     pruned,
     summary: L,
+    stats: run && { gathered: run.state.tags.length, fetched: run.state.done.length, failed: run.failed.length, newRows: run.state.stats.newRows },
+    attacks: result.meta.attacks,
+    players: result.meta.players,
   };
 }
 
@@ -180,7 +212,7 @@ async function collect(
   progress: (l: string, final: boolean) => void,
 ) {
   const { conf } = o;
-  const { resume, carryOver } = loadRunState(stateFile, conf, now(), !!o.fresh);
+  const { resume, carryOver } = loadRunState(stateFile, conf, now(), !!o.fresh || !!o.noRunState);
   let state = resume;
   let carriedOver = 0;
   const saveState = (s: RunState) => fs.writeFileSync(stateFile, JSON.stringify({ ...s, updatedAt: new Date(now()).toISOString() }));
@@ -213,13 +245,14 @@ async function collect(
   await pool(todo, WORKERS, async (tag) => {
     try {
       const r = await fetchPlayerAttacks(api, tag);
-      const fresh = r.rows.filter((row) => !keys.has(rowKey(row)));
+      const mapped = o.tagMap ? r.rows.map((row) => ({ ...row, tag: o.tagMap!(row.tag) })) : r.rows;
+      const fresh = mapped.filter((row) => !keys.has(rowKey(row)));
       for (const row of fresh) keys.add(rowKey(row));
       if (fresh.length) fs.appendFileSync(battles, fresh.map((row) => JSON.stringify(row)).join('\n') + '\n');
       st.stats.entries += r.entries;
       st.stats.legendAttacks += r.legendAttacks;
       st.stats.newRows += fresh.length;
-      st.stats.duplicates += r.rows.length - fresh.length;
+      st.stats.duplicates += mapped.length - fresh.length;
       st.stats.missingCode += r.missingCode;
       if (r.notFound) st.stats.notFound++;
       st.done.push(tag);
