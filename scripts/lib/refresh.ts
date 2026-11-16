@@ -3,8 +3,12 @@
 
 export const REFRESH_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-/** Printed after a meta pull that wrote public/meta.json: the live site only changes when it's pushed (SPEC §15). */
-export const PUSH_META_REMINDER = '[refresh] meta.json updated: run npm run push-meta to update the live site.';
+/**
+ * Printed after a local meta pull that wrote public/meta.json. The daily Meta Action (SPEC §8.4) normally
+ * keeps the live site fresh; a local run usually means the Action missed a day.
+ */
+export const PUSH_META_REMINDER =
+  '[refresh] meta.json updated locally (the daily Meta Action normally does this). Run npm run push-meta only if you want this copy on the live site now.';
 
 export interface RefreshState {
   /** When npm was last asked (successfully) for the newest clash-of-clans-data version. */
@@ -27,7 +31,7 @@ export interface RefreshDeps {
   runSync(): void;
   /** public/meta.json generatedAt in ms, or undefined if missing / unreadable / never generated. */
   metaGeneratedAt(): number | undefined;
-  /** True when COC_API_TOKEN is set (the value is never returned or printed). */
+  /** True when COC_DEV_EMAIL + COC_DEV_PASSWORD or COC_API_TOKEN are set (values never returned or printed). */
   hasToken(): boolean;
   /** Runs `npm run meta`; returns its exit code and captured stderr. May throw. */
   runMeta(): { code: number; stderr: string };
@@ -141,14 +145,18 @@ export function refreshGameData(d: RefreshDeps): DataOutcome {
   return 'synced';
 }
 
+/**
+ * Meta: skipped while public/meta.json (normally the copy the daily Action committed, pulled in step 0)
+ * is under 24h old. Older means the Action missed a day: run `npm run meta` locally if credentials exist.
+ */
 export function refreshMeta(d: RefreshDeps): MetaOutcome {
   const gen = d.metaGeneratedAt();
   if (gen !== undefined && d.now() - gen < REFRESH_MAX_AGE_MS) return 'fresh';
   if (!d.hasToken()) {
-    d.log('[refresh] warning: public/meta.json is over 24h old but .env has no COC_API_TOKEN; skipping npm run meta.');
+    d.log('[refresh] warning: public/meta.json is over 24h old (did the daily Meta Action fail?) and .env has no COC_DEV_EMAIL/COC_DEV_PASSWORD or COC_API_TOKEN; skipping npm run meta.');
     return 'no-token';
   }
-  d.log(`[refresh] public/meta.json is ${gen === undefined ? 'missing' : 'over 24h old'}; running npm run meta…`);
+  d.log(`[refresh] public/meta.json is ${gen === undefined ? 'missing' : 'over 24h old (the daily Meta Action missed it)'}; running npm run meta…`);
   let res: { code: number; stderr: string };
   try {
     res = d.runMeta();

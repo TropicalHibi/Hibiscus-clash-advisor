@@ -6,6 +6,7 @@ import path from 'node:path';
 import { parse as parseDotenv } from 'dotenv';
 import { checkHeroCaps, checkLevels, checkMergeConsumption } from '../../src/data/validate';
 import { loadGameDataFresh } from '../../src/data/loadNode';
+import { hasCredentials } from './auth';
 import { toSnapshot, type DataChangesFile, type Snapshot } from '../../src/data/snapshot';
 import { isoDate, recordSnapshot, type SnapshotIO } from './snapshots';
 import { refresh, type RefreshDeps, type RefreshState } from './refresh';
@@ -77,9 +78,9 @@ export function nodeRefreshDeps(o: NodeOpts): RefreshDeps {
       return Number.isFinite(t) ? t : undefined;
     },
     hasToken: () => {
-      if (process.env.COC_API_TOKEN?.trim()) return true;
+      if (hasCredentials(process.env)) return true;
       try {
-        return Boolean(parseDotenv(fs.readFileSync(path.join(o.root, '.env'))).COC_API_TOKEN?.trim());
+        return hasCredentials(parseDotenv(fs.readFileSync(path.join(o.root, '.env'))));
       } catch {
         return false;
       }

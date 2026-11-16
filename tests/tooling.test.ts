@@ -160,6 +160,8 @@ describe('real refresh wiring (scripts/lib/nodeDeps.ts)', () => {
 
   it('offline (every command times out) → one warning line per step, the refresh never throws, nothing is written', () => {
     vi.stubEnv('COC_API_TOKEN', '');
+    vi.stubEnv('COC_DEV_EMAIL', '');
+    vi.stubEnv('COC_DEV_PASSWORD', '');
     const root = tmp();
     const logs: string[] = [];
     const exec = (() => {
@@ -168,7 +170,7 @@ describe('real refresh wiring (scripts/lib/nodeDeps.ts)', () => {
     expect(() => runRefresh(nodeRefreshDeps({ root, execSync: exec, log: (l) => logs.push(l) }))).not.toThrow();
     expect(logs[0]).toBe('[refresh] warning: git pull --ff-only failed (timed out); continuing with the local copy.');
     expect(logs[1]).toBe('[refresh] warning: game-data check skipped (npm registry unreachable: timed out); starting the site anyway.');
-    expect(logs[2]).toContain('no COC_API_TOKEN'); // meta.json missing in the temp root, no token
+    expect(logs[2]).toContain('no COC_DEV_EMAIL/COC_DEV_PASSWORD or COC_API_TOKEN'); // meta.json missing in the temp root, no token
     expect(fs.existsSync(path.join(root, 'data', 'refresh-state.json'))).toBe(false);
   });
 

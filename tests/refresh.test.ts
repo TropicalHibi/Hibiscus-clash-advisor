@@ -95,7 +95,7 @@ describe('predev refresh', () => {
     const f = fake({ state: { lastDataCheck: NOW }, metaGeneratedAt: () => NOW - 25 * H });
     refresh(f.d);
     expect(f.logs).toEqual([expect.stringContaining('running npm run meta'), PUSH_META_REMINDER]);
-    expect(PUSH_META_REMINDER).toContain('run npm run push-meta to update the live site');
+    expect(PUSH_META_REMINDER).toContain('the daily Meta Action normally does this'); expect(PUSH_META_REMINDER).toContain('npm run push-meta');
     const partial = fake({ state: { lastDataCheck: NOW }, metaGeneratedAt: () => undefined, runMeta: () => ({ code: 2, stderr: '' }) });
     refresh(partial.d);
     expect(partial.logs.at(-1)).toBe(PUSH_META_REMINDER);
@@ -112,7 +112,7 @@ describe('predev refresh', () => {
     expect(refresh(f.d).meta).toBe('no-token');
     expect(f.calls).toEqual([]);
     expect(f.logs).toHaveLength(1);
-    expect(f.logs[0]).toContain('no COC_API_TOKEN');
+    expect(f.logs[0]).toContain('no COC_DEV_EMAIL/COC_DEV_PASSWORD or COC_API_TOKEN');
   });
 
   it('403 → one-line warning with the IP hint; exit 2 (partial) still counts as updated', () => {
