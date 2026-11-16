@@ -36,8 +36,22 @@ export function readConfig(name: string): string {
   return fs.readFileSync(path.join(PROJECT_ROOT, 'config', name), 'utf8');
 }
 
+/** config/id-overrides.yaml, or undefined when the file is absent. */
+export function readIdOverrides(): string | undefined {
+  try {
+    return readConfig('id-overrides.yaml');
+  } catch {
+    return undefined;
+  }
+}
+
+/** Normalizes the installed package from disk (no cache). */
+export function loadGameDataFresh(): GameData {
+  return normalize(readRawFiles(), readConfig('merges.yaml'), dataVersion(), readIdOverrides());
+}
+
 let cached: GameData | undefined;
 export function loadGameDataNode(): GameData {
-  if (!cached) cached = normalize(readRawFiles(), readConfig('merges.yaml'), dataVersion());
+  if (!cached) cached = loadGameDataFresh();
   return cached;
 }

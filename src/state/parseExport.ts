@@ -7,6 +7,39 @@ export interface Unresolved {
   dataId: number;
 }
 
+/**
+ * Active boosts (SPEC §10.1), seconds remaining at the export time. Keys follow the coc.py AccountData
+ * parser (`Boosts`): builder_boost, lab_boost, clocktower_boost, clocktower_cooldown, builder_consumable,
+ * lab_consumable, helper_cooldown. Missing keys are 0.
+ */
+export interface Boosts {
+  builderPotionSec: number;
+  researchPotionSec: number;
+  builderSnackSec: number;
+  researchSnackSec: number;
+  clockTowerSec: number;
+  clockTowerCooldownSec: number;
+}
+
+export const NO_BOOSTS: Boosts = { builderPotionSec: 0, researchPotionSec: 0, builderSnackSec: 0, researchSnackSec: 0, clockTowerSec: 0, clockTowerCooldownSec: 0 };
+
+const BOOST_KEYS: Record<string, keyof Boosts | 'helperCooldown'> = {
+  builder_boost: 'builderPotionSec',
+  lab_boost: 'researchPotionSec',
+  builder_consumable: 'builderSnackSec',
+  lab_consumable: 'researchSnackSec',
+  clocktower_boost: 'clockTowerSec',
+  clocktower_cooldown: 'clockTowerCooldownSec',
+  helper_cooldown: 'helperCooldown',
+};
+
+export interface OwnedHelper {
+  dataId: number;
+  id: string;
+  name: string;
+  level: number;
+}
+
 export interface AccountState {
   tag?: string;
   /** Unix seconds the export was taken (top-level `timestamp`), if present. */
@@ -21,7 +54,41 @@ export interface AccountState {
   instances: OwnedInstance[];
   walls: { level: number; count: number }[];
   unresolved: Unresolved[];
-  boosts: unknown;
+  /** Parsed active boosts (all 0 when the export's `boosts` is empty). */
+  boosts: Boosts;
+  /** The raw `boosts` object, as exported. */
+  rawBoosts: unknown;
+  /** Helpers from the `helpers` section (Builder's Apprentice, Lab Assistant, Prospector, Alchemist). */
+  helpers: OwnedHelper[];
+  /** Seconds until the helpers can work again, at the export time (`helper_cooldown`); undefined = ready. */
+  helperCooldownSec?: number;
+  /** Non-fatal parse notes (unknown boost keys or shapes). Shown on the Plan tab. */
+  warnings: string[];
+}
+
+/** Reads the export's `boosts` object. Unknown keys or shapes produce a warning, never an error. */
+export function parseBoosts(raw: unknown, warnings: string[]): { boosts: Boosts; helperCooldownSec?: number } {
+  const boosts: Boosts = { ...NO_BOOSTS };
+  let helperCooldownSec: number | undefined;
+  if (raw === undefined || raw === null) return { boosts };
+  if (typeof raw !== 'object' || Array.isArray(raw)) {
+    warnings.push(`Export "boosts" has an unexpected shape (${Array.isArray(raw) ? 'list' : typeof raw}); active boosts are ignored.`);
+    return { boosts };
+  }
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    const field = BOOST_KEYS[k];
+    if (!field) {
+      warnings.push(`Unknown boost "${k}" in the export (value ${JSON.stringify(v)?.slice(0, 40)}); ignored.`);
+      continue;
+    }
+    if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) {
+      warnings.push(`Boost "${k}" has an unexpected value (${JSON.stringify(v)?.slice(0, 40)}); ignored.`);
+      continue;
+    }
+    if (field === 'helperCooldown') helperCooldownSec = v;
+    else boosts[field] = v;
+  }
+  return { boosts, helperCooldownSec };
 }
 
 export { IDS };
@@ -57,6 +124,11 @@ export function parseExport(input: string | object, data: GameData): AccountStat
   };
 
   let builders = 0;
+  const warnings: string[] = [];
+  const helpers: OwnedHelper[] = [];
+  const parsedBoosts = parseBoosts(raw.boosts, warnings);
+  const boosts = parsedBoosts.boosts;
+  let helperCooldownSec = parsedBoosts.helperCooldownSec;
 
   for (const section of SECTIONS) {
     const list = raw[section];
@@ -98,6 +170,13 @@ export function parseExport(input: string | object, data: GameData): AccountStat
       const lvl: number = typeof e.lvl === 'number' ? e.lvl : 0;
       const cnt: number = typeof e.cnt === 'number' && e.cnt > 0 ? e.cnt : 1;
 
+      if (section === 'helpers') {
+        helpers.push({ dataId, id: item.id, name: item.name, level: lvl });
+        // Like coc.py, a per-helper helper_cooldown sets the shared helper cooldown (they share one timer).
+        if (typeof e.helper_cooldown === 'number' && e.helper_cooldown >= 0) helperCooldownSec = Math.max(helperCooldownSec ?? 0, e.helper_cooldown);
+        continue;
+      }
+
       if (dataId === IDS.wall) {
         walls.push({ level: lvl, count: cnt });
         continue;
@@ -111,6 +190,9 @@ export function parseExport(input: string | object, data: GameData): AccountStat
           inst.remainingSec = e.timer;
         }
         if (e.extra === true) inst.goblin = true;
+        // The real export says helper_recurrent; coc.py documents recurrent_helper. Accept both.
+        if (e.helper_recurrent === true || e.recurrent_helper === true) inst.helperRecurrent = true;
+        if (typeof e.helper_timer === 'number' && e.helper_timer > 0 && inst.upgradingTo !== undefined) inst.helperTimerSec = e.helper_timer;
         if (typeof e.supercharge === 'number') inst.superchargeLevel = e.supercharge;
         if (typeof e.weapon === 'number') inst.weaponLevel = e.weapon;
         instances.push(inst);
@@ -134,6 +216,10 @@ export function parseExport(input: string | object, data: GameData): AccountStat
     instances,
     walls,
     unresolved,
-    boosts: raw.boosts ?? {},
+    boosts,
+    rawBoosts: raw.boosts ?? {},
+    helpers,
+    helperCooldownSec,
+    warnings,
   };
 }

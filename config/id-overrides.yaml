@@ -1,0 +1,5 @@
+# dataIds the game data (clash-of-clans-data) is missing, so exports that contain them resolve.
+# Format: <dataId>: <data file id>. If the data later ships its own dataId, the data wins (and a
+# differing value is reported as a warning). Read by the browser and Node loaders alike.
+ids:
+  93000003: alchemist   # Alchemist helper: converts resources; recognised only, doesn't affect timing

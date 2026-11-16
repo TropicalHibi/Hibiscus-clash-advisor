@@ -79,6 +79,13 @@ export interface Item {
   housingSpace?: number;
   /** Base troops with a super version: the super troop's housing space. */
   superHousingSpace?: number;
+  /** Helpers (Builder's Apprentice, Lab Assistant): work rate per helper level (hours of progress per work hour). */
+  helperWorkRates?: Record<number, number>;
+  /**
+   * Package-relative image paths ("images/home/..."), best first: the item icon, then level images from
+   * the top level down. The build bundles the first one that exists and is small enough (SPEC §13 Step 3).
+   */
+  images?: string[];
 }
 
 export interface MergeRecipe {
@@ -120,4 +127,8 @@ export interface OwnedInstance {
   parentUid?: string;
   /** True for instances that don't exist yet (to be built). level = 0. */
   planned?: boolean;
+  /** Export `helper_recurrent` / `recurrent_helper`: a helper is set to keep working on this item. */
+  helperRecurrent?: boolean;
+  /** Export `helper_timer`: seconds left of a helper's work hour on this upgrade, at the export time. */
+  helperTimerSec?: number;
 }

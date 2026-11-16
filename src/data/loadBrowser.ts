@@ -2,6 +2,7 @@
 import { normalize, type RawFile } from './normalize';
 import type { GameData } from './types';
 import mergesYaml from '../../config/merges.yaml?raw';
+import idOverridesYaml from '../../config/id-overrides.yaml?raw';
 
 const modules = import.meta.glob('/node_modules/clash-of-clans-data/data/home/{town-hall,defenses,army-buildings,resource-buildings,traps,walls,heroes,troops,spells,siege-machines,pets,hero-equipment,crafted-defenses,guardians,other}/**/*.json', {
   eager: true,
@@ -17,5 +18,5 @@ export function loadGameDataBrowser(): GameData {
     path: p.replace(/^.*\/data\/home\//, ''),
     json,
   }));
-  return normalize(files, mergesYaml, pkgVersion ?? 'unknown');
+  return normalize(files, mergesYaml, pkgVersion ?? 'unknown', idOverridesYaml);
 }

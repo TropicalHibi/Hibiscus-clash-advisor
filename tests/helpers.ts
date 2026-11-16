@@ -1,5 +1,5 @@
 // Test helpers: build realistic synthetic exports straight from the game data.
-import { dataVersion, loadGameDataNode, readConfig, readRawFiles } from '../src/data/loadNode';
+import { dataVersion, loadGameDataNode, readConfig, readIdOverrides, readRawFiles } from '../src/data/loadNode';
 import { countAt, maxLevelAt, normalize, type RawFile } from '../src/data/normalize';
 import type { GameData } from '../src/data/types';
 import { heroCapAt } from '../src/engine/book';
@@ -106,7 +106,7 @@ export function setLevel(ex: SyntheticExport, section: keyof SyntheticExport, id
 export function modifiedData(mutate: (files: RawFile[]) => void, mergesYaml = readConfig('merges.yaml')): GameData {
   const files = readRawFiles().map((f) => ({ path: f.path, json: structuredClone(f.json) }));
   mutate(files);
-  return normalize(files, mergesYaml, dataVersion());
+  return normalize(files, mergesYaml, dataVersion(), readIdOverrides());
 }
 export const rawItem = (files: RawFile[], id: string) => files.find((f) => f.json?.id === id)!.json;
 /** Adds a Town Hall level (copy of the current top level, without a weapon). */
