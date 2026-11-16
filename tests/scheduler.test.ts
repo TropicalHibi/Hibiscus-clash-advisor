@@ -75,10 +75,11 @@ describe('scheduler', () => {
     expect(xbM.end).toBe(xbN.end);
   });
 
-  it('starts the Town Hall immediately in rush mode', () => {
+  it('rush mode: the first free builder takes the Laboratory (Tier 0), the next one the Town Hall', () => {
     const plan = buildPlan(data, fixture(), settings(), EMPTY_META, T0);
     expect(plan.mode).toBe('rush');
-    expect(plan.startNow.find((e) => e.slotId.startsWith('B'))!.itemName).toBe('Town Hall');
+    const builders = plan.startNow.filter((e) => e.slotId.startsWith('B')).map((e) => e.itemName);
+    expect(builders.slice(0, 2)).toEqual(['Laboratory', 'Town Hall']);
   });
 
   it('merge builds consume sources and create the merged defense in the simulation', () => {
@@ -95,11 +96,11 @@ describe('scheduler', () => {
 describe('24h forecast', () => {
   it('sums the cost of every upgrade that starts inside the window, excluding running ones', () => {
     const tl: TimelineEntry[] = [
-      { slotId: 'B1', start: 0, end: 10, itemKey: 'a', itemName: 'A', toLevel: 2, cost: 999, resource: 'gold', reason: '', kind: 'inProgress', inProgress: true },
-      { slotId: 'B1', start: 10, end: 100, itemKey: 'b', itemName: 'B', toLevel: 2, cost: 3_000_000, resource: 'gold', reason: '', kind: 'upgrade', inProgress: false },
-      { slotId: 'B2', start: 50, end: 100, itemKey: 'c', itemName: 'C', toLevel: 5, cost: 2_000_000, resource: 'gold', reason: '', kind: 'upgrade', inProgress: false },
-      { slotId: 'B3', start: 70, end: 100, itemKey: 'd', itemName: 'D', toLevel: 5, cost: 150_000, resource: 'darkElixir', reason: '', kind: 'upgrade', inProgress: false },
-      { slotId: 'B2', start: DAY, end: DAY + 9, itemKey: 'e', itemName: 'E', toLevel: 5, cost: 7_000_000, resource: 'elixir', reason: '', kind: 'upgrade', inProgress: false },
+      { slotId: 'B1', lockUid: 'L', start: 0, end: 10, itemKey: 'a', itemName: 'A', toLevel: 2, cost: 999, resource: 'gold', reason: '', kind: 'inProgress', inProgress: true },
+      { slotId: 'B1', lockUid: 'L', start: 10, end: 100, itemKey: 'b', itemName: 'B', toLevel: 2, cost: 3_000_000, resource: 'gold', reason: '', kind: 'upgrade', inProgress: false },
+      { slotId: 'B2', lockUid: 'L', start: 50, end: 100, itemKey: 'c', itemName: 'C', toLevel: 5, cost: 2_000_000, resource: 'gold', reason: '', kind: 'upgrade', inProgress: false },
+      { slotId: 'B3', lockUid: 'L', start: 70, end: 100, itemKey: 'd', itemName: 'D', toLevel: 5, cost: 150_000, resource: 'darkElixir', reason: '', kind: 'upgrade', inProgress: false },
+      { slotId: 'B2', lockUid: 'L', start: DAY, end: DAY + 9, itemKey: 'e', itemName: 'E', toLevel: 5, cost: 7_000_000, resource: 'elixir', reason: '', kind: 'upgrade', inProgress: false },
     ];
     const f = forecast(tl, DAY, [], 3);
     expect(f.totals).toEqual({ gold: 5_000_000, darkElixir: 150_000 });

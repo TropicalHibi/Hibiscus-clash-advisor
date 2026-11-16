@@ -49,7 +49,16 @@ export const storage = {
     const raw = get(K.settings);
     if (!raw) return defaults;
     try {
-      return coerceSettings({ ...defaults, ...JSON.parse(raw) });
+      // Nested merge: settings saved before a field existed (e.g. lab.kindWeights) keep the YAML default for it.
+      const saved = JSON.parse(raw) ?? {};
+      return coerceSettings({
+        ...defaults,
+        ...saved,
+        forecast: { ...defaults.forecast, ...saved.forecast },
+        lab: { ...defaults.lab, ...saved.lab, kindWeights: { ...defaults.lab.kindWeights, ...saved.lab?.kindWeights } },
+        petHouse: { ...defaults.petHouse, ...saved.petHouse },
+        blacksmith: { ...defaults.blacksmith, ...saved.blacksmith },
+      });
     } catch {
       return defaults;
     }

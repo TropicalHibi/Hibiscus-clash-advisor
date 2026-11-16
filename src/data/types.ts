@@ -100,6 +100,8 @@ export interface GameData {
   merges: MergeRecipe[];
   /** Hero Hall heroLevelCaps table (stale in data; for validation only). */
   heroHallCaps: Record<number, Record<string, number>>;
+  /** Problems found while normalizing (e.g. unknown cost resources). Shown on the Plan tab and by sync. */
+  warnings: string[];
 }
 
 export interface OwnedInstance {
@@ -112,7 +114,6 @@ export interface OwnedInstance {
   remainingSec?: number;
   goblin?: boolean;
   superchargeLevel?: number;
-  superchargeUpgrading?: boolean;
   /** TH weapon level (Town Hall instance only). */
   weaponLevel?: number;
   /** For crafted defense module instances: building uid that owns the module. */

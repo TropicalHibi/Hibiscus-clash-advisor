@@ -1,6 +1,7 @@
 // Test helpers: build realistic synthetic exports straight from the game data.
-import { loadGameDataNode } from '../src/data/loadNode';
-import { countAt, maxLevelAt } from '../src/data/normalize';
+import { dataVersion, loadGameDataNode, readConfig, readRawFiles } from '../src/data/loadNode';
+import { countAt, maxLevelAt, normalize, type RawFile } from '../src/data/normalize';
+import type { GameData } from '../src/data/types';
 import { heroCapAt } from '../src/engine/book';
 import { parseExport } from '../src/state/parseExport';
 import { DEFAULT_SETTINGS, type Settings } from '../src/state/settings';
@@ -15,6 +16,9 @@ export interface Entry {
   cnt?: number;
   timer?: number;
   extra?: boolean;
+  supercharge?: number;
+  weapon?: number;
+  types?: { data: number; modules: { data: number; lvl: number; timer?: number }[] }[];
 }
 
 export interface SyntheticExport {
@@ -93,6 +97,39 @@ export function setLevel(ex: SyntheticExport, section: keyof SyntheticExport, id
   const e = list.find((x) => x.data === dataId);
   if (!e) throw new Error(`${id} not in ${String(section)}`);
   Object.assign(e, patch);
+}
+
+/**
+ * A modified copy of the game data, for "what if the next data release…" tests. `mutate` edits the raw
+ * JSON files in place; helpers below cover the common edits. The real data object is never touched.
+ */
+export function modifiedData(mutate: (files: RawFile[]) => void, mergesYaml = readConfig('merges.yaml')): GameData {
+  const files = readRawFiles().map((f) => ({ path: f.path, json: structuredClone(f.json) }));
+  mutate(files);
+  return normalize(files, mergesYaml, dataVersion());
+}
+export const rawItem = (files: RawFile[], id: string) => files.find((f) => f.json?.id === id)!.json;
+/** Adds a Town Hall level (copy of the current top level, without a weapon). */
+export function addTownHallLevel(files: RawFile[]): void {
+  const th = files.find((f) => f.path.startsWith('town-hall/'))!.json;
+  const top = th.levels[th.levels.length - 1];
+  th.levels.push({ ...structuredClone(top), level: top.level + 1, weapon: undefined });
+}
+/** Appends a normal (non-supercharge) level to a building, requiring `thRequired`. */
+export function addBuildingLevel(files: RawFile[], id: string, thRequired: number, patch: Record<string, unknown> = {}): void {
+  const j = rawItem(files, id);
+  const normal = j.levels.filter((l: any) => !l.supercharge);
+  const last = normal[normal.length - 1];
+  j.levels.push({ ...structuredClone(last), level: last.level + 1, townHallRequired: thRequired, ...patch });
+}
+export const parseWith = (ex: SyntheticExport, d: GameData) => parseExport(JSON.parse(JSON.stringify(ex)), d);
+
+/** Laboratory at its max for the export's TH, so the Tier 0 Lab rule stays out of tests about other tiers. */
+export function maxLab(ex: SyntheticExport): SyntheticExport {
+  const th = ex.buildings.find((b) => b.data === 1000001)!.lvl;
+  const lab = data.byId.get('laboratory')!;
+  ex.buildings.find((b) => b.data === lab.dataId)!.lvl = maxLevelAt(lab, { th });
+  return ex;
 }
 
 export function parse(ex: SyntheticExport) {

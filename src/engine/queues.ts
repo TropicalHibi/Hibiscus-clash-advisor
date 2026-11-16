@@ -4,7 +4,8 @@ import type { GameData, Item, OreCost, OwnedInstance, Resource } from '../data/t
 import { metaStats, type MetaFile, type ScoreKind } from '../meta/meta';
 import type { LabKind, Settings } from '../state/settings';
 import { fmtDuration } from './format';
-import { levelsOf, type EngineState } from './tiers';
+import { levelsOf } from '../state/levels';
+import type { EngineState } from './tiers';
 
 export interface QueueCandidate {
   item: Item;
@@ -29,11 +30,18 @@ export interface QueueCandidate {
   normScore?: number;
   /** Lab only: normScore × the kind weight from settings — what the lab queue picks by. */
   pickValue?: number;
+  /** False when the scheduler/forecast must never start it on its own (lab kind with weight 0). Pins override. */
+  autoPick: boolean;
   pinned: boolean;
   reason: string;
 }
 
 export const LAB_KINDS: LabKind[] = ['troop', 'spell', 'siege'];
+
+/** What the lab / pet house starts next: the first pinned or auto-pickable candidate (SPEC §6.7). */
+export function nextResearch(ranked: QueueCandidate[]): QueueCandidate | undefined {
+  return ranked.find((c) => c.pinned || c.autoPick);
+}
 const LAB_KIND_OF: Record<string, LabKind | undefined> = { troop: 'troop', spell: 'spell', siege: 'siege' };
 
 /**
@@ -133,6 +141,7 @@ export function researchCandidates(
       usage: ms.usage,
       threeStarRate: ms.threeStarRate,
       supers: ms.supers,
+      autoPick: true,
       pinned: pins.includes(item.id),
       reason: '',
     });
@@ -146,12 +155,15 @@ export function researchCandidates(
       c.labKind = kind;
       c.normScore = tops[kind] > 0 ? Math.min(1, c.score / tops[kind]) : 0;
       c.pickValue = c.normScore * weights[kind];
+      c.autoPick = weights[kind] > 0;
     }
-    // Lab queue pick (SPEC §6.7): pins first, then the weighted value across all three kinds.
+    // Lab queue pick (SPEC §6.7): pins first, then auto-pickable kinds by weighted value; kinds with
+    // weight 0 go last (still listed, never auto-picked).
     const pinIdx = (c: QueueCandidate) => (pins.includes(c.item.id) ? pins.indexOf(c.item.id) : Infinity);
     ranked = out.sort(
       (a, b) =>
         pinIdx(a) - pinIdx(b) ||
+        Number(b.autoPick) - Number(a.autoPick) ||
         b.pickValue! - a.pickValue! ||
         (b.usage > 0 ? 1 : 0) - (a.usage > 0 ? 1 : 0) ||
         b.normScore! - a.normScore! ||
@@ -162,7 +174,8 @@ export function researchCandidates(
   } else ranked = rank(out, pins, (c) => [c.rawTimeSec, c.cost]);
   for (const c of ranked) {
     c.reason = reasonFor(c, `${meta.attacks ? 'Not seen in Legend I meta' : 'No meta data yet'}: shortest first (${fmtDuration(c.timeSec)})`);
-    if (queue === 'lab' && !c.pinned && c.usage > 0)
+    if (queue === 'lab' && !c.pinned && !c.autoPick) c.reason += ` · not auto-picked (${c.labKind} weight 0)`;
+    else if (queue === 'lab' && !c.pinned && c.usage > 0)
       c.reason += ` · lab pick ${c.pickValue!.toFixed(2)} (${c.normScore!.toFixed(2)} of top ${c.labKind} × ${settings.lab.kindWeights[c.labKind!]})`;
   }
   return ranked;
@@ -195,6 +208,7 @@ export function equipmentCandidates(data: GameData, instances: OwnedInstance[], 
       usage: ms.usage,
       threeStarRate: ms.threeStarRate,
       supers: ms.supers,
+      autoPick: true,
       pinned: pins.includes(item.id),
       reason: '',
     });

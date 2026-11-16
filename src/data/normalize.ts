@@ -29,7 +29,8 @@ export const DATA_FOLDERS = [
 const STORAGES = new Set(['gold-storage', 'elixir-storage', 'dark-elixir-storage']);
 const COLLECTORS = new Set(['gold-mine', 'elixir-collector', 'dark-elixir-drill']);
 
-export function mapResource(r: string | undefined): Resource {
+/** Data resource string → Resource. An unknown string falls back to gold and is reported via `warn`. */
+export function mapResource(r: string | undefined, warn?: (msg: string) => void): Resource {
   switch (r) {
     case 'Gold':
       return 'gold';
@@ -39,7 +40,11 @@ export function mapResource(r: string | undefined): Resource {
       return 'darkElixir';
     case 'Gold or Elixir':
       return 'goldOrElixir';
+    case undefined:
+    case '':
+      return 'gold';
     default:
+      warn?.(`Unknown cost resource "${r}" in the game data; counted as gold.`);
       return 'gold';
   }
 }
@@ -66,11 +71,11 @@ function perTH(apt: any[] | undefined, field: 'count' | 'countAfterMerges'): Rec
   return any ? out : undefined;
 }
 
-function buildingLevel(l: any): LevelInfo {
+function buildingLevel(l: any, warn?: (msg: string) => void): LevelInfo {
   return {
     level: l.level,
     cost: l.buildCost ?? 0,
-    resource: mapResource(l.buildCostResource),
+    resource: mapResource(l.buildCostResource, warn),
     timeSec: toSeconds(l.buildTime),
     thRequired: l.townHallRequired,
   };
@@ -93,6 +98,9 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string)
   const byId = new Map<string, Item>();
   const heroHallCaps: Record<number, Record<string, number>> = {};
   let maxTH = 0;
+  const warningSet = new Set<string>();
+  const warn = (msg: string) => warningSet.add(msg);
+  const bLevel = (l: any) => buildingLevel(l, warn);
 
   const add = (item: Item, base = true) => {
     items.set(item.key, item);
@@ -110,7 +118,7 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string)
 
     if (folder === 'town-hall') {
       const levels: LevelInfo[] = (j.levels ?? []).map((l: any) => ({
-        ...buildingLevel(l),
+        ...bLevel(l),
         thRequired: l.level - 1,
       }));
       add({ key: String(j.dataId), dataId: j.dataId, id: j.id, name: j.name, category: 'townHall', queue: 'builder', levels: sortLevels(levels) });
@@ -131,7 +139,7 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string)
                 w.levels.map((wl: any) => ({
                   level: wl.level,
                   cost: wl.buildCost ?? 0,
-                  resource: mapResource(wl.buildCostResource),
+                  resource: mapResource(wl.buildCostResource, warn),
                   timeSec: toSeconds(wl.buildTime),
                   thRequired: l.level,
                 })),
@@ -149,7 +157,7 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string)
         (l: any): LevelInfo => ({
           level: l.level,
           cost: l.upgradeCost ?? 0,
-          resource: mapResource(l.upgradeCostResource),
+          resource: mapResource(l.upgradeCostResource, warn),
           timeSec: toSeconds(l.upgradeTime),
           heroHallRequired: l.heroHallLevelRequired,
         }),
@@ -164,7 +172,7 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string)
         (l: any): LevelInfo => ({
           level: l.level,
           cost: l.researchCost ?? 0,
-          resource: mapResource(l.researchCostResource),
+          resource: mapResource(l.researchCostResource, warn),
           timeSec: toSeconds(l.researchTime),
           thRequired: l.townHallRequired,
           labRequired: l.laboratoryRequired,
@@ -190,7 +198,7 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string)
         (l: any): LevelInfo => ({
           level: l.level,
           cost: l.upgradeCost ?? 0,
-          resource: mapResource(l.upgradeCostResource),
+          resource: mapResource(l.upgradeCostResource, warn),
           timeSec: toSeconds(l.upgradeTime),
           thRequired: l.townHallRequired,
           petHouseRequired: l.petHouseLevelRequired,
@@ -223,7 +231,7 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string)
             category: 'craftedDefense',
             queue: 'builder',
             craftedDefenseId: j.dataId,
-            levels: sortLevels((m.upgrades ?? []).map(buildingLevel)),
+            levels: sortLevels((m.upgrades ?? []).map(bLevel)),
           },
           false,
         );
@@ -252,8 +260,8 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string)
     } else if (folder === 'guardians') category = 'guardian';
     else category = 'other';
 
-    const normal = j.levels.filter((l: any) => !l.supercharge).map(buildingLevel);
-    const sc = j.levels.filter((l: any) => l.supercharge).map(buildingLevel);
+    const normal = j.levels.filter((l: any) => !l.supercharge).map(bLevel);
+    const sc = j.levels.filter((l: any) => l.supercharge).map(bLevel);
 
     add({
       key: String(j.dataId),
@@ -314,15 +322,17 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string)
       .filter((th) => counts[th] > 0)
       .sort((a, b) => a - b)[0];
     const unlockTH = firstTH ?? merged.levels[0]?.thRequired ?? 99;
+    // Required source level = the source's max level at the merge's unlock TH (SPEC §7). Levels that a
+    // later TH adds to Cannon / Archer Tower / Wizard Tower never raise the bar for an older merge.
     const requiredSourceLevel: Record<string, number> = {};
     for (const s of sources) {
       const src = byId.get(s.id)!;
-      requiredSourceLevel[s.id] = src.levels[src.levels.length - 1].level;
+      requiredSourceLevel[s.id] = maxLevelAt(src, { th: unlockTH }) || src.levels[src.levels.length - 1].level;
     }
     merges.push({ id, dataId: merged.dataId, sources, unlockTH, requiredSourceLevel });
   }
 
-  return { version, items, byDataId, byId, maxTH, bookThresholdSec, merges, heroHallCaps };
+  return { version, items, byDataId, byId, maxTH, bookThresholdSec, merges, heroHallCaps, warnings: [...warningSet] };
 }
 
 /** Max level of an item reachable at the given TH (and Hero Hall/lab/etc. via `req`). 0 if none. */

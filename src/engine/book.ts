@@ -1,10 +1,6 @@
 // Hero book threshold (SPEC §6.5). The threshold comes from data, never hard-coded.
 import { levelInfo } from '../data/normalize';
-import type { GameData, Item, LevelInfo } from '../data/types';
-
-export function bookThreshold(data: GameData): number {
-  return data.bookThresholdSec;
-}
+import type { Item, LevelInfo } from '../data/types';
 
 /** True when the hero's next level raw time ≥ threshold (Gold Pass scales both sides equally). */
 export function isBookReady(next: LevelInfo | undefined, thresholdSec: number): boolean {

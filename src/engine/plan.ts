@@ -1,5 +1,7 @@
 // Orchestrates parse → simulate → forecast into one Plan used by the UI and the CLI.
 import type { GameData, Resource } from '../data/types';
+import { checkMergeConsumption } from '../data/validate';
+import { levelsOf } from '../state/levels';
 import type { MetaFile } from '../meta/meta';
 import type { AccountState } from '../state/parseExport';
 import type { LabKind, Settings } from '../state/settings';
@@ -16,8 +18,21 @@ export interface BookReadyHero {
   toLevel: number;
   cost: number;
   resource: Resource;
-  timeSec: number; // raw
+  /** Displayed time: Gold-Pass boosted when the toggle is on (the threshold check itself stays raw). */
+  timeSec: number;
+  rawTimeSec: number;
   afterCurrent: boolean; // book-ready once the running upgrade finishes
+}
+
+/** Merge-consumption check (§7), cached per data object: run in the browser so a stale merges.yaml shows on the Plan tab. */
+const mergeIssueCache = new WeakMap<GameData, string[]>();
+export function dataIssues(data: GameData): string[] {
+  let hit = mergeIssueCache.get(data);
+  if (!hit) {
+    hit = [...data.warnings, ...checkMergeConsumption(data).map((i) => `Game data vs config/merges.yaml: ${i.message}`)];
+    mergeIssueCache.set(data, hit);
+  }
+  return hit;
 }
 
 export interface Plan {
@@ -53,36 +68,44 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
   const windowSec = settings.forecast.windowHours * HOUR;
   const sim = simulate(data, account, settings, meta, { nowSec, horizonSec: windowSec });
   const boosts = boostsFor(settings);
-  const mode = detectMode(account.townHall, data);
 
-  // Initial engine state for ranked lists (in-progress items are busy).
-  const busy = new Set<string>();
-  for (const i of account.instances) if (i.upgradingTo !== undefined) busy.add(i.parentUid ?? i.uid);
-  const state = { instances: account.instances, busy };
+  // Ranked lists use the state at "now": jobs finished since the export are applied (SPEC §11).
+  const state = sim.nowState;
+  const lvNow = levelsOf(state.instances);
 
-  const equipment = equipmentCandidates(data, account.instances, settings, meta);
+  const equipment = equipmentCandidates(data, state.instances, settings, meta);
   const bookReady: BookReadyHero[] = [];
-  for (const inst of account.instances) {
+  for (const inst of state.instances) {
     const item = data.items.get(inst.itemKey);
     if (item?.category !== 'hero') continue;
     const lvl = inst.upgradingTo ?? inst.level;
-    const st = heroStatus(item, lvl, account.heroHall, data.bookThresholdSec);
+    const st = heroStatus(item, lvl, lvNow.heroHall, data.bookThresholdSec);
     if (st.kind === 'bookReady')
-      bookReady.push({ name: item.name, level: lvl, toLevel: st.next.level, cost: st.next.cost, resource: st.next.resource, timeSec: st.next.timeSec, afterCurrent: inst.upgradingTo !== undefined });
+      bookReady.push({
+        name: item.name,
+        level: lvl,
+        toLevel: st.next.level,
+        cost: st.next.cost,
+        resource: st.next.resource,
+        timeSec: Math.round(st.next.timeSec * (1 - boosts.builder)),
+        rawTimeSec: st.next.timeSec,
+        afterCurrent: inst.upgradingTo !== undefined,
+      });
   }
 
-  const warnings = [...sim.warnings];
+  const warnings = [...dataIssues(data), ...sim.warnings];
   for (const u of account.unresolved) warnings.push(`Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${data.version}); ignored.`);
   if (!account.exportTimestamp) warnings.push('Export has no timestamp; timers count from the import time.');
 
   const lab = researchCandidates(data, state, 'lab', settings, meta, boosts.research);
+  const mode = detectMode(lvNow.th, data);
   return {
     nowSec,
     mode,
     tierNames: TIER_NAMES[mode],
-    townHall: account.townHall,
+    townHall: lvNow.th,
     maxTH: data.maxTH,
-    heroHall: account.heroHall,
+    heroHall: lvNow.heroHall,
     builders: account.builders,
     goldPass: settings.goldPass,
     bookThresholdSec: data.bookThresholdSec,

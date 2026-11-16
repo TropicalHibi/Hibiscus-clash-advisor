@@ -86,8 +86,3 @@ export function metaStats(meta: MetaFile, dataId: number): MetaStats {
     supers: supers.map((u) => ({ name: u.name, usage: u.usage, ...(typeof u.armyShare === 'number' ? { armyShare: u.armyShare } : {}) })),
   };
 }
-
-/** Meta score (army share for troops/spells, usage otherwise; incl. super troops). 0 when unknown. */
-export function metaScore(meta: MetaFile, dataId: number): number {
-  return metaStats(meta, dataId).score;
-}

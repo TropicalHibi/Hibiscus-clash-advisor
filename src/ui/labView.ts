@@ -2,7 +2,7 @@
 // Lab: a "Next in lab" line (the weighted pick) and three sections ranked by their own score.
 import { fmtCost, fmtDuration, fmtNum } from '../engine/format';
 import type { Plan } from '../engine/plan';
-import type { QueueCandidate } from '../engine/queues';
+import { nextResearch, type QueueCandidate } from '../engine/queues';
 import type { MetaFile } from '../meta/meta';
 import type { LabKind } from '../state/settings';
 import { esc } from './planView';
@@ -58,9 +58,11 @@ const KIND_LABEL: Record<LabKind, string> = { troop: 'troop', spell: 'spell', si
 
 /** "Next in lab": the lab queue pick, its kind, and its weighted value vs the top pick of the other two kinds. */
 export function nextInLab(p: Plan): string {
-  const pick = p.lab[0];
-  if (!pick) return `<div class="card next-lab"><b>Next in lab:</b> nothing left to research.</div>`;
-  const busy = p.sim.timeline.find((e) => e.slotId === 'LAB' && e.inProgress);
+  const pick = nextResearch(p.lab);
+  if (!pick)
+    return `<div class="card next-lab"><b>Next in lab:</b> ${p.lab.length ? 'nothing to auto-pick (every remaining kind has weight 0; pin an item to research it).' : 'nothing left to research.'}</div>`;
+  // Only a job still running at "now" delays the pick (a job that finished since the export doesn't).
+  const busy = p.sim.timeline.find((e) => e.slotId === 'LAB' && e.inProgress && e.end > 0);
   const when = busy ? ` <span class="muted">· starts when ${esc(busy.itemName)} ${busy.toLevel} finishes (in ${esc(fmtDuration(busy.end))})</span>` : '';
   const v = (c: QueueCandidate) => (c.pickValue ?? 0).toFixed(2);
   const others = (['troop', 'spell', 'siege'] as LabKind[])
@@ -68,7 +70,8 @@ export function nextInLab(p: Plan): string {
     .map((k) => {
       // Best unpinned candidate of that kind by pick value (= the kind's top pick).
       const top = p.lab.find((c) => c.labKind === k && !c.pinned);
-      return top ? `top ${KIND_LABEL[k]} ${esc(top.item.name)} ${v(top)}` : `no ${KIND_LABEL[k]} upgrades`;
+      if (!top) return `no ${KIND_LABEL[k]} upgrades`;
+      return top.autoPick ? `top ${KIND_LABEL[k]} ${esc(top.item.name)} ${v(top)}` : `${KIND_LABEL[k]}s not auto-picked (weight 0)`;
     });
   const why = pick.pinned ? 'pinned' : `${KIND_LABEL[pick.labKind ?? 'troop']} · pick value <b>${v(pick)}</b> vs ${others.join(', ')}`;
   return `<div class="card next-lab"><b>Next in lab:</b> <b>${esc(pick.item.name)}</b> ${pick.instance.level}→${pick.toLevel} (${why})${when}</div>`;

@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { checkHeroCaps, checkLevels, checkMergeConsumption } from '../src/data/validate';
 import { heroCapAt, heroStatus } from '../src/engine/book';
 import { buildPlan } from '../src/engine/plan';
-import { builderCandidates, detectMode, type EngineState } from '../src/engine/tiers';
+import { builderCandidates, detectMode, OFFENSE_ORDER, type EngineState } from '../src/engine/tiers';
 import { EMPTY_META } from '../src/meta/meta';
 import type { AccountState } from '../src/state/parseExport';
-import { data, makeExport, parse, setLevel, settings, T0 } from './helpers';
+import { data, makeExport, maxLab, parse, setLevel, settings, T0 } from './helpers';
 
 function stateOf(a: AccountState): EngineState {
   const busy = new Set<string>();
@@ -25,9 +25,9 @@ describe('mode detection', () => {
 
 const dataIdOf = (id: string) => data.byId.get(id)!.dataId;
 
-describe('Tier 0: new buildings, then the Archer Queen', () => {
+describe('Tier 0: Laboratory, new buildings, then the Archer Queen', () => {
   it('an unbuilt new building outranks the Queen', () => {
-    const ex = makeExport(15);
+    const ex = maxLab(makeExport(15));
     const hh = ex.buildings.find((b) => b.data === 1000071)!.lvl;
     setLevel(ex, 'heroes', 'archer-queen', { lvl: heroLevel('archer-queen', hh) - 5 });
     setLevel(ex, 'buildings', 'x-bow', { cnt: 3 }); // TH15 allows 4: one extra copy unbuilt
@@ -43,7 +43,7 @@ describe('Tier 0: new buildings, then the Archer Queen', () => {
   });
 
   it('several new buildings: normal tier first (offense → resources → defenses), then longest first', () => {
-    const ex = makeExport(15);
+    const ex = maxLab(makeExport(15));
     setLevel(ex, 'buildings', 'x-bow', { cnt: 3 });
     setLevel(ex, 'buildings', 'inferno-tower', { cnt: 2 });
     setLevel(ex, 'buildings', 'gold-storage', { cnt: (ex.buildings.find((b) => b.data === dataIdOf('gold-storage'))!.cnt ?? 1) - 1 });
@@ -55,8 +55,8 @@ describe('Tier 0: new buildings, then the Archer Queen', () => {
     expect(defs[0].rawTimeSec).toBeGreaterThanOrEqual(defs[1].rawTimeSec);
   });
 
-  it('outranks everything, including the Town Hall, when not book-ready', () => {
-    const ex = makeExport(15);
+  it('the Queen outranks everything else, including the Town Hall, when not book-ready', () => {
+    const ex = maxLab(makeExport(15));
     const hh = ex.buildings.find((b) => b.data === 1000071)!.lvl;
     setLevel(ex, 'heroes', 'archer-queen', { lvl: heroLevel('archer-queen', hh) - 5 });
     const c = cands(parse(ex));
@@ -122,7 +122,7 @@ describe('hero book threshold', () => {
 
 describe('tier order', () => {
   it('rush mode: TH path → offense → heroes → resources → defenses → temporary', () => {
-    const ex = makeExport(15, 14);
+    const ex = maxLab(makeExport(15, 14));
     const hh = ex.buildings.find((b) => b.data === 1000071)!.lvl;
     setLevel(ex, 'heroes', 'barbarian-king', { lvl: Math.min(50, heroLevel('barbarian-king', hh) - 1) }); // below the 8d book levels
     const c = cands(parse(ex));
@@ -141,7 +141,9 @@ describe('tier order', () => {
     expect(hero).toBeLessThan(storage);
     expect(storage).toBeLessThan(defense);
     // offense follows the configured building order
-    expect(c[offense].item.id).toBe('laboratory');
+    const firstOffense = OFFENSE_ORDER.find((id) => c.some((x) => x.item.id === id && x.tier === 2));
+    expect(c[offense].item.id).toBe(firstOffense);
+    expect(c.some((x) => x.item.id === 'laboratory')).toBe(false); // maxed here; otherwise it would be Tier 0
   });
 
   it('max-TH mode: offense → heroes → TH gate → resources → defenses → temporary', () => {
@@ -151,7 +153,8 @@ describe('tier order', () => {
     const c = cands(parse(ex));
     expect(c.some((x) => x.item.id === 'town-hall')).toBe(false);
     const tierOf = (id: string) => c.find((x) => x.item.id === id)!.tier;
-    expect(tierOf('laboratory')).toBe(1);
+    expect(tierOf('laboratory')).toBe(0); // Laboratory upgrade is Tier 0 in both modes
+    expect(tierOf('army-camp')).toBe(1);
     expect(tierOf('barbarian-king')).toBe(2);
     expect(tierOf('super-wizard-tower')).toBe(5); // merged-defense upgrade past L1 → permanent defense
     expect(tierOf('ricochet-cannon')).toBe(5);
@@ -216,7 +219,7 @@ describe('merges', () => {
   });
 
   it('TH-upgrading lookahead: next TH merge sources are worked while the TH upgrades', () => {
-    const ex = makeExport(15, 14); // cannons/archer towers at 20, TH15 allows 21
+    const ex = maxLab(makeExport(15, 14)); // cannons/archer towers at 20, TH15 allows 21
     const idle = cands(parse(ex));
     expect(idle.some((c) => c.reason.includes('lookahead'))).toBe(false);
     expect(idle[0].item.id).toBe('town-hall');
@@ -235,7 +238,7 @@ describe('merges', () => {
   });
 
   it('a merge whose sources are maxed is a new building: Tier 0, ahead of the Queen', () => {
-    const ex = makeExport(16, 15);
+    const ex = maxLab(makeExport(16, 15));
     const hh = ex.buildings.find((b) => b.data === 1000071)!.lvl;
     setLevel(ex, 'heroes', 'archer-queen', { lvl: heroLevel('archer-queen', hh) - 5 });
     // One Ricochet Cannon missing, two spare Cannons at 21.

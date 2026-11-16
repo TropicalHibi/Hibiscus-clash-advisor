@@ -4,7 +4,11 @@ import type { MetaFile } from '../meta/meta';
 import type { AccountState } from '../state/parseExport';
 import type { Settings } from '../state/settings';
 import { GOLD_PASS_MAX_BOOST } from './constants';
-import { researchCandidates } from './queues';
+import { fmtDuration } from './format';
+import { nextResearch, researchCandidates } from './queues';
+
+/** An export timestamp more than this far ahead of "now" is reported as clock skew. */
+export const FUTURE_TOLERANCE_SEC = 300;
 import { builderCandidates, lockOf, type CandidateKind, type EngineState } from './tiers';
 
 export type SlotQueue = 'builder' | 'lab' | 'petHouse';
@@ -18,6 +22,8 @@ export interface Slot {
 
 export interface TimelineEntry {
   slotId: string;
+  /** Building / unit lock the job holds (one upgrade per lock at a time). */
+  lockUid: string;
   /** Seconds from "now". In-progress jobs start at 0. */
   start: number;
   end: number;
@@ -42,8 +48,13 @@ export interface SimOptions {
 export interface SimResult {
   slots: Slot[];
   timeline: TimelineEntry[];
-  /** Seconds the export is old (now − export timestamp); 0 if no timestamp. */
+  /** Seconds the export is old (now − export timestamp); 0 if no timestamp or a future timestamp. */
   elapsedSec: number;
+  /**
+   * Engine state at "now" (t = 0): jobs that finished since the export are applied, nothing new is
+   * started yet. The ranked lists (top builder priorities, lab, pets, equipment, book-ready) use it.
+   */
+  nowState: EngineState;
   /** Slots that had nothing eligible to start at some point, with the time it happened. */
   idle: { slotId: string; at: number }[];
   finalInstances: OwnedInstance[];
@@ -63,10 +74,14 @@ export function boostsFor(settings: Settings): { builder: number; research: numb
 
 export function simulate(data: GameData, account: AccountState, settings: Settings, meta: MetaFile, opts: SimOptions): SimResult {
   const boosts = boostsFor(settings);
+  const warnings: string[] = [];
+  const ahead = account.exportTimestamp ? account.exportTimestamp - opts.nowSec : 0;
+  if (ahead > FUTURE_TOLERANCE_SEC)
+    warnings.push(`The export timestamp is ${fmtDuration(ahead)} in the future; check the device clock. Timers are counted from now.`);
   const elapsedSec = account.exportTimestamp ? Math.max(0, opts.nowSec - account.exportTimestamp) : 0;
   const instances: OwnedInstance[] = account.instances.map((i) => ({ ...i }));
   const state: EngineState = { instances, busy: new Set() };
-  const warnings: string[] = [];
+  let nowState: EngineState | undefined;
   const timeline: TimelineEntry[] = [];
   const idle: { slotId: string; at: number }[] = [];
 
@@ -117,6 +132,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
     });
     timeline.push({
       slotId: slot.id,
+      lockUid,
       start: 0,
       end,
       itemKey: item.key,
@@ -156,10 +172,8 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
     }
     const t0 = target;
     if (c.kind === 'supercharge') {
-      t0.superchargeUpgrading = true;
       apply = () => {
         t0.superchargeLevel = c.toLevel;
-        delete t0.superchargeUpgrading;
       };
     } else if (c.kind === 'weapon') {
       apply = () => {
@@ -178,6 +192,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
     jobs.push({ slot, end: t + c.timeSec, lockUid, apply });
     timeline.push({
       slotId: slot.id,
+      lockUid,
       start: t,
       end: t + c.timeSec,
       itemKey: c.item.key,
@@ -195,10 +210,8 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
 
   const startResearch = (slot: Slot, t: number): boolean => {
     const q = slot.queue as 'lab' | 'petHouse';
-    // The lab/pet house can't research while the building itself is upgrading.
-    const buildingId = q === 'lab' ? 1000007 : 1000068;
-    if (instances.some((i) => i.dataId === buildingId && state.busy.has(i.uid))) return false;
-    const c = researchCandidates(data, state, q, settings, meta, boosts.research)[0];
+    // Research and Laboratory / Pet House building upgrades run fully in parallel (SPEC §6.6).
+    const c = nextResearch(researchCandidates(data, state, q, settings, meta, boosts.research));
     if (!c) return false;
     const target = findInst(c.instance.uid);
     if (!target) return false;
@@ -215,6 +228,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
     });
     timeline.push({
       slotId: slot.id,
+      lockUid: target.uid,
       start: t,
       end: t + c.timeSec,
       itemKey: c.item.key,
@@ -239,6 +253,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       j.apply();
       state.busy.delete(j.lockUid);
     }
+    if (!nowState) nowState = { instances: instances.map((i) => ({ ...i })), busy: new Set(state.busy) };
     if (t >= opts.horizonSec) break;
     // Fill free slots. Goblin slots never take new work (temporary helpers).
     for (const slot of slots) {
@@ -256,5 +271,6 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
     t = Math.min(...jobs.map((j) => j.end));
   }
 
-  return { slots, timeline, elapsedSec, idle, finalInstances: instances, warnings };
+  nowState ??= { instances: instances.map((i) => ({ ...i })), busy: new Set(state.busy) };
+  return { slots, timeline, elapsedSec, nowState, idle, finalInstances: instances, warnings };
 }

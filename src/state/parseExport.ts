@@ -1,5 +1,6 @@
 // Parse the in-game account export (SPEC §3.2) into AccountState, joining on dataId.
 import type { GameData, OwnedInstance } from '../data/types';
+import { IDS, levelsOf } from './levels';
 
 export interface Unresolved {
   section: string;
@@ -23,17 +24,7 @@ export interface AccountState {
   boosts: unknown;
 }
 
-export const IDS = {
-  townHall: 1000001,
-  wall: 1000010,
-  builderHut: 1000015,
-  bobHut: 1000064,
-  laboratory: 1000007,
-  petHouse: 1000068,
-  blacksmith: 1000070,
-  heroHall: 1000071,
-  craftingStation: 1000097,
-} as const;
+export { IDS };
 
 /** Home-village sections we read. `units` is the real name; `troops` accepted per the coc.py shape. */
 const SECTIONS = ['buildings', 'traps', 'heroes', 'units', 'troops', 'siege_machines', 'spells', 'pets', 'equipment', 'guardians', 'helpers'];
@@ -65,11 +56,6 @@ export function parseExport(input: string | object, data: GameData): AccountStat
     return `${base}#${n}`;
   };
 
-  let townHall = 0;
-  let heroHall = 0;
-  let lab = 0;
-  let petHouse = 0;
-  let blacksmith = 0;
   let builders = 0;
 
   for (const section of SECTIONS) {
@@ -116,11 +102,6 @@ export function parseExport(input: string | object, data: GameData): AccountStat
         walls.push({ level: lvl, count: cnt });
         continue;
       }
-      if (dataId === IDS.townHall) townHall = Math.max(townHall, lvl);
-      if (dataId === IDS.heroHall) heroHall = Math.max(heroHall, lvl);
-      if (dataId === IDS.laboratory) lab = Math.max(lab, lvl);
-      if (dataId === IDS.petHouse) petHouse = Math.max(petHouse, lvl);
-      if (dataId === IDS.blacksmith) blacksmith = Math.max(blacksmith, lvl);
       if (dataId === IDS.builderHut || dataId === IDS.bobHut) builders += cnt;
 
       for (let i = 0; i < cnt; i++) {
@@ -137,17 +118,18 @@ export function parseExport(input: string | object, data: GameData): AccountStat
     }
   }
 
-  if (!townHall) throw new ExportParseError('No Town Hall found in the export.');
+  const lv = levelsOf(instances);
+  if (!lv.th) throw new ExportParseError('No Town Hall found in the export.');
 
   walls.sort((a, b) => a.level - b.level);
   return {
     tag: typeof raw.tag === 'string' ? raw.tag : undefined,
     exportTimestamp: typeof raw.timestamp === 'number' ? raw.timestamp : undefined,
-    townHall,
-    heroHall,
-    lab,
-    petHouse,
-    blacksmith,
+    townHall: lv.th,
+    heroHall: lv.heroHall,
+    lab: lv.lab,
+    petHouse: lv.petHouse,
+    blacksmith: lv.blacksmith,
     builders: Math.max(1, builders),
     instances,
     walls,
