@@ -350,3 +350,37 @@ The owner's rule: ore is time-gated (daily attacks, wars, raids, events), so it 
 - **The Everything tab's Blacksmith section keeps its ore totals** (every remaining level). *Why:* "everything left" is informational, not a 24-hour need, and has no "needed by" time.
 - **`forecast.blacksmithTopN` is deleted** (type, defaults, `coerceSettings`, `config/settings.sample.yaml`). Nothing else used it. A value saved in localStorage is ignored by `coerceSettings` (tested).
 - Tests: the old "ore totals cover the top-N picks" test was replaced by "ore is never forecast" (no ore in totals, "needed by" or the CLI resources; equipment still has ore costs; the CLI Blacksmith list says "ore cost" with no "needed"). The meta test now checks equipment order only. The UI test checks: no ore tile, no "Ore picks", and equipment rows show "ore cost:" with no "needed by".
+
+
+# Decisions (daily game-data update Action)
+
+One line each: decision, then why. The owner asked for no questions, so these are my calls.
+
+## Workflow (`.github/workflows/data-update.yml`)
+- **Daily at `17 10 * * *` (10:17 UTC) + `workflow_dispatch`**, no secrets, never `npm run meta`. `actions/checkout@v7` / `setup-node@v7` (Node 24), like the Pages workflow. Concurrency group `data-update`, never cancelled midway.
+- **Deploying: `gh workflow run pages.yml --ref main`** after the push (needs `actions: write`). *Why:* a push made with `GITHUB_TOKEN` doesn't trigger other workflows, but `workflow_dispatch` is the documented exception. I didn't call Pages as a reusable workflow (`workflow_call`) because its checkout would build the caller's commit (the one *before* the data commit), not the new `main`. Dispatching runs Pages exactly as a normal push would, tests included, on the latest `main`. No PAT needed.
+- **The commit:** `git add` of exactly `package.json`, `package-lock.json` and `public/data-changes.json`; message `data: clash-of-clans-data <old> → <new> (N changes)`; author `github-actions[bot]`; `git pull --rebase origin main` then push. *Why:* only the files the owner named; the rebase covers a push to `main` landing while the job ran (a conflict is a failure → issue).
+- **Steps run as named steps** (`npm ci` → `check` → `npm test` → commit → deploy). The last three only run when `check` says `updated`, so "no new version" ends after `check` with a green run.
+
+## Same code as `npm run sync`
+- **`scripts/lib/dataUpdate.ts` wraps `syncData` unchanged**: same deps (`nodeSyncDeps`), so the same version pin (`<N+1.0.0`), validation, known-good restore, snapshot and diff code. It only observes the steps (versions, the failure reason, the diff) through thin wrappers.
+- **One change to sync itself, for both paths: snapshot the installed version before installing a newer one.** *Why:* CI starts with an empty `data/snapshots/` (git-ignored), so without it there's no "before" and no diff. Locally it's a no-op (the snapshot exists). A test runs both paths (CI with no snapshots, local with the old snapshot) and gets identical changes.
+- **`public/data-changes.json` isn't rewritten when it already holds the same diff** (same versions and changes, ignoring the date). *Why:* after `git pull` brings in the Action's commit, a local offline sync would otherwise change only the date and leave a dirty working tree.
+
+## Stricter checks for unattended deploys
+- **A merge missing from `config/merges.yaml` fails the update** (locally it stays a warning, §9). *Why:* the owner asked for an issue naming the merge; and deploying would give every user a Plan-tab warning plus wrong building counts until someone edits merges.yaml. A missing diff also fails (the banner depends on it). Hero-cap mismatches stay warnings (known data quirk).
+- **Naming the merge:** `explainMissingMerges()` finds sources whose count drops with no recipe explaining it (per TH), then candidate merged defenses: defenses first available at that TH, not already a recipe, whose count divides each source's extra drop. The data has no "merged from" field, so candidates are ranked: new in this release (from the diff), then the name contains a source's name, then ≤ 2 of each source. *Why:* with today's data and the Super Wizard Tower recipe removed, the count arithmetic also fits Revenge Tower (1 copy = 4 Wizard Towers); the ranking puts Super Wizard Tower first and lists Revenge Tower as "less likely".
+- `npm test` runs on the new data in the data-update job, before the commit (Pages runs it again on deploy).
+
+## Failure issue
+- **Title `Data update failed: <new version>`** (`Data update failed: npm check` when npm couldn't be asked at all). An open issue with exactly that title is **edited** (fresh body) and gets a "Failed again: <run>" comment; otherwise a new one is created. *Why:* "update, not duplicate"; a newer failing version gets its own issue.
+- **Body:** the failing step, from → to, "Nothing was committed", the run link, a plain "A merge is missing from config/merges.yaml" section when that's the cause, the reason, the sync/validation output (the last 120 lines, diff lines left out), the diff summary (first 60 changes) and, for a test failure, the last 80 lines of the test log. If the commit was pushed but the Pages dispatch failed, it says to run Pages by hand instead.
+- The failing step comes from the step outcomes (`npm ci`, `check` (the result names its sub-step: npm registry check, install, load + validate, validation: merges.yaml, snapshot + diff), npm test, commit and push, start the Pages workflow). If the issue builder itself can't run (e.g. `npm ci` failed), a minimal body is written by shell.
+
+## Local: `git pull --ff-only` in the predev refresh
+- **Step 0 of the refresh**, before the data check: `git pull --ff-only` with a 30 s timeout and `GIT_TERMINAL_PROMPT=0`. Silent when there's nothing new; "[refresh] pulled N new commits from origin." otherwise. Any failure (uncommitted changes that block the merge, diverged history, offline, no repo) is a one-line warning and the refresh continues. *Why:* the owner's rule; `--ff-only` never creates a merge commit or touches local work.
+- **If the pull changed `package.json` / `package-lock.json`:** `npm install`, then `npm run sync -- --offline`. *Why:* otherwise `node_modules` would still hold the old data version and the site would run old data with the new lockfile; the offline sync records the local snapshot for the new version (and leaves `data-changes.json` alone, see above).
+- Tests: the existing refresh tests now expect a `git` field in the result; the offline wiring test now expects the git pull's own timeout warning first (every command times out there).
+
+## Run on GitHub
+- Triggered once with `workflow_dispatch` after pushing (run 43973368778): passed in 15 s, "no new version" (0.19.1 is the newest 0.x); test / commit / deploy / issue steps skipped, nothing committed, no issue opened.

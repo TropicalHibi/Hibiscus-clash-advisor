@@ -929,3 +929,36 @@ The 1 MB of JS is the bundled game data (REVIEW finding 16, left for v2), not im
 - New warnings: 1000106 "still occupies a slot", and two unknown equipment ids (90000062, 90000063), ignored. Data 0.19.1 doesn't have them yet; the next `npm run sync` should bring them in.
 
 **Still to check in-game:** the Pet Potion's export key (assumed `pet_boost`; an unknown key would show a warning), Study Soup ×4, and whether a helper whose repeat target isn't upgrading helps another job or sits idle.
+
+
+## Follow-up: daily game-data update
+
+**Status:** `.github/workflows/data-update.yml` is live. It runs every day at **10:17 UTC** and can be started by hand from the Actions tab ("Daily game-data update" → Run workflow). `npm test` passes (**261 tests in 17 files**), `npm run build` succeeds, and the Pages workflow passed on the push.
+
+**What it does**
+- Asks npm for a newer `clash-of-clans-data` within the current major. **None → the run ends green** ("No new clash-of-clans-data version").
+- **Newer:** it runs the same code as your local `npm run sync`:
+  - snapshot the installed version, install the new one, check it (and put the old one back if it won't load);
+  - diff the two and write `public/data-changes.json`;
+  - run `npm test`.
+- **If everything passes,** it commits `package.json`, `package-lock.json` and `public/data-changes.json` to `main` as `data: clash-of-clans-data 0.19.1 → 0.20.0 (N changes)`, then starts the Pages workflow. That deploys the new data and the "Game data updated" banner. (A push from an Action doesn't start other workflows by itself, so it starts Pages explicitly.)
+- **If anything fails,** nothing is committed, and you get a GitHub issue **"Data update failed: <version>"** (updated, not duplicated, if it fails again). It names the failing step and includes the validation output, the diff summary and the test output.
+  - If the cause is a **merge missing from `config/merges.yaml`**, the issue says so plainly and names the new merged defense and its sources, e.g. "New merged defense, most likely: Super Wizard Tower = 2× Wizard Tower".
+  - Unattended, that's a failure; a local sync still only warns.
+- **No secrets**, and it never runs `npm run meta`.
+
+**On your PC:** `npm run dev` now starts with `git pull --ff-only`, so it picks up what the Action committed. If that pull brings a data update, it also runs `npm install` so your local data matches. If the pull can't run (e.g. you have uncommitted changes in the way, or you're offline), you get a one-line warning and the site starts anyway.
+
+**Tested** with a fake npm registry (no real release needed):
+- no new version;
+- a clean update (same diff as a local sync);
+- a missing merge (the issue names Super Wizard Tower = 2× Wizard Tower);
+- new data that won't load (old version restored);
+- npm unreachable, and a failed install;
+- the issue text;
+- the git-pull step;
+- the workflow file itself.
+
+**Manual run (workflow_dispatch, 16 Nov 2026, 10:47 PM UTC): passed in 15 s.** Log: `clash-of-clans-data 0.19.1 is the newest 0.x release (unchanged)` → `No new clash-of-clans-data version: 0.19.1 is the newest 0.x release. Nothing to do.` The test, commit, deploy and issue steps were skipped; no commit was made and no issue was opened. Run: https://github.com/TropicalHibi/Hibiscus-clash-advisor/actions/runs/43973368778
+
+**Check:** the first real release (Hero Hall 13 data) will be the first end-to-end run. Look for the `data: …` commit and a Pages deploy that morning, or an issue if something needs fixing.

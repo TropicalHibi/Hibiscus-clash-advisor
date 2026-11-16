@@ -2,7 +2,7 @@
 
 A local website that reads a Clash of Clans account export and tells the player what to upgrade next, following a rush-first priority system. It also produces a 24-hour resource "shopping list" and lab/pet/equipment picks ranked by Legend League I usage.
 
-**v1 = runs locally on Windows**, and the same static site is also published to **GitHub Pages** (§15): https://tropicalhibi.github.io/Hibiscus-clash-advisor/. No accounts, no backend. Meta and game-data refreshes still run only on the local machine (the API key is IP-locked); scheduled automation in CI is v2+.
+**v1 = runs locally on Windows**, and the same static site is also published to **GitHub Pages** (§15): https://tropicalhibi.github.io/Hibiscus-clash-advisor/. No accounts, no backend. Game data is kept current on the live site by a daily GitHub Action (§9b). The Legend I meta still refreshes only on the local machine (the API key is IP-locked); a scheduled meta job in CI is v2+.
 
 ---
 
@@ -22,7 +22,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 **Out of scope (v1, revisit later)**
 - Builder Base, Clan Capital.
 - Sleep/awake windows for timing finishes.
-- Scheduled CI jobs (daily meta / version check in GitHub Actions), multi-device sync.
+- Scheduled meta job in GitHub Actions (the API key is IP-locked), multi-device sync. (The daily game-data update is in scope: §9b.)
 - Entering current resources.
 
 ---
@@ -99,6 +99,7 @@ coc-planner/
   SPEC.md
   .github/workflows/
     pages.yml            # test + build + deploy to GitHub Pages on push to main (§15)
+    data-update.yml      # daily clash-of-clans-data update → commit → deploy, or an issue (§9b)
   config/
     merges.yaml          # merge recipes (hand-maintained)
     id-overrides.yaml    # dataIds missing from the game data (§3.1)
@@ -107,6 +108,7 @@ coc-planner/
     sync.ts              # npm run sync
     meta.ts              # npm run meta
     refresh.ts           # predev refresh (§9a)
+    data-update.ts       # the daily data-update Action's steps (§9b)
     push-meta.ts         # npm run push-meta (§15)
   src/
     data/                # load + normalize clash-of-clans-data into Item model
@@ -321,13 +323,13 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
 
 ## 9. Game-data sync (`npm run sync`)
 
-1. Install the newest `clash-of-clans-data` **within the current major** (never jump a major automatically). Record the version.
+1. Install the newest `clash-of-clans-data` **within the current major** (never jump a major automatically). Record the version. **Before installing**, snapshot the currently installed version (step 2) if it loads, so there is always a "before" to diff against, even on a fresh checkout with an empty `data/snapshots/` (the daily Action, §9b). That's a no-op when its snapshot already exists.
    - Load and validate it. If it can't be used (normalize throws, or levels are broken), **restore the last known-good version**, record the failure in `data/refresh-state.json`, and exit non-zero.
    - The `npm run dev` refresh (§9a) warns about the recorded failure on every start until a sync succeeds.
    - Merge-consumption and hero-cap findings are warnings, not failures (the site warns about merges itself, §7).
 2. Normalize into the `Item` model; write `data/snapshots/<date>_<version>.json` (Item model only, no raw JSON or image paths), once per data version. Snapshots are ~0.3 MB each, so `data/snapshots/` is **git-ignored** and only the newest two are kept on disk.
 3. Diff vs the newest snapshot of another version and print human-readable changes: new / removed items, new / removed levels, renames, and per-level cost, time and requirement changes. Examples: `Archer Tower 21: 18d → 16d`, `Gold Mine 17: 8M gold → 7.2M gold`, `NEW: Town Hall 19 (…)`, `NEW ITEM: …`, `REMOVED ITEM: …`. Items match by key (dataId), never by name. Equipment compares all three ores.
-   - The diff is saved to `public/data-changes.json` (`{ version, previousVersion, date, changes[] }`). It's committed with `package.json` / `package-lock.json`, so the live site gets it too.
+   - The diff is saved to `public/data-changes.json` (`{ version, previousVersion, date, changes[] }`). It's committed with `package.json` / `package-lock.json`, so the live site gets it too. If the file already holds the same diff (same versions and changes), it isn't rewritten, so the date alone never dirties the working tree (e.g. a local sync after pulling the Action's commit).
    - The Plan tab shows a dismissible **"Game data updated: N changes"** banner with the list when `data-changes.json` matches the bundled data version and that version hasn't been dismissed yet (dismissal is per version, in localStorage).
    - The first snapshot has nothing to compare with and writes no diff. A snapshot/diff failure is a warning, not a failed sync.
    - `npm run sync -- --offline` validates and snapshots the installed version without asking npm.
@@ -341,9 +343,10 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
 
 ## 9a. Automatic refresh — no OS schedulers
 
-The player never uses Windows Task Scheduler (or cron). Freshness comes from starting the site:
+The player never uses Windows Task Scheduler (or cron). Freshness comes from starting the site (and, for game data on the live site, from the daily Action in §9b):
 
 - `npm run dev` runs a `predev` refresh (`scripts/refresh.ts`) before Vite starts:
+  0. **Git:** `git pull --ff-only` (30 s timeout, no credential prompt), so the local copy has whatever the daily Action committed. Silent when already up to date; prints one line when commits came in. If the pull changed `package.json` / `package-lock.json`, it runs `npm install` (node_modules must match the committed data version), then `npm run sync -- --offline` to record the local snapshot. If the pull can't fast-forward (uncommitted changes, diverged history, offline, not a git checkout), it prints a one-line warning and continues with the local copy.
   1. **Game data:** if the last check was >24h ago (`data/refresh-state.json`, git-ignored), ask npm for the newest `clash-of-clans-data` within the installed major; if it is newer than the installed one, run the full `npm run sync`. A version that sync already recorded as unusable isn't reinstalled on every start; a newer release, or `npm run sync` by hand after a fix, retries.
   2. **Meta:** if `public/meta.json` (`generatedAt`) is >24h old or missing **and** `.env` has `COC_API_TOKEN`, run `npm run meta`. Staleness means "last aggregation" (`generatedAt`), so `npm run meta -- --aggregate-only` also resets the 24 h clock.
   3. **Any failure** (offline, 403, no token, sync error) prints a **one-line warning** and the site starts anyway. A failed check is retried on the next start. A meta run where some players failed counts as updated; those players are retried by the next run (§8.1).
@@ -351,6 +354,18 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
   5. After a meta pull that wrote `public/meta.json` (exit 0, or exit 2 = partial), print one line: `run npm run push-meta to update the live site`. The refresh **never pushes** by itself (§15).
 - `npm run dev:fast` skips the refresh.
 - The refresh runs only locally; the GitHub Pages workflow never runs it (§15).
+
+## 9b. Daily game-data update (GitHub Action)
+
+`.github/workflows/data-update.yml` keeps `clash-of-clans-data` current on the live site without the local machine. It runs **daily at 10:17 UTC** and on **manual dispatch**. **No secrets**: it only talks to the npm registry and this repo, and never runs `npm run meta`.
+
+1. `npm ci`, then `scripts/data-update.ts check`. That's the same `syncData` code as `npm run sync` (§9): ask npm for the newest version **within the current major**. If it isn't newer, the run **ends successfully** ("No new clash-of-clans-data version").
+2. If newer: snapshot the installed version, install the new one, normalize + validate it (with the known-good restore if it can't load), snapshot it, diff the two and write `public/data-changes.json`. The CI path and a local `npm run sync` produce the same diff (tested).
+3. **Stricter than local, because nobody is watching:** a merge that `config/merges.yaml` doesn't explain (§7 consumption check) **fails** the update instead of being a warning. So does a missing diff. Hero-cap mismatches stay warnings.
+4. `npm test` on the new data.
+5. All good → commit **only** `package.json`, `package-lock.json` and `public/data-changes.json` to `main` as `data: clash-of-clans-data <old> → <new> (N changes)` (author `github-actions[bot]`), rebase on `main` and push. Then start the Pages workflow with `gh workflow run pages.yml --ref main`. A push made with the workflow's `GITHUB_TOKEN` doesn't trigger other workflows, but a `workflow_dispatch` does. Pages then runs its own `npm test` + build on the new commit and deploys.
+6. **Anything fails → nothing is committed**, and the run opens an issue titled **`Data update failed: <new version>`** (`… npm check` when npm couldn't be asked). If an open issue with that exact title exists, it's updated and gets a "Failed again" comment instead of a duplicate. The body names the failing step and has the reason, the sync/validation output, the diff summary and, for a test failure, the end of the test log. If the cause is a merge missing from `config/merges.yaml`, it says so plainly and names the new merged defense and its sources. The data has no "merged from" field, so candidates are derived from the counts and ranked: new in this release, then the name contains a source's name, then ≤ 2 of each source.
+7. Permissions: `contents: write` (push), `issues: write` (report), `actions: write` (dispatch Pages). Concurrency group `data-update`, never cancelled midway.
 
 ---
 
@@ -474,12 +489,13 @@ Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
 - **No token in CI.** The workflow never runs the predev refresh (it never calls `npm run dev`), `npm run meta`, `npm run sync` or `npm run push-meta`. The site ships the committed `public/meta.json` and the `clash-of-clans-data` version locked in `package-lock.json`.
 - **Base path:** only `vite build --mode pages` uses base `/Hibiscus-clash-advisor/`; `npm run dev`, `npm run build` and tests stay at `/`. Every runtime fetch uses `import.meta.env.BASE_URL` (§2).
 - **Meta on the site:** the live site only gets new meta when `public/meta.json` is pushed. `npm run push-meta` commits that file alone (`meta: <generatedAt>`) and pushes `main` if it changed; it does nothing when unchanged and refuses off `main`. The predev refresh reminds after a successful meta pull (§9a step 5) but never pushes.
-- **Game-data updates** reach the site the same way: `npm run sync` locally updates `package.json` / `package-lock.json`; committing and pushing them redeploys.
+- **Game-data updates** reach the site **automatically** through the daily data-update Action (§9b): it commits the new version and starts this workflow by `workflow_dispatch`. A local `npm run sync` + commit + push still works too. `npm run dev` pulls the Action's commits first (§9a step 0).
 - **Privacy:** user data stays in each browser's `localStorage`; nothing is uploaded. Committed fixtures are redacted (§8.1 / `scripts/lib/redact.ts`); `.env`, `samples/`, `battles.jsonl` and run-state files are git-ignored and were never committed.
 
 ### 15.2 v2+ (not now)
 
-- GitHub Actions on a schedule: daily version check / rebuild, daily meta (needs an API key that isn't IP-locked to the home network).
+- ~~Daily version check / rebuild in GitHub Actions~~ → done (§9b).
+- Daily meta in GitHub Actions (needs an API key that isn't IP-locked to the home network).
 - Sleep/awake windows for finish-time fitting.
 - Multi-device state.
 - Builder Base / Clan Capital.
