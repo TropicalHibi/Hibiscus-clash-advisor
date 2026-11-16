@@ -257,7 +257,7 @@ One list (no kinds, no weights): meta score (usage share) descending, unused at 
 
 ### 6.9 Blacksmith (equipment)
 - Upgrades are instant; the constraint is ore. Show a ranked list by meta score (= usage share) with ore costs per next level. Ore cost does not affect the order.
-- Include ore totals in the forecast for the top-ranked items (see §10).
+- **Ore is never forecast.** It's time-gated (daily attacks, wars, raids, events): you can't farm it on demand, so a "needed in 24 h" ore total would be meaningless. Each row shows the next level's **ore cost** (informational, no "needed by" time) on the Lab / Pets / Equipment tab, and in the `npm run plan` Blacksmith list. The Everything tab's Blacksmith section totals the remaining ore, also informational.
 
 ---
 
@@ -385,7 +385,7 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 - Sum cost by resource for every upgrade that **starts** within 24h in the simulation.
 - Show a per-slot timeline: `B2 free 11:40 PM → Cannon 21 (3.0M gold)`. Times show the clock today, the weekday within 6 days ("Wed 11:40 PM"), and the date beyond that ("Tue Nov 24, 9:24 AM").
 - Show "needed by" times so the player knows which resource to farm first.
-- Ore: sum ore for the top-N blacksmith picks (N configurable, default 3), counting only each piece's **next** level.
+- **No ore.** Ore is time-gated (daily attacks, wars, raids, events), so it never appears in "Resources needed": no ore tiles, totals or "needed by" rows in the Plan tab or the CLI. Equipment ore costs are informational only (§6.9). The old `forecast.blacksmithTopN` setting is gone; a saved value is ignored.
 - Already-running upgrades are not counted (already paid).
 
 ### 10.4 Wall dump line
@@ -402,7 +402,7 @@ Mobile-friendly layout (the player checks on a phone later), single page with ta
 2. **Plan** (default tab). The "Game data updated" banner (§9) sits on top when a new data version arrives.
    - "Now": what each free builder should start, with the `reason` string.
    - 24h timeline per slot.
-   - Resources needed in 24h (gold, elixir, DE, each ore).
+   - Resources needed in 24h (gold, elixir, DE; never ore, §10.3).
    - Book-ready heroes list.
    - Wall dump line.
 3. **Lab / Pets / Equipment** — "Next in lab" line (§6.7), then Lab sections Troops / Spells / Sieges, Pet House, Blacksmith. Ranked lists with the meta score (army share for troops/spells), Legend I usage % and 3★ rate, pin buttons. Equipment rows show ore cost.

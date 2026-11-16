@@ -44,7 +44,7 @@ Other commands:
   - Running timers count down from the export timestamp.
   - Merges remove their source defenses in the simulation, and new buildings get added.
   - Gold Pass boost is one constant in `src/engine/constants.ts` (builder 20%, research 20%).
-- **Forecast** (`forecast.ts`): resources needed in the next 24h with "needed by" times, ore for the top 3 equipment picks, and the wall overflow line.
+- **Forecast** (`forecast.ts`): resources needed in the next 24h with "needed by" times, and the wall overflow line. *(Ore was removed from the forecast later: it's time-gated. See "Follow-up: ore is never forecast".)*
 - **UI:** Import & Settings tab and Plan tab. The Plan tab shows:
   - what to start now
   - a per-builder 24h timeline
@@ -141,10 +141,6 @@ Export taken 11/15/2026, 7:55:48 AM (22m ago) · now 11/15/2026, 8:18:06 AM
 
 == Resources needed (upgrades starting in the next 1d) ==
   DE                290K   first needed 8:18 AM (Royal Champion 38)
-  Ore (top 3 equipment): 360 shiny · 0 glowy · 0 starry
-    - Frozen Arrow 1→2: 120 shiny / 0 glowy / 0 starry
-    - Haste Vial 1→2: 120 shiny / 0 glowy / 0 starry
-    - Heroic Torch 1→2: 120 shiny / 0 glowy / 0 starry
 
 == Book-ready heroes (your call) ==
   Grand Warden 77→78: 25.5M elixir, 8d (after current upgrade)
@@ -266,10 +262,6 @@ Export taken 11/15/2026, 7:55:48 AM (5h 50m ago) · now 11/15/2026, 1:46:15 PM
 
 == Resources needed (upgrades starting in the next 1d) ==
   DE                485K   first needed 1:46 PM (Royal Champion 38)
-  Ore (top 3 equipment): 360 shiny · 0 glowy · 0 starry
-    - Frozen Arrow 1→2: 120 shiny / 0 glowy / 0 starry
-    - Haste Vial 1→2: 120 shiny / 0 glowy / 0 starry
-    - Heroic Torch 1→2: 120 shiny / 0 glowy / 0 starry
 
 == Book-ready heroes (your call) ==
   Grand Warden 77→78: 25.5M elixir, 8d (after current upgrade)
@@ -325,7 +317,7 @@ If a run is interrupted (Ctrl+C, a crash, a closed window), run `npm run meta` a
 - **Lab / Pets / Equipment tab:** three ranked lists, each item with a usage bar, usage %, 3★ rate, time and cost (ore for equipment), and a **Pin** button.
   - Unused items are at the bottom, at normal contrast, marked "Not seen in Legend I · 0% used".
   - Pins are saved in the browser.
-  - The same ranking drives the Plan tab's lab and pet queue order and its ore picks.
+  - The same ranking drives the Plan tab's lab and pet queue order. *(It used to drive ore picks too; ore is no longer forecast.)*
   - The footer shows the meta date, attack count and player count.
   - With no `meta.json`, everything falls back to the Step 1 order, and a note says to run `npm run meta`.
 - **Goblin test (mid-step request):** a Goblin Builder job and a Goblin Researcher job in the export each run out their timer inside the 24h window. After that, neither Goblin gets a new upgrade in the schedule, in "Now" or in the 24h forecast, and neither counts as a builder. I checked that the test fails if the rule is broken. The engine already followed SPEC §10.1, so no engine change was needed.
@@ -429,7 +421,7 @@ The builder plan is unchanged. Only the lab, pet house and blacksmith order chan
 - After: **Frosty 10→11** (79.3%), **Greedy Raven 1→2** (48.7%), Poison Lizard 2→3 (29.3%), Angry Jelly 1→2 (23.1%), Diggy 1→2 (10.3%), Electro Owl 2→3. Unused: Mighty Yak, L.A.S.S.I.
 - 30-day pet simulation: before, Mighty Yak / Poison Lizard / Diggy levels. After: Frosty 11 → 12 → 13 → 14.
 
-**Blacksmith (ore picks in the 24h forecast)**
+**Blacksmith ranking** *(at the time this fed ore picks into the 24h forecast; ore is no longer forecast, so these are now just the top of the Blacksmith list with each next level's ore cost)*
 - Before: Frozen Arrow, Haste Vial and Heroic Torch 1→2 (360 shiny ore in total).
 - After: **Action Figure 26→27** (3600 shiny / 600 glowy / 150 starry), **Eternal Tome 17→18** (2700 / 600 / 0), **Spiky Ball 16→17** (2600 / 0 / 0). Total: **8.9K shiny · 1.2K glowy · 150 starry**. Next: Snake Bracelet, Rocket Backpack, Meteor Staff, Heroic Torch 1→2 (31.7%), Monolith Arrow 1→2.
 
@@ -439,10 +431,6 @@ Plan output excerpt (`npm run plan -- samples/myexport.json`, 16 Nov 2026, 2:01 
 == Resources needed (upgrades starting in the next 1d) ==
   DE                685K   first needed 2:01 PM (Barbarian King 83)
   gold               52M   first needed Tue 9:25 AM (Firespitter 3)
-  Ore (top 3 equipment): 8.9K shiny · 1.2K glowy · 150 starry
-    - Action Figure 26→27: 3600 shiny / 600 glowy / 150 starry
-    - Eternal Tome 17→18: 2700 shiny / 600 glowy / 0 starry
-    - Spiky Ball 16→17: 2600 shiny / 0 glowy / 0 starry
 
 == Lab (top 5) ==
   Archer 11→12 · 4d 12h · 9M elixir — Legend I usage 88.0% (incl. Super Archer 0.2%)
@@ -564,7 +552,7 @@ For reference, the top lab units across Legend I by the new score (whether or no
 ## How your lab queue changed
 
 - **Next 24 hours: no change.** The Laboratory is busy with Druid 4 for 89.8h more and the Goblin Researcher with Wall Breaker 14. Nothing new starts in the forecast window.
-- **Builder plan, 24h resources, pets and ore picks: identical.** I diffed `npm run plan -- samples/myexport.json --at-export` before and after: only the five "lab picks" lines changed.
+- **Builder plan, 24h resources and pets: identical.** I diffed `npm run plan -- samples/myexport.json --at-export` before and after: only the five "lab picks" lines changed.
 - **30-day lab simulation:**
   - Before: Druid 4 (running, done day 3.7) → **Archer 12 → 13 → 14** (days 3.7–30.7).
   - After: Druid 4 → **Sky Wagon 2 → 3 → 4** (days 3.7–43.2; 22M elixir for the first level alone).

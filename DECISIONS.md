@@ -20,7 +20,7 @@ One line each: decision, then why.
 - Assumed export field for supercharge progress: `supercharge` (number). **Unverified**: this account has no supercharges. *Why:* best guess; it's a single line in `parseExport.ts` to fix.
 - TH weapons come from `town-hall.levels[].weapon.levels`, keyed `1000001:w<TH>`. Assumed export field: `weapon` on the TH entry, default level 1 if absent. *Why:* TH18 has no weapon, so the real export can't confirm it.
 - `Item` gained `key` (string), `id` (file id) and a few optional fields. Category gained `other`, Queue gained `none`. `LevelInfo` gained `petHouseRequired`, `blacksmithRequired` and `ore`. *Why:* the data needed them (synthetic keys, multi-ore costs).
-- Equipment `cost`/`resource` = shiny ore. All three ores are kept in `ore`. *Why:* `LevelInfo` has a single cost; the forecast needs all three.
+- Equipment `cost`/`resource` = shiny ore. All three ores are kept in `ore`. *Why:* `LevelInfo` has a single cost; the forecast needs all three. *(The ore forecast was later removed (see "ore is never forecast"); `ore` now feeds the equipment rows' "ore cost", the equipment fallback order and the Everything tab.)*
 - The browser loads only the needed `data/home/*` folders via `import.meta.glob`; Node reads them with `fs`. One shared `normalize()`, plus a parity test. *Why:* the package's dist bundle is 2.2 MB and includes Builder Base and Clan Capital; the glob keeps the data identical in both.
 - The package version is read via glob/fs, not an import. *Why:* the package `exports` field doesn't expose `package.json`.
 - Hero Banner is skipped. *Why:* no `dataId` and no levels in the data.
@@ -107,7 +107,7 @@ One line each: decision, then why.
 
 ## UI / ranking
 - New tab **Lab / Pets / Equipment** between Plan and Import. Each list shows meta score descending, then unused items at normal contrast, labelled "Not seen in Legend I · 0% used" (lab/pets shortest first, equipment cheapest first). Each row has a usage bar, usage %, 3★ rate, time/cost (ore for equipment) and a Pin/Unpin button.
-- **Pins:** the newest pin goes to the top. Pins are stored in the existing settings object (`lab.pinned`, `petHouse.pinned`, `blacksmith.pinned`) in localStorage, keyed by the item's file id. The same ranking feeds the scheduler (lab/pet order) and the ore forecast (top-N blacksmith picks), so pins change the Plan tab too.
+- **Pins:** the newest pin goes to the top. Pins are stored in the existing settings object (`lab.pinned`, `petHouse.pinned`, `blacksmith.pinned`) in localStorage, keyed by the item's file id. The same ranking feeds the scheduler (lab/pet order), so lab and pet pins change the Plan tab too. *(It also fed the ore forecast's top-N picks until ore was removed from the forecast.)*
 - With no meta (missing file, 404 or empty `units`), the tab shows a "run `npm run meta`" note and the Step 1 order, without errors. The fallback reason now says "No meta data yet" instead of "Not seen in Legend I meta" when the file has 0 attacks.
 - Footer: meta `generatedAt`, attack count and player count.
 - **Not changed:** the meta score stays plain `usage` (SPEC §8.3), even though it rewards cheap filler troops (Archer: 88% usage at ~2.6 per army). See REPORT "Check".
@@ -337,3 +337,16 @@ Rules 2, 3 and 5 below come from the owner. Everything else is my call, logged h
 ## Tests
 - `tests/followup.test.ts` covers: an unknown level-0 building holding a builder (nothing "Now"), unknown research / pet / goblin jobs in their slots, unknown ids without a timer, the real export (B6 busy, when present), the 23-hour cycle, potion + Apprentice, potion + bite = ×11, the clock tower cooldown, Research Potion vs Pet Potion, and dates past 6 days.
 - Updated: three helper tests now expect the second work hour that a 23-hour cycle puts inside the 24-hour window; the boost-keys test includes `petPotionSec`. The two real-export tests now check that every unresolved id is truly missing from the data and that each running one became a slot-holding job: the new export contains ids newer than data 0.19.1 (building 1000106, equipment 90000062 and 90000063).
+
+
+# Decisions (ore is never forecast)
+
+The owner's rule: ore is time-gated (daily attacks, wars, raids, events), so it doesn't belong in "Resources needed". Below are my calls on applying it.
+
+- **Removed from the 24 h forecast everywhere:** `Forecast` no longer has `ore` / `oreItems`, and `forecast()` takes only the timeline and the window. The Plan tab loses the shiny / glowy / starry tiles and the "Ore picks" card; the CLI loses the "Ore (top 3 equipment)" lines. The REPORT's plan-output blocks lost their ore rows too (12 lines), and the prose that mentioned "ore picks" now notes the change.
+- The Plan tab shows one line under the resources instead: "Ore isn't forecast… Equipment ore costs are on the Lab / Pets / Equipment tab." *Why:* someone used to the ore tiles should learn where they went. If nothing starts in the window, the Plan tab now says so instead of showing an empty grid (before, the three ore tiles always filled it).
+- **Kept, informational:** the Blacksmith section of the Lab / Pets / Equipment tab still ranks by Legend I usage, and each row reads "ore cost: X shiny · Y glowy · Z starry" for the next level, with no time. The ranking, pins and the cheapest-first fallback for unused pieces are unchanged.
+- **The CLI gets a "Blacksmith (top 3, by Legend I usage)" list** with the same "ore cost" label, next to its Lab and Pet House lists. *Why:* the CLI's only equipment output was the forecast's ore rows; without this, the CLI would lose equipment entirely. It's informational, like the tab.
+- **The Everything tab's Blacksmith section keeps its ore totals** (every remaining level). *Why:* "everything left" is informational, not a 24-hour need, and has no "needed by" time.
+- **`forecast.blacksmithTopN` is deleted** (type, defaults, `coerceSettings`, `config/settings.sample.yaml`). Nothing else used it. A value saved in localStorage is ignored by `coerceSettings` (tested).
+- Tests: the old "ore totals cover the top-N picks" test was replaced by "ore is never forecast" (no ore in totals, "needed by" or the CLI resources; equipment still has ore costs; the CLI Blacksmith list says "ore cost" with no "needed"). The meta test now checks equipment order only. The UI test checks: no ore tile, no "Ore picks", and equipment rows show "ore cost:" with no "needed by".
