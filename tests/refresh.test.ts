@@ -39,7 +39,7 @@ function fake(over: Partial<RefreshDeps> & { state?: RefreshState } = {}) {
 describe('predev refresh', () => {
   it('does nothing when both were checked within 24h', () => {
     const f = fake({ state: { lastDataCheck: NOW - 23 * H } });
-    expect(refresh(f.d)).toEqual({ data: 'checked-recently', meta: 'fresh' });
+    expect(refresh(f.d)).toEqual({ git: 'skipped', data: 'checked-recently', meta: 'fresh' });
     expect(f.calls).toEqual([]);
     expect(f.logs).toEqual([]);
   });
@@ -65,7 +65,7 @@ describe('predev refresh', () => {
       },
       metaGeneratedAt: () => NOW - 25 * H,
     });
-    expect(refresh(f.d)).toEqual({ data: 'failed', meta: 'updated' });
+    expect(refresh(f.d)).toEqual({ git: 'skipped', data: 'failed', meta: 'updated' });
     expect(f.logs[0]).toBe('[refresh] warning: game-data check skipped (npm registry unreachable: ENOTFOUND); starting the site anyway.');
     expect(f.state().lastDataCheck).toBeUndefined();
     expect(f.calls).toContain('meta');

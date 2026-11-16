@@ -158,7 +158,7 @@ describe('real refresh wiring (scripts/lib/nodeDeps.ts)', () => {
     expect(cmds[0]).toContain('clash-of-clans-data@<1.0.0');
   });
 
-  it('an npm view timeout → one warning line, the refresh never throws, nothing is written', () => {
+  it('offline (every command times out) → one warning line per step, the refresh never throws, nothing is written', () => {
     vi.stubEnv('COC_API_TOKEN', '');
     const root = tmp();
     const logs: string[] = [];
@@ -166,8 +166,9 @@ describe('real refresh wiring (scripts/lib/nodeDeps.ts)', () => {
       throw Object.assign(new Error('spawnSync npm ETIMEDOUT'), { code: 'ETIMEDOUT', stderr: '' });
     }) as never;
     expect(() => runRefresh(nodeRefreshDeps({ root, execSync: exec, log: (l) => logs.push(l) }))).not.toThrow();
-    expect(logs[0]).toBe('[refresh] warning: game-data check skipped (npm registry unreachable: timed out); starting the site anyway.');
-    expect(logs[1]).toContain('no COC_API_TOKEN'); // meta.json missing in the temp root, no token
+    expect(logs[0]).toBe('[refresh] warning: git pull --ff-only failed (timed out); continuing with the local copy.');
+    expect(logs[1]).toBe('[refresh] warning: game-data check skipped (npm registry unreachable: timed out); starting the site anyway.');
+    expect(logs[2]).toContain('no COC_API_TOKEN'); // meta.json missing in the temp root, no token
     expect(fs.existsSync(path.join(root, 'data', 'refresh-state.json'))).toBe(false);
   });
 
