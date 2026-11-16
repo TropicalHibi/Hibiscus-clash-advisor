@@ -66,7 +66,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 - Top-level `boosts` object: builder boost, lab boost, clock tower, etc.
 - **No resource amounts** — that's why the forecast reports totals needed, not a deficit.
 - **Verify on first real export:** is there a top-level timestamp? If yes, timers count down from it. If not, use the paste time as the baseline and show "imported at HH:MM".
-- Builder count = number of Builder's Huts in `buildings` (+ Goblin Builder if active).
+- Builder count = number of Builder's Huts in `buildings`. Goblins are never counted as schedulable slots (§10.1).
 
 ### 3.3 Official API — meta pipeline only
 - Base URL `https://api.clashofclans.com/v1`, bearer token from `.env` (`COC_API_TOKEN`). In v1 the key is locked to the player's home IP.
@@ -147,7 +147,7 @@ interface OwnedInstance {
   level: number;
   upgradingTo?: number;
   remainingSec?: number;
-  goblin?: boolean;
+  goblin?: boolean;          // in-progress Goblin job: finishes, never rescheduled
 }
 
 interface Candidate {        // one possible next upgrade
@@ -296,7 +296,7 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
 
 ### 10.1 Scheduler
 - Discrete-event simulation starting at "now" (export baseline + elapsed time).
-- Resources: N builders (+ Goblin if active), lab, pet house. In-progress upgrades occupy their slot until `remainingSec` elapses.
+- Resources: N builders, lab, pet house. **Goblin Builder / Goblin Researcher are never scheduled:** an in-progress Goblin job (`extra: true`) runs out its timer, but the Goblin is never given a new suggestion. In-progress upgrades occupy their slot until `remainingSec` elapses.
 - When a slot frees: pick the highest-priority eligible candidate for that queue (§6), apply Gold Pass boost to its time, occupy the slot, then mark the instance's new level as the next candidate.
 - Tier 0 rule: free builders take new unbuilt buildings first; then, if the Queen is eligible and not upgrading, the next free builder takes her.
 - Active boosts and helpers (Builder's Apprentice, Lab Assistant) are Step 3. Until then, use raw remaining timers.

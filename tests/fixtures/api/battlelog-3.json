@@ -1,0 +1,7348 @@
+{
+  "items": [
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p9e14_8-1p3e17_48-2p7e4_19-7p10e52_59i1x135-1x58-1x81d2x98u3x28-2x58-6x80-1x97-5x7-1x5-1x23-3x6-1x1s4x35-3x120-2x2",
+      "opponentPlayerTag": "#PLAYER99",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 81,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 719204
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 225
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 157,
+      "battleTimestamp": "20261114T183308.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h1p9e17_48-2p7e19_4-4p4e13_6-7p10e52_59i1x5-2x58-1x64d1x2-1x98u1x23-2x28-3x58-1x95-5x80-2x5-5x7-1x135-1x6-2x82s5x35-1x5-1x2-1x98-1x120",
+      "opponentPlayerTag": "#PLAYER100",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 3,
+      "destructionPercentage": 100,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 375
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 134,
+      "battleTimestamp": "20261114T194208.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": false,
+      "armyShareCode": "h1p3e48_39-2m1p16e4_5-4p10e6_40-6p4e35_43u29x84s3x2",
+      "opponentPlayerTag": "#PLAYER101",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 1,
+      "destructionPercentage": 70,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 769976
+        },
+        {
+          "name": "Elixir",
+          "amount": 657967
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 9909
+        },
+        {
+          "name": "SourElixir",
+          "amount": 150
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 952508
+        },
+        {
+          "name": "Elixir",
+          "amount": 808830
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10909
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 63,
+      "battleTimestamp": "20261114T223328.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p9e14_32-1p11e16_48-2p7e19_4-7p10e59_56i1x5-1x64-1x80d1x53-1x120-1x9u3x28-3x5-5x7-1x23-2x12-2x6-2x58-5x80-1x135-1x97-1x82-3x1s3x35-3x2-2x5",
+      "opponentPlayerTag": "#PLAYER102",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 86,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold",
+          "amount": 604391
+        },
+        {
+          "name": "SourElixir",
+          "amount": 225
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 171,
+      "battleTimestamp": "20261114T223735.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p8e8_14-1p9e39_48-2p7e19_24-7p4e60_52i1x64-1x147d2x98u1x28-1x58-7x147-1x87-3x123-1x97-2x82-4x1s3x109-1x17-1x2-1x5-3x120-1x9",
+      "opponentPlayerTag": "#PLAYER103",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 1,
+      "destructionPercentage": 86,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 828000
+        },
+        {
+          "name": "Elixir",
+          "amount": 828000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 8280
+        },
+        {
+          "name": "SourElixir",
+          "amount": 180
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 180,
+      "battleTimestamp": "20261114T232652.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p10e14_32-1p9e48_39-2p16e5_24-7p4e59_60i1x10-2x5-1x57-1x58-1x64d1x70-1x98u4x26-10x132-1x87-2x5-5x7-2x28-2x109-1x58-1x82-1x1-1x10s3x109-3x120-1x98-1x9-1x17-1x5",
+      "opponentPlayerTag": "#PLAYER104",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 73,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 621000
+        },
+        {
+          "name": "Elixir",
+          "amount": 414000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 225
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 143,
+      "battleTimestamp": "20261115T055931.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": false,
+      "armyShareCode": "h2p2e34_22-4p3e40_7-7p7e59_57u2x2-1x75-11x59-1x8s4x120-3x2-1x11",
+      "opponentPlayerTag": "#PLAYER105",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 64,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 1067821
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10673
+        },
+        {
+          "name": "Elixir",
+          "amount": 813474
+        },
+        {
+          "name": "SourElixir",
+          "amount": 225
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1067821
+        },
+        {
+          "name": "Elixir",
+          "amount": 813474
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10673
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 100,
+      "battleTimestamp": "20261115T063542.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p9e32_14-1p17e16_48-2p7e19_4-7p4e52_60i1x188-5x12-1x58d1x53-2x120u3x28-5x7-2x58-1x12-1x23-5x80-1x97-1x5-1x109-1x82-3x1s3x35-1x9-2x2-1x109-1x98",
+      "opponentPlayerTag": "#PLAYER106",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 3,
+      "destructionPercentage": 100,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 375
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 178,
+      "battleTimestamp": "20261115T072459.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h1p17e17_48-2m1p16e4_34-6p4e49_43-7p11e60_52i1x188-1x63-1x76d2x35-1x70u7x57-7x8-6x65-2x10-2x1s6x109-1x2-1x120-1x98",
+      "opponentPlayerTag": "#PLAYER107",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 3,
+      "destructionPercentage": 100,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 375
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 142,
+      "battleTimestamp": "20261115T074757.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h1p9e48_17-2m1p16e4_41-6p17e49_61-7p4e52_60i1x188-1x63-1x81d2x98u3x23-6x81-2x76-2x1s3x109-1x2-1x70-2x5-2x120",
+      "opponentPlayerTag": "#PLAYER108",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 80,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 845811
+        },
+        {
+          "name": "Elixir",
+          "amount": 895104
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 157,
+      "battleTimestamp": "20261115T090833.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p9e14_32-1p3e17_20-2p16e24_5-7p4e52_53i1x135-1x5-2x58-1x64d1x98-1x70u2x4-2x28-2x26-9x132-2x5-5x7-1x58-2x109-1x150-1x3-2x1-1x82s3x10-2x5-4x120-1x9-1x35",
+      "opponentPlayerTag": "#PLAYER109",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 72,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 828000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10263
+        },
+        {
+          "name": "Elixir",
+          "amount": 900209
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 164,
+      "battleTimestamp": "20261115T115145.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h1p9e48_17-2m1p16e4_34-6p17e49_43-7p4e52_60i1x188-1x63-1x81d2x98u1x63-1x23-8x8-5x65-5x57-2x1s3x109-2x120-1x2-1x70-2x5",
+      "opponentPlayerTag": "#PLAYER110",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 78,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 166,
+      "battleTimestamp": "20261115T123622.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": false,
+      "armyShareCode": "h1p3e17_20-2p10e22_24-4p4e13_40-7p11e56_60d1x53u15x8-8x5-1x62s8x120-1x98",
+      "opponentPlayerTag": "#PLAYER111",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 16,
+      "stars": 2,
+      "destructionPercentage": 76,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 1478467
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 19084
+        },
+        {
+          "name": "Elixir",
+          "amount": 1220507
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1478467
+        },
+        {
+          "name": "Elixir",
+          "amount": 1220507
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 19084
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 82,
+      "battleTimestamp": "20261115T143712.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p9e14_32-1p3e17_48-2p16e24_5-7p4e60_53i1x10-2x5-1x57-1x58-1x110d1x10-2x120u2x58-8x132-2x5-5x7-1x28-1x135-3x109-1x82-3x10s2x10-3x5-1x70-2x98",
+      "opponentPlayerTag": "#PLAYER112",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 76,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 652772
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 146,
+      "battleTimestamp": "20261115T145952.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": false,
+      "armyShareCode": "h0p10e32_14-1p17e39_48-2p9e5_24-7p11e52_60u10x132-2x5-5x7-3x12s2x109-1x120",
+      "opponentPlayerTag": "#PLAYER113",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 1,
+      "destructionPercentage": 47,
+      "lootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 10117
+        },
+        {
+          "name": "Elixir",
+          "amount": 1466322
+        },
+        {
+          "name": "Gold",
+          "amount": 1500671
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1500671
+        },
+        {
+          "name": "Elixir",
+          "amount": 1466322
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10117
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 65,
+      "battleTimestamp": "20261115T175420.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": false,
+      "armyShareCode": "h1p10e17_20-2m1p16e34_24-4p4e13_40-6p2e49_43i1x188-2x65u10x8-6x65-1x10s3x98-4x35",
+      "opponentPlayerTag": "#PLAYER114",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 1,
+      "destructionPercentage": 78,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1200384
+        },
+        {
+          "name": "Gold",
+          "amount": 2143350
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 42
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 2678088
+        },
+        {
+          "name": "Elixir",
+          "amount": 2144027
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10838
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 180,
+      "battleTimestamp": "20261115T182432.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p10e14_32-1p16e17_48-2p7e19_4-7p4e60_52i1x3-2x58-1x64d2x2u2x5-2x1-1x23-2x28-2x58-5x80-1x97-1x135-5x7-1x95-2x82s2x120-1x9-2x109-3x98",
+      "opponentPlayerTag": "#PLAYER115",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 98,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 180,
+      "battleTimestamp": "20261115T184025.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x2-1x70u6x57-1x63-8x8-5x65-1x10-2x1s2x98-3x109-3x120-1x5",
+      "opponentPlayerTag": "#PLAYER116",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 79,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 828000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 7928
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 177,
+      "battleTimestamp": "20261115T190458.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x70-1x2u6x57-8x8-5x65-1x63-1x10-2x1s2x98-3x109-3x120-1x5",
+      "opponentPlayerTag": "#PLAYER117",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 3,
+      "destructionPercentage": 100,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 500
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 137,
+      "battleTimestamp": "20261115T190745.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x70-1x2u6x57-1x10-8x8-5x65-1x63-2x1s2x98-3x109-2x120-1x5",
+      "opponentPlayerTag": "#PLAYER118",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 3,
+      "destructionPercentage": 100,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 500
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 153,
+      "battleTimestamp": "20261115T191055.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x2-1x70u6x57-2x1-1x63-8x8-5x65-1x10s3x109-2x98-3x120-1x5",
+      "opponentPlayerTag": "#PLAYER119",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 89,
+      "lootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 828000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 180,
+      "battleTimestamp": "20261115T191354.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x70-1x2u6x57-1x63-1x10-8x8-5x65-2x1s2x98-3x109-3x120-1x5",
+      "opponentPlayerTag": "#PLAYER120",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 98,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 180,
+      "battleTimestamp": "20261115T191708.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x70-1x2u6x57-1x63-8x8-5x65s3x109-3x120-2x98-1x5",
+      "opponentPlayerTag": "#PLAYER121",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 1,
+      "destructionPercentage": 74,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 621000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 8280
+        },
+        {
+          "name": "Elixir",
+          "amount": 828000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 141,
+      "battleTimestamp": "20261115T192005.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x2-1x70u1x63-6x57-8x8-5x65-1x10-2x1s3x109-3x120-2x98-1x5",
+      "opponentPlayerTag": "#PLAYER122",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 87,
+      "lootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Elixir",
+          "amount": 822510
+        },
+        {
+          "name": "Gold",
+          "amount": 828000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 180,
+      "battleTimestamp": "20261115T192309.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x2-1x70u6x57-1x10-2x1-1x63-8x8-5x65s3x109-2x98-3x120-1x5",
+      "opponentPlayerTag": "#PLAYER123",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 76,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold",
+          "amount": 621000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 167,
+      "battleTimestamp": "20261115T192553.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": false,
+      "armyShareCode": "h1p3e17_20-2p16e22_24-6p9e47_61i1x75u8x132-2x82-6x110-2x150-4x7s2x10-4x35-1x5-1x98",
+      "opponentPlayerTag": "#PLAYER124",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 61,
+      "lootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 15119
+        },
+        {
+          "name": "Elixir",
+          "amount": 1254621
+        },
+        {
+          "name": "Gold",
+          "amount": 1784237
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1784237
+        },
+        {
+          "name": "Elixir",
+          "amount": 1254621
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 15119
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 133,
+      "battleTimestamp": "20261115T223934.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": false,
+      "armyShareCode": "h1p3e20_48-2m1p9e34_24-4p10e12_40-6p1e43_49u2x7-1x91-8x59-1x8-2x23-1x6-1x28s2x5-1x10-6x0-1x2",
+      "opponentPlayerTag": "#PLAYER125",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 16,
+      "stars": 1,
+      "destructionPercentage": 54,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1618721
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 4958
+        },
+        {
+          "name": "Gold",
+          "amount": 460524
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1927240
+        },
+        {
+          "name": "Elixir",
+          "amount": 1926721
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 18232
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        }
+      ],
+      "battleTime": 121,
+      "battleTimestamp": "20261116T064144.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": false,
+      "armyShareCode": "h2p2e24_4-4p10e40_13-6p16e49_43-7p4e59_56u10x8-5x5-5x65-1x188-1x10s9x35-2x120",
+      "opponentPlayerTag": "#PLAYER126",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 18,
+      "stars": 1,
+      "destructionPercentage": 85,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1328059
+        },
+        {
+          "name": "Gold",
+          "amount": 1083220
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10539
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1840044
+        },
+        {
+          "name": "Elixir",
+          "amount": 1840059
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 12461
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 170,
+      "battleTimestamp": "20261116T144827.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p10e14_51-1p9e48_17-2p17e24_22-7p4e53_60i1x5-1x64-1x147d1x53-1x98u9x57-2x10-5x7-2x150-2x123-7x4-1x135-2x58-1x53-4x1-5x84-2x82s3x35-5x10-1x9-2x120",
+      "opponentPlayerTag": "#PLAYER127",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 18,
+      "stars": 3,
+      "destructionPercentage": 100,
+      "lootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 600
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 114,
+      "battleTimestamp": "20261116T160040.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p10e14_32-1p9e17_48-2p16e5_24-7p4e53_52i1x87-2x5-3x58d1x70-1x9-1x5u3x1-9x132-2x5-5x7-2x28-1x58-3x109-2x26-1x82s3x10-4x120-2x98",
+      "opponentPlayerTag": "#PLAYER128",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 18,
+      "stars": 2,
+      "destructionPercentage": 99,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 180,
+      "battleTimestamp": "20261116T164606.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": true,
+      "armyShareCode": "h0p8e14_8-1p9e17_39-2p2e4_22-7p4e53_57u23x12s6x10-5x0",
+      "opponentPlayerTag": "#PLAYER129",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 1,
+      "destructionPercentage": 66,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 971811
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 1162
+        },
+        {
+          "name": "Gold",
+          "amount": 1087472
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1502533
+        },
+        {
+          "name": "Elixir",
+          "amount": 1549652
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 3018
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 32,
+      "battleTimestamp": "20261116T170835.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": true,
+      "armyShareCode": "h0p8e14_8-1p9e17_39-2p2e4_22-7p4e53_57u44x12s6x10-5x0",
+      "opponentPlayerTag": "#PLAYER130",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 1,
+      "destructionPercentage": 65,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 335906
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 3535
+        },
+        {
+          "name": "Elixir",
+          "amount": 309650
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 369265
+        },
+        {
+          "name": "Elixir",
+          "amount": 315448
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 5341
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 14,
+      "battleTimestamp": "20261116T170858.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": true,
+      "armyShareCode": "h0p8e14_8-1p9e17_39-2p2e4_22-7p4e53_57u44x12s6x10-5x0",
+      "opponentPlayerTag": "#PLAYER131",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 61,
+      "lootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 8390
+        },
+        {
+          "name": "Elixir",
+          "amount": 411771
+        },
+        {
+          "name": "Gold",
+          "amount": 246035
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 382936
+        },
+        {
+          "name": "Elixir",
+          "amount": 582078
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 13014
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 13,
+      "battleTimestamp": "20261116T170927.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": true,
+      "armyShareCode": "h0p8e14_8-1p9e17_39-2p2e4_22-7p4e53_57u44x12s6x10-5x0",
+      "opponentPlayerTag": "#PLAYER132",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 18,
+      "stars": 1,
+      "destructionPercentage": 51,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 125667
+        },
+        {
+          "name": "Elixir",
+          "amount": 84300
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 5525
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 444939
+        },
+        {
+          "name": "Elixir",
+          "amount": 368093
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 9191
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 15,
+      "battleTimestamp": "20261116T170956.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": true,
+      "armyShareCode": "h0p8e14_8-1p9e17_39-2p2e4_22-7p4e53_57u44x12",
+      "opponentPlayerTag": "#PLAYER133",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 18,
+      "stars": 1,
+      "destructionPercentage": 57,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1031227
+        },
+        {
+          "name": "Gold",
+          "amount": 259002
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 33
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 873331
+        },
+        {
+          "name": "Elixir",
+          "amount": 1726587
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 8281
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 22,
+      "battleTimestamp": "20261116T171031.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": true,
+      "armyShareCode": "h0p8e14_8-1p9e17_39-2p2e4_22-7p4e53_57u43x12s6x10-5x0",
+      "opponentPlayerTag": "#PLAYER134",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 18,
+      "stars": 1,
+      "destructionPercentage": 77,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1458991
+        },
+        {
+          "name": "Gold",
+          "amount": 609168
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 9315
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1782860
+        },
+        {
+          "name": "Elixir",
+          "amount": 2106991
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 11845
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 32,
+      "battleTimestamp": "20261116T171115.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": true,
+      "armyShareCode": "h0p8e14_8-1p9e17_39-2p2e4_22-7p4e53_57u44x12",
+      "opponentPlayerTag": "#PLAYER135",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 18,
+      "stars": 2,
+      "destructionPercentage": 57,
+      "lootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 1831
+        },
+        {
+          "name": "Elixir",
+          "amount": 1005568
+        },
+        {
+          "name": "Gold",
+          "amount": 605182
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1497159
+        },
+        {
+          "name": "Elixir",
+          "amount": 1672116
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 8528
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 21,
+      "battleTimestamp": "20261116T171144.000Z"
+    },
+    {
+      "battleType": "homeVillage",
+      "attack": true,
+      "armyShareCode": "h0p8e14_8-1p9e17_39-2p2e4_22-7p4e53_57u44x12",
+      "opponentPlayerTag": "#PLAYER136",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 1,
+      "destructionPercentage": 50,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 266988
+        },
+        {
+          "name": "Elixir",
+          "amount": 295193
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 1375
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 638336
+        },
+        {
+          "name": "Elixir",
+          "amount": 653102
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 4360
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 13,
+      "battleTimestamp": "20261116T171232.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x2-1x70u1x63-6x57-8x8-5x65-1x10-2x1s3x109-2x98-3x120-1x5",
+      "opponentPlayerTag": "#PLAYER137",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 86,
+      "lootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 4657
+        },
+        {
+          "name": "Gold",
+          "amount": 890581
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 180,
+      "battleTimestamp": "20261116T172442.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x2-1x70u1x63-6x57-8x8-5x65-2x1-1x10s3x109-3x120-1x5-2x98",
+      "opponentPlayerTag": "#PLAYER138",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 74,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 621000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 7834
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 169,
+      "battleTimestamp": "20261116T172800.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x2-1x70u6x57-8x8-5x65-1x63-2x1-1x10s2x98-3x109-3x120-1x5",
+      "opponentPlayerTag": "#PLAYER139",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 86,
+      "lootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 828000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 174,
+      "battleTimestamp": "20261116T173114.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x2-1x70u6x57-2x1-8x8-5x65-1x63-1x10s3x109-2x98-3x120-1x5",
+      "opponentPlayerTag": "#PLAYER140",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 1,
+      "destructionPercentage": 86,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 828000
+        },
+        {
+          "name": "Gold",
+          "amount": 316659
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 8280
+        },
+        {
+          "name": "SourElixir",
+          "amount": 200
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 165,
+      "battleTimestamp": "20261116T173404.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x2-1x70u6x57-1x63-8x8-5x65-1x10-2x1s2x98-3x109-3x120-1x5",
+      "opponentPlayerTag": "#PLAYER141",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 86,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 828000
+        },
+        {
+          "name": "Elixir",
+          "amount": 828000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 180,
+      "battleTimestamp": "20261116T173709.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x70-1x2u6x57-8x8-5x65-1x63s3x109-2x98-3x120-1x5",
+      "opponentPlayerTag": "#PLAYER142",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 3,
+      "destructionPercentage": 100,
+      "lootedResources": [
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 500
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 156,
+      "battleTimestamp": "20261116T174001.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": true,
+      "armyShareCode": "h1p9e17_48-2m1p16e4_34-6p17e43_49-7p4e60_52i1x188-1x63-1x81d1x2-1x70u6x57-8x8-5x65-1x63-2x1-1x10s3x109-3x120-2x98-1x5",
+      "opponentPlayerTag": "#PLAYER143",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 17,
+      "stars": 2,
+      "destructionPercentage": 93,
+      "lootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 300
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 180,
+      "battleTimestamp": "20261116T174348.000Z"
+    },
+    {
+      "battleType": "legend",
+      "attack": false,
+      "armyShareCode": "h0p9e14_32-1p16e17_48-2p7e19_4-7p10e59_52i1x64-1x147d1x120-1x5-1x70u1x23-2x28-5x80-1x95-2x5-5x7-1x97-2x58-1x188-2x82-2x1s4x35-1x2-1x70-1x98",
+      "opponentPlayerTag": "#PLAYER144",
+      "opponentName": "Redacted Opponent",
+      "opponentTownHallLevel": 18,
+      "stars": 3,
+      "destructionPercentage": 100,
+      "lootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "SourElixir",
+          "amount": 600
+        }
+      ],
+      "extraLootedResources": [
+        {
+          "name": "Elixir",
+          "amount": 0
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        }
+      ],
+      "availableLoot": [
+        {
+          "name": "Diamonds",
+          "amount": 0
+        },
+        {
+          "name": "Gold",
+          "amount": 1035000
+        },
+        {
+          "name": "Elixir",
+          "amount": 1035000
+        },
+        {
+          "name": "DarkElixir",
+          "amount": 10350
+        },
+        {
+          "name": "Gold2",
+          "amount": 0
+        },
+        {
+          "name": "Elixir2",
+          "amount": 0
+        },
+        {
+          "name": "Medals",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir",
+          "amount": 0
+        },
+        {
+          "name": "BankedDarkElixir",
+          "amount": 0
+        },
+        {
+          "name": "CapitalResource",
+          "amount": 0
+        },
+        {
+          "name": "CapitalReward",
+          "amount": 0
+        },
+        {
+          "name": "BankedGold2",
+          "amount": 0
+        },
+        {
+          "name": "BankedElixir2",
+          "amount": 0
+        },
+        {
+          "name": "SourElixir",
+          "amount": 0
+        },
+        {
+          "name": "EventTokens",
+          "amount": 0
+        },
+        {
+          "name": "CommonOre",
+          "amount": 0
+        },
+        {
+          "name": "RareOre",
+          "amount": 0
+        },
+        {
+          "name": "EpicOre",
+          "amount": 0
+        },
+        {
+          "name": "ClanEventResource",
+          "amount": 0
+        },
+        {
+          "name": "SparkyStone",
+          "amount": 0
+        },
+        {
+          "name": "Stars",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource3",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource1",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource4",
+          "amount": 0
+        },
+        {
+          "name": "CraftingResource2",
+          "amount": 0
+        },
+        {
+          "name": "CraftingCurrency",
+          "amount": 0
+        },
+        {
+          "name": "RankedPrestige",
+          "amount": 0
+        }
+      ],
+      "battleTime": 148,
+      "battleTimestamp": "20261116T182120.000Z"
+    }
+  ]
+}

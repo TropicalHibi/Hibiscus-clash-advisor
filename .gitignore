@@ -5,3 +5,5 @@ samples/
 .env.*
 *.log
 .vite/
+data/meta/battles.jsonl
+data/meta/run-state.json

@@ -1,0 +1,119 @@
+{
+  "items": [
+    {
+      "tag": "#PLAYER1",
+      "name": "Redacted Player",
+      "expLevel": 241,
+      "trophies": 5728,
+      "attackWins": 256,
+      "defenseWins": 6,
+      "rank": 1,
+      "previousRank": 6,
+      "clan": {
+        "tag": "#CLAN1",
+        "name": "Redacted Clan"
+      },
+      "league": {
+        "id": 29000000,
+        "name": "Unranked"
+      },
+      "leagueTier": {
+        "id": 105000036,
+        "name": "Legend League I"
+      }
+    },
+    {
+      "tag": "#PLAYER2",
+      "name": "Redacted Player",
+      "expLevel": 277,
+      "trophies": 5690,
+      "attackWins": 1499,
+      "defenseWins": 21,
+      "rank": 2,
+      "previousRank": 4,
+      "clan": {
+        "tag": "#CLAN1",
+        "name": "Redacted Clan"
+      },
+      "league": {
+        "id": 29000000,
+        "name": "Unranked"
+      },
+      "leagueTier": {
+        "id": 105000036,
+        "name": "Legend League I"
+      }
+    },
+    {
+      "tag": "#PLAYER3",
+      "name": "Redacted Player",
+      "expLevel": 282,
+      "trophies": 5672,
+      "attackWins": 356,
+      "defenseWins": 29,
+      "rank": 3,
+      "previousRank": 2,
+      "clan": {
+        "tag": "#CLAN2",
+        "name": "Redacted Clan"
+      },
+      "league": {
+        "id": 29000000,
+        "name": "Unranked"
+      },
+      "leagueTier": {
+        "id": 105000036,
+        "name": "Legend League I"
+      }
+    },
+    {
+      "tag": "#PLAYER4",
+      "name": "Redacted Player",
+      "expLevel": 255,
+      "trophies": 5672,
+      "attackWins": 454,
+      "defenseWins": 13,
+      "rank": 4,
+      "previousRank": 13,
+      "clan": {
+        "tag": "#CLAN1",
+        "name": "Redacted Clan"
+      },
+      "league": {
+        "id": 29000000,
+        "name": "Unranked"
+      },
+      "leagueTier": {
+        "id": 105000036,
+        "name": "Legend League I"
+      }
+    },
+    {
+      "tag": "#PLAYER5",
+      "name": "Redacted Player",
+      "expLevel": 269,
+      "trophies": 5625,
+      "attackWins": 280,
+      "defenseWins": 16,
+      "rank": 5,
+      "previousRank": 137,
+      "clan": {
+        "tag": "#CLAN3",
+        "name": "Redacted Clan"
+      },
+      "league": {
+        "id": 29000000,
+        "name": "Unranked"
+      },
+      "leagueTier": {
+        "id": 105000036,
+        "name": "Legend League I"
+      }
+    }
+  ],
+  "paging": {
+    "cursors": {
+      "after": "eyJwb3MiOjV9"
+    }
+  }
+}
