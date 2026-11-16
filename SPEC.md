@@ -64,7 +64,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 
 - `other/helpers`: Builder's Apprentice and Lab Assistant levels carry `workRate` (hours of progress per work hour), used by the scheduler (§10.1). The Prospector and Alchemist are recognised but don't affect timing.
 - **Missing dataIds** go in `config/id-overrides.yaml` (`<dataId>: <file id>`). Today: `93000003: alchemist` (the Alchemist file has no `dataId`). If the data later ships its own dataId, the data wins, and a differing value shows a warning.
-- **Images:** item files carry `images.icon` (troops, spells, sieges, heroes, pets, equipment) or per-level `levels[].images.normal` (buildings). The files are WebP saved as `.png`, some up to 4096 px. See §13 Step 3.
+- **Images:** item files carry `images.icon` (troops, spells, sieges, heroes, pets, equipment) or per-level `levels[].images.normal` (buildings). The files are WebP saved as `.png`, some up to 4096 px, so the build resizes them (§13 Step 3).
 
 **Known data quirk:** Hero Hall `heroLevelCaps` is stale (says Archer Queen cap 105 at Hero Hall 12; in-game max is 110). **Derive hero caps from each hero level's `heroHallLevelRequired`, not from the Hero Hall's cap table.** Validation test (§9) logs the mismatch.
 
@@ -442,7 +442,8 @@ Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
 - Full `npm run sync`: snapshots, diffs, validation checks (§9).
 - Everything tab (§11), hero order drag-reorder, active boosts and helpers in the scheduler (§10.1).
 - **Item images** from `clash-of-clans-data/images/*` next to every item in the Plan, Lab / Pets / Equipment and Everything tabs (and the hero order list):
-  - **one image per item**, chosen at build time by the `virtual:item-images` Vite plugin: the first of the item's candidates (icon, then level images from the top level down) that exists and is **≤ 300 KB** (`IMAGE_MAX_BYTES`). Only those files are bundled, not the folder. The account's levels are only known in the browser, so one image per item, not per level. An item whose candidates are all bigger shows its name only;
+  - **one image per item**, chosen at build time by the `virtual:item-images` Vite plugin: the first of the item's candidates (icon, then level images from the top level down) that exists. No size cap. Only those images are bundled, not the folder. The account's levels are only known in the browser, so one image per item, not per level;
+  - **resized at build time** (`vite build`, so also in the Pages workflow) with `sharp` (dev dependency) to **96×96 WebP** (fit inside, transparent padding, quality 80). Results are cached in `.cache/item-images/` (git-ignored), keyed by a hash of the source bytes plus the resize settings, so unchanged images are never reprocessed; icons no longer referenced are removed. The Pages workflow keeps that folder between runs with `actions/cache`. The dev server and tests use the original files (no sharp needed). An image that can't be read or resized is a build warning, and that item shows its name only;
   - lazy-load (`loading="lazy"`, `width`/`height` attributes so the layout doesn't jump), kept as separate files (never inlined into the JS);
   - text fallback: if an image is missing or fails to load (`onerror` removes the `<img>`), show the name only.
 

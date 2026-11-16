@@ -803,7 +803,7 @@ Before this fix, the priority list at the same moment would have left out BK 83 
 ### 5. Item images
 - Every item in the Plan, Lab / Pets / Equipment and Everything tabs (and the hero order list) has its icon next to it. The images load lazily, have a fixed size so the layout doesn't jump, and disappear if they fail to load (name only, no broken-image icon).
 - **Only one image per item is bundled**, not the 52 MB folder: its icon, else its top-level picture. Your levels are only known in your browser, so a per-level picture would mean shipping every level.
-- **Size cap of 300 KB per image.** The package's images are full-size (some 4096 px, about 1 MB each, shown at 28 px). An item whose images are all bigger shows its name only. That's 16 game items, mostly equipment (Barbarian Puppet, Giant Gauntlet, Rage Vial, Royal Gem, Vampstache …), plus Crafting Station, Super Wizard Tower, Overgrowth Spell, the Super Wizard Tower supercharge and the helpers.
+- ~~Size cap of 300 KB per image~~ → replaced by build-time resizing (see "Follow-up: icons resized with sharp" below). **Every item now has an icon.**
 
 ### 6. CI
 - `.github/workflows/pages.yml` now uses `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-pages-artifact@v5` and `actions/deploy-pages@v5`. All run on Node 24. The run after the bump passed (test → build → deploy). Its only annotation is GitHub's notice that `ubuntu-latest` moves to Ubuntu 26; there's no Node 20 deprecation warning.
@@ -867,12 +867,37 @@ Everything tab for your account (helpers on): Heroes 49 upgrades (286d raw / 229
 | Images | none | **171 files, 8.8 MB** (one per item, ≤ 300 KB each) |
 | Without the size cap | | 21 MB (190 files) |
 
-The images are lazy-loaded, so a page only downloads the icons on screen. The Everything tab's sections start closed, so their icons load when you open one. **One thing I couldn't do:** I wanted to add `sharp` as a dev dependency to shrink every icon to ~3 KB at build time (about 0.5 MB in total, and no item left without an image). Installing it was blocked by this environment's permission rules. If you want it, allow `npm install -D sharp` and I can wire it into the image plugin.
+The images are lazy-loaded, so a page only downloads the icons on screen. The Everything tab's sections start closed, so their icons load when you open one. *(Superseded: the follow-up below resizes every icon, and the build is now 2.0 MB.)*
 
 ## Check in-game
 - [ ] **Helper time savings:** does the Builder's Apprentice L8 take 8 h off an upgrade per day, and the Lab Assistant L7 7 h? Is it really one work hour every 24 h, and do all helpers share one cooldown?
 - [ ] **Repeat target not upgrading:** your Lab Assistant is set to repeat on Archer, which isn't researching. The planner assumes it then helps the running research. In-game, does it do that, or does it sit idle?
 - [ ] **Boosts:** next time you export with a potion or snack running, send the `boosts` part so I can confirm the key names. Also check: Builder Bite ×2 and Study Soup ×4 (my guesses); does the Research Potion also speed up the Pet House? Is an export `timer` real seconds left, or does it already include a running potion?
 - [ ] **Hero Hall 13 / new data:** run `npm run dev` (or `npm run sync`). Check that the printed diff and the Plan-tab banner make sense, then commit `public/data-changes.json` with `package.json` / `package-lock.json`.
-- [ ] **Icons:** 16 items show their name only (images too big, see above). Say if you'd rather have them at full size (the deploy grows to ~21 MB).
+- [x] ~~Icons: 16 items show their name only~~ → fixed by the sharp follow-up: all items have an icon.
 - [ ] Not changed, but noticed: timeline end times show only the weekday ("done Wed 9:25 AM" for a 15-day job lands two weeks later). Say if you want dates there.
+
+
+## Follow-up: icons resized with sharp
+
+**Status:** `sharp` is now a dev dependency. Every item image the site uses is resized to a **96×96 WebP** at build time, both locally and in the GitHub Pages workflow. The 300 KB cap is gone, so **every item has an icon (226 of 226; before: 20 without)**. `npm test` passes (**235 tests in 15 files**) and `npm run build` succeeds.
+
+**How it works:**
+- `vite build` picks one image per item (as before, but without the size cap), shrinks it with sharp to 96×96 (whole picture kept, transparent edges, WebP quality 80), and ships the small file.
+- **Cache:** results go to `.cache/item-images/` (git-ignored), named by a hash of the original image, so an unchanged image is never processed again. A new data release only resizes the pictures that changed. Icons that are no longer used are deleted.
+- **In CI** an `actions/cache` step keeps that folder between workflow runs, so the Pages build doesn't redo them either.
+- `npm run dev` and the tests still use the original files, so they never need sharp.
+- Build log line: `190 icons at 96px: 0 resized, 190 from cache (55 ms)`. A cold build resized all 190 in 0.8 s.
+
+**Build size** (`npm run build:pages`):
+
+| | Before Step 3 | Step 3 (300 KB cap) | Now (96 px WebP) |
+|---|---|---|---|
+| `dist/` total | 992 KB (4 files) | 9.8 MB (175 files) | **2.0 MB** (194 files) |
+| Images | none | 171 files, 8.8 MB | **190 files, 0.65 MB** (avg 3.4 KB) |
+| JS bundle | 981.8 kB (140.3 kB gzip) | 1,009 kB (149.7 kB gzip) | 1,017 kB (153.3 kB gzip) |
+| Items without an icon | — | 20 | **0** |
+
+The 1 MB of JS is the bundled game data (REVIEW finding 16, left for v2), not images.
+
+**Also fixed:** every build printed a Vite warning about extensionless imports in `vite.config.ts`'s import chain. They now use `.ts` extensions.
