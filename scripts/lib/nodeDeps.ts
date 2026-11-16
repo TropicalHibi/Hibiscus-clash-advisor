@@ -4,9 +4,10 @@ import { execSync as realExecSync, spawnSync as realSpawnSync } from 'node:child
 import fs from 'node:fs';
 import path from 'node:path';
 import { parse as parseDotenv } from 'dotenv';
-import { normalize } from '../../src/data/normalize';
 import { checkHeroCaps, checkLevels, checkMergeConsumption } from '../../src/data/validate';
-import { readRawFiles, readConfig, dataVersion } from '../../src/data/loadNode';
+import { loadGameDataFresh } from '../../src/data/loadNode';
+import { toSnapshot, type DataChangesFile, type Snapshot } from '../../src/data/snapshot';
+import { isoDate, recordSnapshot, type SnapshotIO } from './snapshots';
 import { refresh, type RefreshDeps, type RefreshState } from './refresh';
 import { majorOf, newestOf, type DataCheck, type SyncDeps } from './sync';
 
@@ -105,7 +106,7 @@ export function runRefresh(deps: RefreshDeps): void {
 /** Loads the installed data from disk (no cache) and validates it. */
 export function checkInstalledData(): DataCheck {
   try {
-    const data = normalize(readRawFiles(), readConfig('merges.yaml'), dataVersion());
+    const data = loadGameDataFresh();
     if (!data.maxTH || !data.items.size) return { ok: false, error: 'no Town Hall levels / items in the data', warnings: [] };
     const levelErrors = checkLevels(data);
     if (levelErrors.length) return { ok: false, error: levelErrors[0].message, warnings: [] };
@@ -116,9 +117,29 @@ export function checkInstalledData(): DataCheck {
   }
 }
 
+/** Snapshot files in data/snapshots, data-changes.json in public/. */
+export function nodeSnapshotIO(root: string): SnapshotIO {
+  const dir = path.join(root, 'data', 'snapshots');
+  return {
+    list: () => (fs.existsSync(dir) ? fs.readdirSync(dir) : []),
+    read: (name) => JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8')) as Snapshot,
+    write: (name, s) => {
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, name), JSON.stringify(s) + '\n');
+    },
+    remove: (name) => fs.rmSync(path.join(dir, name), { force: true }),
+    writeChanges: (f: DataChangesFile) => fs.writeFileSync(path.join(root, 'public', 'data-changes.json'), JSON.stringify(f, null, 2) + '\n'),
+  };
+}
+
 export function nodeSyncDeps(o: NodeOpts): SyncDeps {
   const exec = o.execSync ?? (realExecSync as unknown as ExecSync);
+  const log = o.log ?? ((line: string) => console.log(line));
   return {
+    // Reads the installed package fresh (after an install the cached copy would be stale).
+    snapshot: () => {
+      recordSnapshot(nodeSnapshotIO(o.root), toSnapshot(loadGameDataFresh(), isoDate(new Date())), log);
+    },
     ...stateIO(o.root),
     installedVersion: () => installedVersion(o.root),
     latestInMajor: (major) => npmLatestInMajor(o.root, major, exec),

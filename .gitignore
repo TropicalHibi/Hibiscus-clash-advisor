@@ -8,3 +8,5 @@ samples/
 data/meta/battles.jsonl
 data/meta/run-state.json
 data/refresh-state.json
+data/snapshots/*
+!data/snapshots/.gitkeep

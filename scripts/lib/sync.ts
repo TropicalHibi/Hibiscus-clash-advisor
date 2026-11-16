@@ -22,7 +22,14 @@ export interface SyncDeps {
   check(): DataCheck;
   readState(): RefreshState;
   writeState(s: RefreshState): void;
+  /** Writes the normalized snapshot of the installed data and prints the diff vs the previous one. */
+  snapshot?(): void;
   log(line: string): void;
+}
+
+export interface SyncOptions {
+  /** Don't ask npm or install anything: validate and snapshot the installed version only. */
+  offline?: boolean;
 }
 
 export type SyncOutcome = 'up-to-date' | 'updated' | 'restored' | 'failed';
@@ -41,13 +48,19 @@ function report(d: SyncDeps, c: DataCheck): void {
   if (c.maxTH !== undefined) d.log(`Max TH in data: ${c.maxTH}`);
   if (!c.warnings.length) d.log('Validation: all checks passed.');
   for (const w of c.warnings) d.log(`  [WARN] ${w}`);
+  // Snapshot + diff (SPEC §9 steps 2–3). A failure here never fails the sync: the data itself is fine.
+  try {
+    d.snapshot?.();
+  } catch (e) {
+    d.log(`  [WARN] snapshot/diff failed: ${(e as Error).message}`);
+  }
 }
 
 /**
  * Update within the current major. A new version that fails to load is replaced by the last known-good
  * version, and the failure is recorded in refresh-state.json so `npm run dev` warns on every start.
  */
-export function syncData(d: SyncDeps): SyncOutcome {
+export function syncData(d: SyncDeps, opts: SyncOptions = {}): SyncOutcome {
   const before = d.installedVersion();
   const state = d.readState();
   d.log(`clash-of-clans-data installed: ${before ?? 'none'}`);
@@ -55,6 +68,17 @@ export function syncData(d: SyncDeps): SyncOutcome {
   const current = before ? d.check() : { ok: false, error: 'not installed', warnings: [] };
   let lastGood = state.lastGoodDataVersion;
   if (current.ok && before) lastGood = before;
+
+  if (opts.offline) {
+    if (!current.ok) {
+      d.log(`clash-of-clans-data ${before ?? 'none'} can't be used: ${current.error ?? 'unknown error'} (offline: nothing restored; run npm run sync).`);
+      return 'failed';
+    }
+    d.writeState({ ...state, lastGoodDataVersion: before });
+    d.log(`Offline: checked the installed ${before} without asking npm.`);
+    report(d, current);
+    return 'up-to-date';
+  }
 
   let latest: string;
   try {
