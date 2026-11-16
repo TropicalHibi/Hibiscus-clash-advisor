@@ -222,12 +222,17 @@ interface Candidate {        // one possible next upgrade
 
 ### 6.7 Lab queue
 - Candidates: all troops, spells, siege machines with an available next level (respecting TH/lab level).
-- Order by meta score (§8) descending. **Unused items are still listed at the bottom** (not greyed out), ordered by shortest time.
-- Siege machines are ranked by the same meta score. Sieges with high Legend I usage rank high.
-- Player can pin overrides (move item to top). Pinned items stay pinned until unpinned.
+- **Lab tab: three sections — Troops, Spells, Sieges** — each ordered by its own meta score (§8.3) descending: troops and spells by share of housing space, sieges by usage share. **Unused items are still listed at the bottom of each section** (not greyed out), ordered by shortest time.
+- **Lab queue pick (scheduler + 24h forecast):** normalize within kind, then weight:
+  - `normScore = score ÷ top score of its kind`, where the top is the highest score of any unit of that kind in the Legend I meta (so each kind's Legend I #1 = 1.0; the player's best upgrade of a kind can be < 1.0).
+  - `pickValue = normScore × kindWeight`, weights from settings `lab.kindWeights` (defaults: troops 1.0, spells 0.7, sieges 0.5; 0 = never auto-pick that kind).
+  - The next lab upgrade is the highest `pickValue` across all three kinds. Ties: higher `normScore`, then shortest time. Unused items (value 0) come last, shortest first.
+  - Consecutive levels of the same unit are allowed (no repeat penalty).
+- Player can pin overrides (move item to top of its section and of the lab queue, in pin order). Pinned items stay pinned until unpinned.
+- **"Next in lab" line** at the top of the Lab tab: the pick, its kind, and its `pickValue` vs the top pick of the other two kinds (or "pinned"); if the lab is busy, when it starts.
 
 ### 6.8 Pet House queue
-Same as lab: meta score descending, unused at bottom, pins allowed.
+One list (no kinds, no weights): meta score (usage share) descending, unused at bottom (shortest first), pins allowed. Unchanged by the §6.7 lab pick.
 
 ### 6.9 Blacksmith (equipment)
 - Upgrades are instant; the constraint is ore. Show a ranked list by meta score (= usage share) with ore costs per next level. Ore cost does not affect the order.
@@ -353,7 +358,7 @@ Mobile-friendly layout (the player checks on a phone later), single page with ta
    - Resources needed in 24h (gold, elixir, DE, each ore).
    - Book-ready heroes list.
    - Wall dump line.
-3. **Lab / Pets / Equipment** — ranked lists with the meta score (army share for troops/spells), Legend I usage % and 3★ rate, pin buttons. Equipment rows show ore cost.
+3. **Lab / Pets / Equipment** — "Next in lab" line (§6.7), then Lab sections Troops / Spells / Sieges, Pet House, Blacksmith. Ranked lists with the meta score (army share for troops/spells), Legend I usage % and 3★ rate, pin buttons. Equipment rows show ore cost.
 4. **Everything** — all remaining upgrades grouped by tier, with time-to-max per tier and total cost per resource.
 5. **Footer** — data version/date, meta date, "rerun `npm run sync` / `npm run meta`" hint.
 
@@ -362,7 +367,7 @@ Mobile-friendly layout (the player checks on a phone later), single page with ta
 ## 12. Config files
 
 - `config/merges.yaml` — recipes (§7).
-- `config/settings.sample.yaml` — defaults loaded into the UI on first run. The UI persists edits to localStorage; the YAML is the reset point.
+- `config/settings.sample.yaml` — defaults loaded into the UI on first run. The UI persists edits to localStorage; the YAML is the reset point. Includes `lab.kindWeights` (troop / spell / siege, §6.7), editable in the Settings tab.
 
 ---
 
@@ -389,6 +394,10 @@ Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
 ### Step 3 — Polish
 - Full `npm run sync`: snapshots, diffs, validation checks (§9).
 - Everything tab (§11), hero order drag-reorder, active boosts and helpers in the scheduler.
+- **Item images** from `clash-of-clans-data/images/*` next to every item in the Plan, Lab / Pets / Equipment and Everything tabs:
+  - bundle only the images actually used (the item's icon / current-level image), not the whole folder;
+  - lazy-load (`loading="lazy"`, fixed size so the layout doesn't jump);
+  - text fallback: if an image is missing or fails to load, show the name only (no broken-image icon).
 
 ---
 

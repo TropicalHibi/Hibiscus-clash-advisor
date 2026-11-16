@@ -2,11 +2,11 @@
 import type { GameData, Resource } from '../data/types';
 import type { MetaFile } from '../meta/meta';
 import type { AccountState } from '../state/parseExport';
-import type { Settings } from '../state/settings';
+import type { LabKind, Settings } from '../state/settings';
 import { heroStatus } from './book';
 import { HOUR } from './constants';
 import { forecast, wallDump, type Forecast, type WallDump } from './forecast';
-import { equipmentCandidates, researchCandidates, type QueueCandidate } from './queues';
+import { equipmentCandidates, labSections, researchCandidates, type QueueCandidate } from './queues';
 import { boostsFor, simulate, type SimResult, type TimelineEntry } from './scheduler';
 import { builderCandidates, detectMode, TIER_NAMES, type Candidate, type Mode } from './tiers';
 
@@ -40,7 +40,10 @@ export interface Plan {
   forecast: Forecast;
   bookReady: BookReadyHero[];
   wallDump: WallDump | null;
+  /** Lab queue order: pins, then the weighted pick value across kinds (what the scheduler starts). */
   lab: QueueCandidate[];
+  /** Lab tab sections: each kind ranked by its own score. */
+  labByKind: Record<LabKind, QueueCandidate[]>;
   pets: QueueCandidate[];
   equipment: QueueCandidate[];
   warnings: string[];
@@ -72,6 +75,7 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
   for (const u of account.unresolved) warnings.push(`Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${data.version}); ignored.`);
   if (!account.exportTimestamp) warnings.push('Export has no timestamp; timers count from the import time.');
 
+  const lab = researchCandidates(data, state, 'lab', settings, meta, boosts.research);
   return {
     nowSec,
     mode,
@@ -90,7 +94,8 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
     forecast: forecast(sim.timeline, windowSec, equipment, settings.forecast.blacksmithTopN),
     bookReady,
     wallDump: wallDump(data, account),
-    lab: researchCandidates(data, state, 'lab', settings, meta, boosts.research),
+    lab,
+    labByKind: labSections(lab, settings.lab.pinned),
     pets: researchCandidates(data, state, 'petHouse', settings, meta, boosts.research),
     equipment,
     warnings,

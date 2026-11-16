@@ -1,8 +1,10 @@
 // Lab / Pets / Equipment tab (SPEC §6.7–6.9, §11.3).
+// Lab: a "Next in lab" line (the weighted pick) and three sections ranked by their own score.
 import { fmtCost, fmtDuration, fmtNum } from '../engine/format';
 import type { Plan } from '../engine/plan';
 import type { QueueCandidate } from '../engine/queues';
 import type { MetaFile } from '../meta/meta';
+import type { LabKind } from '../state/settings';
 import { esc } from './planView';
 
 export type PinList = 'lab' | 'petHouse' | 'blacksmith';
@@ -52,16 +54,40 @@ const ore = (c: QueueCandidate) => {
   return parts.join(' · ') || 'free';
 };
 
-export function renderLab(p: Plan, meta: MetaFile, heroName: (id: string) => string): string {
+const KIND_LABEL: Record<LabKind, string> = { troop: 'troop', spell: 'spell', siege: 'siege' };
+
+/** "Next in lab": the lab queue pick, its kind, and its weighted value vs the top pick of the other two kinds. */
+export function nextInLab(p: Plan): string {
+  const pick = p.lab[0];
+  if (!pick) return `<div class="card next-lab"><b>Next in lab:</b> nothing left to research.</div>`;
+  const busy = p.sim.timeline.find((e) => e.slotId === 'LAB' && e.inProgress);
+  const when = busy ? ` <span class="muted">· starts when ${esc(busy.itemName)} ${busy.toLevel} finishes (in ${esc(fmtDuration(busy.end))})</span>` : '';
+  const v = (c: QueueCandidate) => (c.pickValue ?? 0).toFixed(2);
+  const others = (['troop', 'spell', 'siege'] as LabKind[])
+    .filter((k) => k !== pick.labKind)
+    .map((k) => {
+      // Best unpinned candidate of that kind by pick value (= the kind's top pick).
+      const top = p.lab.find((c) => c.labKind === k && !c.pinned);
+      return top ? `top ${KIND_LABEL[k]} ${esc(top.item.name)} ${v(top)}` : `no ${KIND_LABEL[k]} upgrades`;
+    });
+  const why = pick.pinned ? 'pinned' : `${KIND_LABEL[pick.labKind ?? 'troop']} · pick value <b>${v(pick)}</b> vs ${others.join(', ')}`;
+  return `<div class="card next-lab"><b>Next in lab:</b> <b>${esc(pick.item.name)}</b> ${pick.instance.level}→${pick.toLevel} (${why})${when}</div>`;
+}
+
+export function renderLab(p: Plan, meta: MetaFile, heroName: (id: string) => string, weights: Record<LabKind, number> = { troop: 1, spell: 0.7, siege: 0.5 }): string {
   const out: string[] = [];
   if (meta.attacks > 0 && meta.generatedAt) {
     out.push(`<div class="card small">Ranked by Legend League I meta: <b>${fmtNum(meta.attacks)}</b> attacks by <b>${fmtNum(meta.players)}</b> players, last ${meta.windowDays} days (recent days weigh more; half-life ${meta.halfLifeDays}d). Generated ${esc(new Date(meta.generatedAt).toLocaleString())}.
-      Troops and spells are ranked by their average share of army housing space (so filler troops count for little); sieges, pets and equipment by the share of attacks that use them.
+      Troops and spells are ranked by their average share of army housing space (so filler troops count for little); sieges, pets and equipment by the share of attacks that use them. The lab picks across the three lab sections by each unit's score ÷ the Legend I top score of its kind, times a kind weight (troops ${esc(String(weights.troop))}, spells ${esc(String(weights.spell))}, sieges ${esc(String(weights.siege))}; change them under Settings).
       <span class="muted">Items not seen in Legend I are listed at the bottom (lab and pets shortest first, equipment cheapest first). Pins move an item to the top and also change the Plan tab's lab/pet order and ore picks.</span></div>`);
   } else {
     out.push(`<div class="card small warn">No Legend I meta yet. Run <code>npm run meta</code> to rank by usage. Until then: lab and pets shortest first, equipment cheapest first. Pins still work.</div>`);
   }
-  out.push(section('Laboratory', 'lab', p.lab, (c) => `${fmtDuration(c.timeSec)} · ${fmtCost(c.cost, c.resource)}`, 'Nothing left to research at this Town Hall / Laboratory level.'));
+  out.push(nextInLab(p));
+  const labSub = (c: QueueCandidate) => `${fmtDuration(c.timeSec)} · ${fmtCost(c.cost, c.resource)}`;
+  out.push(section('Laboratory · Troops', 'lab', p.labByKind.troop, labSub, 'No troop upgrades available.'));
+  out.push(section('Laboratory · Spells', 'lab', p.labByKind.spell, labSub, 'No spell upgrades available.'));
+  out.push(section('Laboratory · Sieges', 'lab', p.labByKind.siege, labSub, 'No siege machine upgrades available.'));
   out.push(section('Pet House', 'petHouse', p.pets, (c) => `${fmtDuration(c.timeSec)} · ${fmtCost(c.cost, c.resource)}`, 'No pet upgrades available.'));
   out.push(section('Blacksmith (equipment)', 'blacksmith', p.equipment, (c) => `${c.item.hero ? `${heroName(c.item.hero)} · ` : ''}${ore(c)}`, 'No equipment upgrades available.'));
   return out.join('');

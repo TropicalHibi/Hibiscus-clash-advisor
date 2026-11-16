@@ -92,4 +92,34 @@ describe('UI', () => {
     expect(titles()[0]).toBe('Archer');
     expect(JSON.parse(localStorage.getItem('cocPlanner.settings')!).lab.pinned).toEqual([]);
   });
+
+  it('Lab tab: "Next in lab" line and Troops / Spells / Sieges sections', () => {
+    (document.querySelector('[data-tab="lab"]') as HTMLButtonElement).click();
+    const tab = document.querySelector('#tab-lab') as HTMLElement;
+    const heads = [...tab.querySelectorAll('h2')].map((h) => h.textContent!);
+    expect(heads.slice(0, 3).map((h) => h.split(' ').slice(0, 3).join(' '))).toEqual(['Laboratory · Troops', 'Laboratory · Spells', 'Laboratory · Sieges']);
+    const next = tab.querySelector('.next-lab')!.textContent!.replace(/\s+/g, ' ');
+    // Archer: Super Archer 5% of troop space ÷ Legend I top troop (Balloon 20%) = 0.25 × troop weight 1.
+    expect(next).toContain('Next in lab: Archer');
+    expect(next).toContain('troop · pick value 0.25 vs top spell');
+    expect(next).toMatch(/top siege .+ 0\.00/);
+    expect(next).toContain('starts when Balloon 4 finishes'); // the Laboratory is busy in this fixture
+    // Spells and sieges have their own sections, ranked within kind.
+    const spellTitles = [...tab.querySelectorAll('.rank-list')[1].querySelectorAll('.title b')].map((b) => b.textContent);
+    expect(spellTitles.length).toBeGreaterThan(0);
+  });
+
+  it('lab kind weights are editable in Settings and persist', () => {
+    (document.querySelector('[data-tab="import"]') as HTMLButtonElement).click();
+    const inp = document.querySelector('input[data-weight="siege"]') as HTMLInputElement;
+    expect(inp.value).toBe('0.5');
+    inp.value = '1.2';
+    inp.dispatchEvent(new Event('change'));
+    expect(JSON.parse(localStorage.getItem('cocPlanner.settings')!).lab.kindWeights).toEqual({ troop: 1, spell: 0.7, siege: 1.2 });
+    inp.value = '-3';
+    inp.dispatchEvent(new Event('change'));
+    expect(inp.value).toBe('1.2'); // rejected
+    (document.querySelector('[data-tab="lab"]') as HTMLButtonElement).click();
+    expect(document.querySelector('#tab-lab')!.textContent).toContain('sieges 1.2');
+  });
 });

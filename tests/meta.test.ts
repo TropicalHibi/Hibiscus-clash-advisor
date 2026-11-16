@@ -443,6 +443,90 @@ describe('army-share score', () => {
     const plan = buildPlan(data, parse(makeExport(16)), settings(), m, T0);
     expect(plan.lab.slice(0, 2).map((c) => c.item.id)).toEqual(['balloon', 'archer']);
     expect(plan.lab[0]).toMatchObject({ scoreKind: 'armyShare', score: 0.15, usage: 0.3 });
-    expect(plan.lab[0].reason).toBe('Legend I: 15.0% of troop space (in 30.0% of attacks)');
+    expect(plan.lab[0].reason).toBe('Legend I: 15.0% of troop space (in 30.0% of attacks) · lab pick 1.00 (1.00 of top troop × 1)');
+  });
+});
+
+// ── Lab queue pick across kinds (SPEC §6.7) ──
+describe('lab pick: normalized within kind × kind weight', () => {
+  const id = (fileId: string) => String(data.byId.get(fileId)!.dataId);
+  const meta: MetaFile = {
+    ...EMPTY_META,
+    generatedAt: '2026-11-16T00:00:00Z',
+    attacks: 100,
+    players: 10,
+    units: {
+      [id('archer')]: { name: 'Archer', usage: 0.5, threeStarRate: 0.6, armyShare: 0.3, kind: 'troop' }, // top troop
+      [id('balloon')]: { name: 'Balloon', usage: 0.6, threeStarRate: 0.6, armyShare: 0.15, kind: 'troop' }, // 0.5 of top
+      [id('rage-spell')]: { name: 'Rage Spell', usage: 0.7, threeStarRate: 0.6, armyShare: 0.4, kind: 'spell' }, // top spell
+      [id('wall-wrecker')]: { name: 'Wall Wrecker', usage: 0.9, threeStarRate: 0.6, kind: 'siege' }, // top siege
+    },
+  };
+  const acct = () => parse(makeExport(16, 16)); // Laboratory not upgrading
+
+  it('settings: default weights 1 / 0.7 / 0.5; 0 allowed; junk falls back', async () => {
+    const { coerceSettings, DEFAULT_SETTINGS } = await import('../src/state/settings');
+    expect(DEFAULT_SETTINGS.lab.kindWeights).toEqual({ troop: 1, spell: 0.7, siege: 0.5 });
+    expect(settings().lab.kindWeights).toEqual({ troop: 1, spell: 0.7, siege: 0.5 });
+    expect(coerceSettings({ lab: { kindWeights: { troop: 0, spell: -1, siege: 'x' } } }).lab.kindWeights).toEqual({ troop: 0, spell: 0.7, siege: 0.5 });
+    expect(coerceSettings({ lab: { pinned: ['archer'] } }).lab).toEqual({ pinned: ['archer'], kindWeights: { troop: 1, spell: 0.7, siege: 0.5 } });
+  });
+
+  it('each kind is divided by its Legend I top (so each kind’s #1 = 1.0), then weighted; highest value is picked', () => {
+    const plan = buildPlan(data, acct(), settings(), meta, T0);
+    const by = new Map(plan.lab.map((c) => [c.item.id, c]));
+    expect(by.get('archer')).toMatchObject({ labKind: 'troop', normScore: 1, pickValue: 1 });
+    expect(by.get('balloon')).toMatchObject({ labKind: 'troop', normScore: 0.5, pickValue: 0.5 });
+    expect(by.get('rage-spell')!.pickValue).toBeCloseTo(0.7, 10);
+    expect(by.get('wall-wrecker')).toMatchObject({ labKind: 'siege', normScore: 1, pickValue: 0.5 });
+    // Order: Archer 1.0, Rage 0.7, then Wall Wrecker / Balloon tied at 0.5 → higher within-kind rank first.
+    expect(plan.lab.slice(0, 4).map((c) => c.item.id)).toEqual(['archer', 'rage-spell', 'wall-wrecker', 'balloon']);
+    expect(plan.lab[1].reason).toContain('lab pick 0.70 (1.00 of top spell × 0.7)');
+    expect(plan.lab.slice(4).every((c) => c.pickValue === 0)).toBe(true); // unused last
+  });
+
+  it('the denominator is the Legend I top of the kind, not the best upgrade the player has', () => {
+    const plan = buildPlan(data, acct(), settings(), meta, T0);
+    const candidates = new Set(plan.lab.map((c) => c.item.id));
+    const absent = [...data.items.values()].find((i) => i.category === 'troop' && i.queue === 'lab' && !candidates.has(i.id))!;
+    expect(absent).toBeDefined();
+    const m2: MetaFile = { ...meta, units: { ...meta.units, [String(absent.dataId)]: { name: absent.name, usage: 0.9, threeStarRate: 0.5, armyShare: 0.6, kind: 'troop' } } };
+    const p2 = buildPlan(data, acct(), settings(), m2, T0);
+    expect(p2.lab.find((c) => c.item.id === 'archer')!.normScore).toBeCloseTo(0.5, 10); // 0.3 / 0.6
+    expect(p2.lab[0].item.id).toBe('rage-spell'); // 0.7 now beats Archer's 0.5
+  });
+
+  it('kind weights from settings change the pick, and the scheduler + forecast follow it', () => {
+    const base = buildPlan(data, acct(), settings(), meta, T0);
+    expect(base.sim.timeline.find((e) => e.slotId === 'LAB' && !e.inProgress)?.itemName).toBe('Archer');
+    const w = settings({ lab: { kindWeights: { troop: 0.5, spell: 0.7, siege: 0.9 } } });
+    const plan = buildPlan(data, acct(), w, meta, T0);
+    expect(plan.lab[0].item.id).toBe('wall-wrecker'); // 1.0 × 0.9
+    const first = plan.sim.timeline.find((e) => e.slotId === 'LAB' && !e.inProgress)!;
+    expect(first.itemName).toBe('Wall Wrecker');
+    expect(Object.values(plan.forecast.neededBy).flat().some((n) => n!.slotId === 'LAB' && n!.label.startsWith('Wall Wrecker'))).toBe(true);
+  });
+
+  it('pins still go first, in pin order', () => {
+    const spell = buildPlan(data, acct(), settings(), meta, T0).labByKind.spell.at(-1)!.item.id; // an unused spell
+    const plan = buildPlan(data, acct(), settings({ lab: { pinned: ['balloon', spell] } }), meta, T0);
+    expect(plan.lab.slice(0, 3).map((c) => c.item.id)).toEqual(['balloon', spell, 'archer']);
+    expect(plan.sim.timeline.find((e) => e.slotId === 'LAB' && !e.inProgress)?.itemName).toBe('Balloon');
+    expect(plan.labByKind.spell[0].item.id).toBe(spell);
+    expect(plan.labByKind.troop[0].item.id).toBe('balloon');
+  });
+
+  it('Lab tab sections: each kind ranked by its own score, unused at the bottom', () => {
+    const plan = buildPlan(data, acct(), settings(), meta, T0);
+    const { troop, spell, siege } = plan.labByKind;
+    expect(troop.slice(0, 2).map((c) => c.item.id)).toEqual(['archer', 'balloon']);
+    expect(spell[0].item.id).toBe('rage-spell');
+    expect(siege[0].item.id).toBe('wall-wrecker');
+    expect(troop.every((c) => c.item.category === 'troop') && spell.every((c) => c.item.category === 'spell') && siege.every((c) => c.item.category === 'siege')).toBe(true);
+    expect(troop.length + spell.length + siege.length).toBe(plan.lab.length);
+    for (const list of [troop, spell, siege]) {
+      const firstUnused = list.findIndex((c) => c.usage === 0);
+      if (firstUnused >= 0) expect(list.slice(firstUnused).every((c) => c.usage === 0)).toBe(true);
+    }
   });
 });

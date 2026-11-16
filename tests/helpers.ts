@@ -99,6 +99,7 @@ export function parse(ex: SyntheticExport) {
   return parseExport(JSON.parse(JSON.stringify(ex)), data);
 }
 
-export function settings(patch: Partial<Settings> = {}): Settings {
-  return { ...DEFAULT_SETTINGS, ...patch };
+type SettingsPatch = Omit<Partial<Settings>, 'lab'> & { lab?: Partial<Settings['lab']> };
+export function settings(patch: SettingsPatch = {}): Settings {
+  return { ...DEFAULT_SETTINGS, ...patch, lab: { ...DEFAULT_SETTINGS.lab, ...patch.lab } };
 }

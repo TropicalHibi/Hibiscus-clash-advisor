@@ -66,7 +66,7 @@ function renderLabTab(): void {
   }
   try {
     const plan = buildPlan(data, accountWithBaseline(account), settings, meta, Math.floor(Date.now() / 1000));
-    el.innerHTML = renderLab(plan, meta, heroName);
+    el.innerHTML = renderLab(plan, meta, heroName, settings.lab.kindWeights);
   } catch (e) {
     el.innerHTML = `<div class="card warn">Could not rank upgrades: ${esc((e as Error).message)}</div>`;
     console.error(e);
@@ -79,7 +79,7 @@ function renderLabTab(): void {
       const pins = settings[list].pinned;
       // Newest pin goes first; unpinning removes it.
       const next = pins.includes(id) ? pins.filter((x) => x !== id) : [id, ...pins];
-      settings = { ...settings, [list]: { pinned: next } };
+      settings = { ...settings, [list]: { ...settings[list], pinned: next } };
       storage.saveSettings(settings);
       renderLabTab();
     }),
@@ -141,6 +141,14 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
       <p class="small muted">Max applies the builder boost to builder upgrades (including supercharges) and the research boost to lab and pet upgrades. Running timers are never changed.</p>
     </div>
     <div class="card">
+      <div><b>Lab pick weights</b> <span class="small muted">(score ÷ Legend I top of its kind × weight; 0 = never auto-pick that kind)</span></div>
+      <div class="row" style="margin-top:6px">
+        ${(['troop', 'spell', 'siege'] as const)
+          .map((k) => `<label class="small">${k === 'troop' ? 'Troops' : k === 'spell' ? 'Spells' : 'Sieges'} <input type="number" class="weight" data-weight="${k}" min="0" max="10" step="0.1" value="${settings.lab.kindWeights[k]}" style="width:5em"></label>`)
+          .join('')}
+      </div>
+    </div>
+    <div class="card">
       <div><b>Hero order</b> <span class="small muted">(Archer Queen always gets Tier 0 until book-ready)</span></div>
       <ol class="hero-order">
         ${settings.heroOrder
@@ -178,6 +186,18 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
   el.querySelectorAll<HTMLInputElement>('input[name="gp"]').forEach((r) =>
     r.addEventListener('change', () => {
       settings = { ...settings, goldPass: r.value === 'max' ? 'max' : 'none' };
+      storage.saveSettings(settings);
+    }),
+  );
+  el.querySelectorAll<HTMLInputElement>('[data-weight]').forEach((inp) =>
+    inp.addEventListener('change', () => {
+      const k = inp.dataset.weight as keyof Settings['lab']['kindWeights'];
+      const v = Number(inp.value);
+      if (!Number.isFinite(v) || v < 0) {
+        inp.value = String(settings.lab.kindWeights[k]);
+        return;
+      }
+      settings = { ...settings, lab: { ...settings.lab, kindWeights: { ...settings.lab.kindWeights, [k]: v } } };
       storage.saveSettings(settings);
     }),
   );

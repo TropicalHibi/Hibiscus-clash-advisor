@@ -143,3 +143,21 @@ One line each: decision, then why.
 - **Always exits 0.** Each step is in its own try/catch, plus an outer one. *Why:* a non-zero `predev` would stop `npm run dev`.
 - Ctrl+C during a predev meta run stops `npm run dev` too. The meta run is resumable, so the next start continues it.
 - The logic takes injected side effects, so `tests/refresh.test.ts` covers every branch without npm, network or the API. Live checks: the first run printed "game data up to date (0.19.1)", the second was silent, an unreachable registry printed one warning line with exit 0, and `npm run dev` ran the hook and then started Vite.
+
+# Decisions (lab sections + normalized lab pick)
+
+- **Normalization denominator = the top score of that kind in the Legend I meta.** It's taken across every lab unit in the game data, not only the player's current candidates. *Why:* if each kind were divided by the player's own best upgrade of that kind, every kind's #1 would always be exactly 1.0, so the pick would always be the top troop (1.0 × 1.0 beats 0.7 and 0.5) and spells or sieges would never be picked. Dividing by the Legend I top keeps "how close to the meta's best of its kind is this upgrade" meaningful.
+  - Example: your best spell, Poison, is 0.26 of the top spell (Totem); Dragon is the top troop (1.00); Sky Wagon is the top siege (1.00).
+  - Super troop credit is included when finding the top. The top is cached per meta file because the scheduler asks for it many times.
+- `pickValue = normScore × lab.kindWeights[kind]`.
+  - **Order:** pins (in pin order), then pickValue, then items used in Legend I before unused ones, then normScore, then shortest time, then cost, then name. Unused items have value 0 and keep the shortest-first order at the bottom.
+  - **Repeats:** none are penalized, as asked.
+- **The scheduler and forecast** still take `researchCandidates(...)[0]`, which is now the weighted pick, so the 24h forecast, the Plan tab's lab picks and the CLI follow it automatically. The Pet House and Blacksmith code paths are untouched.
+- **Settings:** `lab.kindWeights {troop, spell, siege}` in `config/settings.sample.yaml`, coerced with a ≥ 0 rule (0 = never auto-pick that kind; negative or junk values fall back to the default).
+  - The Settings tab has three number inputs. Invalid input is reverted.
+  - The pin handler now keeps `kindWeights` when saving pins; before this change it replaced the whole `lab` object.
+- **Lab tab:**
+  - Three sections (Laboratory · Troops / Spells / Sieges), each ranked by its own score with the existing rank function (pins first, unused at the bottom). They come from `plan.labByKind`.
+  - **"Next in lab"** names `plan.lab[0]`, its kind and pick value, and the best unpinned candidate of each other kind with its value. When the pick is pinned it says "pinned". When the Laboratory is busy it adds "starts when X finishes (in …)".
+- Plan reasons for lab items append `· lab pick 0.50 (1.00 of top siege × 0.5)`.
+- **SPEC Step 3:** item images were added to the plan only. Nothing is built yet.

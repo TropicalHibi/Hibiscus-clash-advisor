@@ -156,3 +156,5 @@ button:disabled { opacity: .4; cursor: default; }
   .rank-item .stats .usage { grid-column: 1 / -1; }
 }
 button.pin[aria-pressed='true'] { color: var(--accent); border-color: var(--accent); font-weight: 650; }
+
+.next-lab { border-left: 3px solid var(--accent); }

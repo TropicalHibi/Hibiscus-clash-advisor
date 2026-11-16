@@ -577,3 +577,89 @@ For reference, the top lab units across Legend I by the new score (whether or no
 - [ ] **Back-to-back levels are still possible.** The score is per unit, not per level, so whatever ranks first gets every level in a row: Sky Wagon 2, 3 and 4 fill about 40 days of lab time. Pin something else in the Lab tab to break it up, or consider a per-level decay.
 - [ ] **Balloon fell from #2 to #7.** It's in 81% of armies but averages only 7.8% of troop space. That's what the new formula measures; pin it if you're running a balloon army.
 - [ ] **Refresh on a newer data release** hasn't run for real yet (0.19.1 is still the newest), and neither has a stale-meta pull from `predev`. Both paths are covered by tests with fake npm/API. The first `npm run dev` after tomorrow ~3 PM will do a real meta pull (about 2 min) before the site starts.
+
+---
+
+# Lab sections + normalized lab pick
+
+## What changed
+
+- **Lab tab split into three sections: Troops, Spells, Sieges.**
+  - Each is ranked by its own score: share of troop space, share of spell space, or siege usage share.
+  - Unused items sit at the bottom of each section, and pins still work.
+- **Lab queue pick, used by the scheduler and the 24h forecast:**
+  - Each unit's score is divided by the **top score of its kind in Legend I**, so each kind's #1 is 1.0.
+  - That is multiplied by a kind weight: troops 1.0, spells 0.7, sieges 0.5. The weights are in `config/settings.sample.yaml` under `lab.kindWeights` and editable in the Settings tab.
+  - The highest value across the three kinds is the next research. Pinned items still go first, and consecutive levels are allowed.
+  - **Why the Legend I top and not your own best?** Dividing by your own best upgrade would make each kind's #1 exactly 1.0 every time, so the top troop would always win and spells and sieges would never be picked.
+- **"Next in lab" line** at the top of the Lab tab: the pick, its kind, and its value against the top pick of the other two kinds. It also says when the lab frees up.
+- **Pet House and Blacksmith:** unchanged.
+- **SPEC Step 3:** item images were added to the plan (only used images bundled, lazy-loaded, text fallback). Not built.
+
+**Tests:** 115 pass (up from 107), and `npm run build` passes. The new tests cover:
+- the weight settings;
+- normalizing against the Legend I top rather than your own candidates;
+- the pick order and ties, and weights changing the scheduler's pick and the forecast;
+- pins, and section ranking;
+- the "Next in lab" line and the weight inputs in the UI.
+
+I mutation-checked one case: removing the weight from the pick value fails two tests.
+
+meta.json was regenerated from the existing battles (13,629 attacks, 889 players, no API calls). The Legend I top scores per kind are: troop 15.0% (Dragon), spell 19.6% (Totem Spell), siege 49.6% (Sky Wagon).
+
+## New lab order for your export (`samples/myexport.json`)
+
+**Next in lab: Dragon 11→12** (troop · pick value 1.00 vs top spell Poison Spell 0.19, top siege Sky Wagon 0.50), starting when Druid 4 finishes (day 3.7).
+
+**Troops** (by share of troop space)
+| # | Upgrade | Score | ÷ top | Pick value | Used in |
+|---|---|---|---|---|---|
+| 1 | Dragon 11→12 | 15.0% | 1.00 | 1.00 | 33.9% |
+| 2 | Dragon Rider 2→3 | 12.0% | 0.80 | 0.80 | 30.3% |
+| 3 | Bowler 5→6 | 10.5% | 0.70 | 0.70 | 24.8% |
+| 4 | Balloon 10→11 | 7.8% | 0.52 | 0.52 | 80.6% |
+| 5 | Yeti 6→7 | 5.8% | 0.39 | 0.39 | 16.5% |
+
+**Spells** (by share of spell space; weight 0.7)
+| # | Upgrade | Score | ÷ top | Pick value | Used in |
+|---|---|---|---|---|---|
+| 1 | Poison Spell 7→8 | 5.2% | 0.26 | 0.19 | 55.4% |
+| 2 | Skeleton Spell 5→6 | 1.4% | 0.07 | 0.05 | 14.7% |
+| 3 | Recall Spell 2→3 | 0.8% | 0.04 | 0.03 | 4.4% |
+| 4 | Lightning Spell 9→10 | 0.4% | 0.02 | 0.02 | 1.8% |
+| 5 | Clone Spell 6→7 | 0.3% | 0.02 | 0.01 | 0.4% |
+
+**Sieges** (by usage share; weight 0.5)
+| # | Upgrade | Score | ÷ top | Pick value | Used in |
+|---|---|---|---|---|---|
+| 1 | Sky Wagon 1→2 | 49.6% | 1.00 | 0.50 | 49.6% |
+| 2 | Troop Launcher 1→2 | 30.9% | 0.62 | 0.31 | 30.9% |
+| 3 | Log Launcher 3→4 | 8.8% | 0.18 | 0.09 | 8.8% |
+| 4 | Flame Flinger 1→2 | 6.0% | 0.12 | 0.06 | 6.0% |
+| 5 | Siege Barracks 3→4 | 4.4% | 0.09 | 0.04 | 4.4% |
+
+**Combined lab queue order:**
+1. Dragon 1.00
+2. Dragon Rider 0.80
+3. Bowler 0.70
+4. Balloon 0.52
+5. Sky Wagon 0.50
+6. Yeti 0.39
+7. Troop Launcher 0.31
+8. Ice Golem 0.27
+
+## 30-day lab queue (Gold Pass off)
+
+| Days | Research |
+|---|---|
+| 0.0 – 3.7 | Druid → 4 (running) |
+| 3.7 – 13.7 | **Dragon → 12** |
+| 13.7 – 28.7 | **Dragon → 13** |
+| 28.7 – 36.7 | **Dragon Rider → 3** |
+
+Earlier versions for comparison: plain usage share gave Archer 12 → 13 → 14; army share with sieges at raw usage gave Sky Wagon 2 → 3 → 4. The next 24 hours are unchanged, because the lab is busy with Druid 4.
+
+## Check
+
+- [ ] **Your spells barely register.** Your best spell upgrade is Poison at 0.26 of the top spell. The spells Legend I leans on (Totem, Rage, Revive, Freeze, Invisibility) aren't among your current upgrades: they're maxed for your lab level or not unlocked. With weight 0.7, spells won't be picked for a long time. Raise the spell weight in Settings if you want Poison sooner.
+- [ ] **Dragon twice in a row (25 days)**, as asked (repeats allowed). Pin Dragon Rider or Sky Wagon to break it up.
