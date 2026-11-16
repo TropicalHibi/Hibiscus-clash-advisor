@@ -77,9 +77,9 @@ export function helperLine(account: AccountState, sim: SimResult, nowSec: number
   if (!on) return timeHelpers.length ? 'not simulated (Settings → Simulate helpers and boosts is off)' : '';
   const parts: string[] = [];
   if (sim.helpers.length) {
-    const next = Math.min(...sim.helpers.map((h) => h.firstAt));
-    const when = next > 0 ? `next work hour ${fmtClock(nowSec + nextHelperTime(sim.helpers[0], 0), nowSec)}` : 'working once a day from now';
-    parts.push(`${sim.helpers.map((h) => `${h.name} L${h.level} (−${h.workRate}h/day)`).join(', ')}; ${when}`);
+    // Helpers share one cooldown, so they all work at the same time.
+    const next = Math.min(...sim.helpers.map((h) => nextHelperTime(h, 0)));
+    parts.push(`${sim.helpers.map((h) => `${h.name} L${h.level} (−${h.workRate}h/day)`).join(', ')}; next work hour ${fmtClock(nowSec + next, nowSec)}`);
   }
   if (sim.activeBoosts.length) parts.push(`Boosts: ${sim.activeBoosts.join(', ')}`);
   return parts.join(' · ');
