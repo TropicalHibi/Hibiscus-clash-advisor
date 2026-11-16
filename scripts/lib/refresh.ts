@@ -31,8 +31,20 @@ export interface RefreshDeps {
   hasToken(): boolean;
   /** Runs `npm run meta`; returns its exit code and captured stderr. May throw. */
   runMeta(): { code: number; stderr: string };
+  /**
+   * `git pull --ff-only` (SPEC §9a step 0), so the local copy has what the daily data-update Action
+   * committed. Returns whether anything came in and whether package.json / package-lock.json changed.
+   * Throws (one-line message) when it can't fast-forward: uncommitted changes, diverged, offline, no repo.
+   */
+  gitPull?(): { pulled: number; lockChanged: boolean };
+  /** `npm install` (after a pull changed the lockfile) so node_modules matches the committed data version. */
+  installDeps?(): void;
+  /** `npm run sync -- --offline`: validate + snapshot the installed data (no npm registry). */
+  syncOffline?(): void;
   log(line: string): void;
 }
+
+export type GitOutcome = 'skipped' | 'up-to-date' | 'pulled' | 'pulled-deps' | 'failed';
 
 export type DataOutcome = 'checked-recently' | 'up-to-date' | 'synced' | 'known-bad' | 'failed';
 export type MetaOutcome = 'fresh' | 'no-token' | 'updated' | 'updated-with-failures' | 'failed';
@@ -59,6 +71,34 @@ export function oneLine(text: string, fallback: string): string {
 }
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
+
+/**
+ * Step 0: fast-forward to origin so the data check sees what the daily Action committed. A pull that
+ * changes the lockfile also runs `npm install` (node_modules must match) and an offline sync (local
+ * snapshot for the new version). Any failure is a one-line warning and the refresh continues.
+ */
+export function refreshGit(d: RefreshDeps): GitOutcome {
+  if (!d.gitPull) return 'skipped';
+  let r: { pulled: number; lockChanged: boolean };
+  try {
+    r = d.gitPull();
+  } catch (e) {
+    d.log(`[refresh] warning: git pull --ff-only failed (${oneLine(msg(e), 'git pull failed')}); continuing with the local copy.`);
+    return 'failed';
+  }
+  if (!r.pulled) return 'up-to-date';
+  d.log(`[refresh] pulled ${r.pulled} new commit${r.pulled === 1 ? '' : 's'} from origin.`);
+  if (!r.lockChanged || !d.installDeps) return 'pulled';
+  try {
+    d.installDeps();
+    d.log('[refresh] package-lock.json changed (e.g. a data update from the daily Action): npm install done.');
+    d.syncOffline?.();
+  } catch (e) {
+    d.log(`[refresh] warning: npm install after the pull failed (${oneLine(msg(e), 'npm install failed')}); run npm install by hand.`);
+    return 'failed';
+  }
+  return 'pulled-deps';
+}
 
 export function refreshGameData(d: RefreshDeps): DataOutcome {
   const now = d.now();
@@ -132,9 +172,15 @@ export function refreshMeta(d: RefreshDeps): MetaOutcome {
 }
 
 /** Never throws: every failure becomes a one-line warning so `npm run dev` always starts. */
-export function refresh(d: RefreshDeps): { data: DataOutcome; meta: MetaOutcome } {
+export function refresh(d: RefreshDeps): { git: GitOutcome; data: DataOutcome; meta: MetaOutcome } {
+  let git: GitOutcome = 'failed';
   let data: DataOutcome = 'failed';
   let meta: MetaOutcome = 'failed';
+  try {
+    git = refreshGit(d);
+  } catch (e) {
+    d.log(`[refresh] warning: git pull step failed (${oneLine(msg(e), 'unknown error')}); continuing.`);
+  }
   try {
     data = refreshGameData(d);
   } catch (e) {
@@ -145,5 +191,5 @@ export function refresh(d: RefreshDeps): { data: DataOutcome; meta: MetaOutcome 
   } catch (e) {
     d.log(`[refresh] warning: meta refresh failed (${oneLine(msg(e), 'unknown error')}); starting the site anyway.`);
   }
-  return { data, meta };
+  return { git, data, meta };
 }
