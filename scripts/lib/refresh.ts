@@ -3,6 +3,9 @@
 
 export const REFRESH_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
+/** Printed after a meta pull that wrote public/meta.json: the live site only changes when it's pushed (SPEC §15). */
+export const PUSH_META_REMINDER = '[refresh] meta.json updated: run npm run push-meta to update the live site.';
+
 export interface RefreshState {
   /** When npm was last asked (successfully) for the newest clash-of-clans-data version. */
   lastDataCheck?: number;
@@ -113,10 +116,14 @@ export function refreshMeta(d: RefreshDeps): MetaOutcome {
     d.log(`[refresh] warning: meta run failed (${oneLine(msg(e), 'npm run meta failed')}); starting the site anyway.`);
     return 'failed';
   }
-  if (res.code === 0) return 'updated';
+  if (res.code === 0) {
+    d.log(PUSH_META_REMINDER);
+    return 'updated';
+  }
   if (res.code === 2) {
     // scripts/meta.ts exits 2 when meta.json was written but some players could not be fetched.
     d.log('[refresh] warning: meta.json updated, but some players failed; the next run retries them.');
+    d.log(PUSH_META_REMINDER);
     return 'updated-with-failures';
   }
   const hint = /\b403\b/.test(res.stderr) ? ' (403: the API key is locked to a different IP)' : '';

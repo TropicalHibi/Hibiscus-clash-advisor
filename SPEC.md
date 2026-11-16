@@ -2,7 +2,7 @@
 
 A local website that reads a Clash of Clans account export and tells the player what to upgrade next, following a rush-first priority system. It also produces a 24-hour resource "shopping list" and lab/pet/equipment picks ranked by Legend League I usage.
 
-**v1 = runs locally on Windows.** No hosting, no accounts, no backend. Hosting and automation are v2+.
+**v1 = runs locally on Windows**, and the same static site is also published to **GitHub Pages** (§15): https://tropicalhibi.github.io/Hibiscus-clash-advisor/. No accounts, no backend. Meta and game-data refreshes still run only on the local machine (the API key is IP-locked); scheduled automation in CI is v2+.
 
 ---
 
@@ -17,18 +17,19 @@ A local website that reads a Clash of Clans account export and tells the player 
 - Wall "dump" line.
 - Legend League I meta pipeline (local script → `meta.json`).
 - Game-data sync script with validation tests.
+- Static hosting on GitHub Pages, deployed by GitHub Actions on every push to `main` (§15).
 
 **Out of scope (v1, revisit later)**
 - Builder Base, Clan Capital.
 - Sleep/awake windows for timing finishes.
-- Hosting, GitHub Actions, multi-device sync.
+- Scheduled CI jobs (daily meta / version check in GitHub Actions), multi-device sync.
 - Entering current resources.
 
 ---
 
 ## 2. Stack
 
-- **Vite + TypeScript** single-page app. `npm run dev` → `http://localhost:5173`.
+- **Vite + TypeScript** single-page app. `npm run dev` → `http://localhost:5173`. The Pages build is served under `/Hibiscus-clash-advisor/`, so runtime fetches (`meta.json`, any future image or data file) build their URL from `import.meta.env.BASE_URL`, never a hard-coded `/`.
 - Plain TS + minimal DOM or a light framework (Preact or Svelte fine; no heavy UI kit).
 - **Node scripts** in TypeScript run with `tsx`.
 - **Vitest** for tests.
@@ -42,6 +43,9 @@ A local website that reads a Clash of Clans account export and tells the player 
 | `npm run dev:fast` | Start the local site without the refresh |
 | `npm run sync` | Update game data, run validation, print diff vs last snapshot |
 | `npm run meta` | Pull Legend I battle logs, aggregate, write `public/meta.json` |
+| `npm run push-meta` | Commit `public/meta.json` (only that file) as `meta: <generatedAt>` and push `main`, if it changed — redeploys the live site (§15) |
+| `npm run build` | Typecheck + production build at base `/` |
+| `npm run build:pages` | Same, at the GitHub Pages base `/Hibiscus-clash-advisor/` (used by CI) |
 | `npm test` | Unit + validation tests |
 
 ---
@@ -87,6 +91,8 @@ A local website that reads a Clash of Clans account export and tells the player 
 ```
 coc-planner/
   SPEC.md
+  .github/workflows/
+    pages.yml            # test + build + deploy to GitHub Pages on push to main (§15)
   config/
     merges.yaml          # merge recipes (hand-maintained)
     settings.sample.yaml # defaults the UI starts from
@@ -94,6 +100,7 @@ coc-planner/
     sync.ts              # npm run sync
     meta.ts              # npm run meta
     refresh.ts           # predev refresh (§9a)
+    push-meta.ts         # npm run push-meta (§15)
   src/
     data/                # load + normalize clash-of-clans-data into Item model
     state/               # parse export JSON → AccountState
@@ -112,7 +119,7 @@ coc-planner/
     meta/battles.jsonl   # raw deduped Legend I attacks (git-ignored)
     refresh-state.json   # last game-data check (git-ignored)
   public/
-    meta.json            # aggregated meta the site reads
+    meta.json            # aggregated meta the site reads (committed; the live site serves the pushed copy)
   tests/
 ```
 
@@ -327,7 +334,9 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
   2. **Meta:** if `public/meta.json` (`generatedAt`) is >24h old or missing **and** `.env` has `COC_API_TOKEN`, run `npm run meta`. Staleness means "last aggregation" (`generatedAt`), so `npm run meta -- --aggregate-only` also resets the 24 h clock.
   3. **Any failure** (offline, 403, no token, sync error) prints a **one-line warning** and the site starts anyway. A failed check is retried on the next start. A meta run where some players failed counts as updated; those players are retried by the next run (§8.1).
   4. While sync has a recorded data failure, **every start** prints a one-line warning that the site is running on the last known-good data.
+  5. After a meta pull that wrote `public/meta.json` (exit 0, or exit 2 = partial), print one line: `run npm run push-meta to update the live site`. The refresh **never pushes** by itself (§15).
 - `npm run dev:fast` skips the refresh.
+- The refresh runs only locally; the GitHub Pages workflow never runs it (§15).
 
 ---
 
@@ -425,9 +434,21 @@ Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
 
 ---
 
-## 15. v2+ (not now)
+## 15. Hosting (GitHub Pages) and v2+
 
-- Hosting (GitHub Pages or similar) + GitHub Actions: daily version check / rebuild, daily meta.
+### 15.1 GitHub Pages (done)
+
+- **Live site:** https://tropicalhibi.github.io/Hibiscus-clash-advisor/ — the repo `TropicalHibi/Hibiscus-clash-advisor` is public. Pages source = "GitHub Actions".
+- **Workflow** `.github/workflows/pages.yml`, on every push to `main` (and manual dispatch): `npm ci` → `npm test` → `npm run build:pages` → upload `dist/` → deploy. A failing test stops the job before the build, so nothing is deployed.
+- **No token in CI.** The workflow never runs the predev refresh (it never calls `npm run dev`), `npm run meta`, `npm run sync` or `npm run push-meta`. The site ships the committed `public/meta.json` and the `clash-of-clans-data` version locked in `package-lock.json`.
+- **Base path:** only `vite build --mode pages` uses base `/Hibiscus-clash-advisor/`; `npm run dev`, `npm run build` and tests stay at `/`. Every runtime fetch uses `import.meta.env.BASE_URL` (§2).
+- **Meta on the site:** the live site only gets new meta when `public/meta.json` is pushed. `npm run push-meta` commits that file alone (`meta: <generatedAt>`) and pushes `main` if it changed; it does nothing when unchanged and refuses off `main`. The predev refresh reminds after a successful meta pull (§9a step 5) but never pushes.
+- **Game-data updates** reach the site the same way: `npm run sync` locally updates `package.json` / `package-lock.json`; committing and pushing them redeploys.
+- **Privacy:** user data stays in each browser's `localStorage`; nothing is uploaded. Committed fixtures are redacted (§8.1 / `scripts/lib/redact.ts`); `.env`, `samples/`, `battles.jsonl` and run-state files are git-ignored and were never committed.
+
+### 15.2 v2+ (not now)
+
+- GitHub Actions on a schedule: daily version check / rebuild, daily meta (needs an API key that isn't IP-locked to the home network).
 - Sleep/awake windows for finish-time fitting.
 - Multi-device state.
 - Builder Base / Clan Capital.

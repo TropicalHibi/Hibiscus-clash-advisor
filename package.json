@@ -8,11 +8,13 @@
     "dev": "vite",
     "dev:fast": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:pages": "tsc --noEmit && vite build --mode pages",
     "preview": "vite preview",
     "test": "vitest run",
     "sync": "tsx scripts/sync.ts",
     "plan": "tsx scripts/plan.ts",
     "meta": "tsx scripts/meta.ts",
+    "push-meta": "tsx scripts/push-meta.ts",
     "probe": "tsx scripts/probe.ts",
     "refresh": "tsx scripts/refresh.ts"
   },

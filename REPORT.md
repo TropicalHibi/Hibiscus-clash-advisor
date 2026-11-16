@@ -1,5 +1,7 @@
 # Step 1 Report: CoC Upgrade Planner
 
+**Live site:** https://tropicalhibi.github.io/Hibiscus-clash-advisor/ (GitHub Pages; redeploys on every push to `main` once tests pass. To publish fresh meta after `npm run dev` pulls it, run `npm run push-meta`. See SPEC §15.)
+
 **Status:** Step 1 is built. `npm test` passes (49 tests, 4 files; 44 at the original Step 1 hand-off) and `npm run build` succeeds. The plan for your real export is at the bottom of this file. Design choices and assumptions are in `DECISIONS.md`.
 
 ## Start the site

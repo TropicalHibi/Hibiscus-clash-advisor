@@ -199,3 +199,34 @@ One line each: decision, then why. Finding numbers refer to REVIEW.md.
 
 ## Skipped
 - **#16 bundle size:** not done (v2), as instructed.
+
+# Decisions (GitHub Pages hosting)
+
+One line each: decision, then why. The user asked for no questions, so these are my calls.
+
+## Pre-publish safety check (all 15 commits, every ref)
+- **Result: clean, repo made public.** No `.env`, `samples/`, `battles.jsonl`, `run-state.json` or `refresh-state.json` was ever committed (every path in history is still tracked in HEAD). No JWT-like string (`eyJ…`), bearer token or `TOKEN=` value anywhere. The only real tag in history is the known league-group tag `#8UG890J` (accepted, history not rewritten). Every other tag is a pseudonym (`#PLAYER1`, `#CLAN1`, `#TEST`). The only IP is the test's `1.2.3.4`. Long strings are army share codes. *How:* `git grep` over `git rev-list --all` plus the list of every path ever committed.
+
+## Build and base path
+- **`npm run build:pages` = `tsc --noEmit && vite build --mode pages`**; `vite.config.ts` sets `base` to `/Hibiscus-clash-advisor/` only when `mode === 'pages'`. *Why:* a Vite mode needs no env var (works the same in PowerShell and CI), and `npm run dev`, `npm run build`, `npm run preview` and tests stay at `/`.
+- **No fetch changes were needed:** the only runtime fetch (`meta.json` in `src/main.ts`) already used `import.meta.env.BASE_URL`. There is no `data-changes.json` and no image fetch; game data is bundled at build time by `import.meta.glob`. SPEC §2 now makes `BASE_URL` the rule for any future fetch.
+- `tests/pages.test.ts` checks the base per mode and that the workflow's `run:` steps are exactly `npm ci`, `npm test`, `npm run build:pages`, with no refresh/meta/sync/token. *Why:* keeps "no token in CI" from drifting.
+
+## Workflow
+- **One `build` job (ci → test → build:pages → upload artifact) and a `deploy` job** using the official `actions/upload-pages-artifact@v3` / `actions/deploy-pages@v4`. Tests run before the build in the same job, so a failure means no artifact and no deploy.
+- **Node 24** in CI. *Why:* matches the local major (v26 isn't an LTS on setup-node yet; 24 is the active LTS) and is new enough for Vite 8 / TypeScript 7.
+- Plain `npm ci` (install scripts allowed). *Why:* `predev` only runs on `npm run dev`; blocking install scripts could break esbuild/rolldown binaries for no gain.
+- `workflow_dispatch` added. *Why:* lets the site be redeployed from the Actions tab without a dummy commit.
+- `concurrency: pages`, no cancel-in-progress. *Why:* GitHub's recommended setting; a deploy in progress is never cut off halfway.
+- Pages enabled with `gh api -X POST repos/TropicalHibi/Hibiscus-clash-advisor/pages -f build_type=workflow`.
+
+## `npm run push-meta`
+- **Logic in `scripts/lib/pushMeta.ts`** (git injected, tested in `tests/push-meta.test.ts`); `scripts/push-meta.ts` wires real `git`. *Why:* same pattern as refresh/sync/meta.
+- Commits with `git add -- public/meta.json` then `git commit --only -m "meta: <generatedAt>" -- public/meta.json`. *Why:* `--only` commits that one path and leaves anything else that was already staged alone, so it's "only that file" even with other work in progress.
+- **Does nothing if unchanged; refuses (exit 1, no commit) when not on `main`.** *Why:* Pages deploys from `main`; a meta commit on a feature branch would never reach the site.
+- Pushes `origin main`. A rejected push keeps the commit and prints a one-line fix hint (`git pull --rebase`, then `git push`), exit 1. *Why:* never rewrites or force-pushes anything.
+- `generatedAt` is used as written in meta.json; an unreadable file is committed as `meta: unknown`.
+- **Reminder** `[refresh] meta.json updated: run npm run push-meta to update the live site.` is printed after a meta run exits 0 or 2 (both wrote meta.json), not after a fresh/no-token/failed run. *Why:* exit 2 is a partial run that still updated the file (SPEC §9a). It is not prefixed `warning:` because nothing failed.
+
+## Docs
+- SPEC: intro, §1 scope, §2 (base rule + scripts table), §4 layout, §9a step 5, §15 split into 15.1 GitHub Pages (done) and 15.2 v2+. Scheduled CI (daily meta / version check) stays v2+ because the API key is IP-locked.

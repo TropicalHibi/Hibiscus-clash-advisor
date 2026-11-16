@@ -1,6 +1,6 @@
 // SPEC §9a: predev refresh. Fake side effects only — no npm, no network, no API.
 import { describe, expect, it } from 'vitest';
-import { isNewerVersion, oneLine, refresh, REFRESH_MAX_AGE_MS, type RefreshDeps, type RefreshState } from '../scripts/lib/refresh';
+import { isNewerVersion, oneLine, PUSH_META_REMINDER, refresh, REFRESH_MAX_AGE_MS, type RefreshDeps, type RefreshState } from '../scripts/lib/refresh';
 
 const NOW = Date.parse('2026-11-16T12:00:00Z');
 const H = 3_600_000;
@@ -89,6 +89,22 @@ describe('predev refresh', () => {
     expect(f.calls).toEqual(['meta']);
     const g = fake({ state: { lastDataCheck: NOW }, metaGeneratedAt: () => undefined });
     expect(refresh(g.d).meta).toBe('updated');
+  });
+
+  it('a successful meta pull prints the one-line push-meta reminder (SPEC §15); a fresh or failed one does not', () => {
+    const f = fake({ state: { lastDataCheck: NOW }, metaGeneratedAt: () => NOW - 25 * H });
+    refresh(f.d);
+    expect(f.logs).toEqual([expect.stringContaining('running npm run meta'), PUSH_META_REMINDER]);
+    expect(PUSH_META_REMINDER).toContain('run npm run push-meta to update the live site');
+    const partial = fake({ state: { lastDataCheck: NOW }, metaGeneratedAt: () => undefined, runMeta: () => ({ code: 2, stderr: '' }) });
+    refresh(partial.d);
+    expect(partial.logs.at(-1)).toBe(PUSH_META_REMINDER);
+    const fresh = fake({ state: { lastDataCheck: NOW } });
+    refresh(fresh.d);
+    expect(fresh.logs).not.toContain(PUSH_META_REMINDER);
+    const failed = fake({ state: { lastDataCheck: NOW }, metaGeneratedAt: () => undefined, runMeta: () => ({ code: 1, stderr: 'boom' }) });
+    refresh(failed.d);
+    expect(failed.logs).not.toContain(PUSH_META_REMINDER);
   });
 
   it('stale meta without a token → one-line warning, no run', () => {
