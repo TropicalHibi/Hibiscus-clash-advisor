@@ -2,7 +2,7 @@
 
 A local website that reads a Clash of Clans account export and tells the player what to upgrade next, following a rush-first priority system. It also produces a 24-hour resource "shopping list" and lab/pet/equipment picks ranked by Legend League I usage.
 
-**v1 = runs locally on Windows**, and the same static site is also published to **GitHub Pages** (§15): https://tropicalhibi.github.io/Hibiscus-clash-advisor/. No accounts, no backend. Game data is kept current on the live site by a daily GitHub Action (§9b). The Legend I meta still refreshes only on the local machine (the API key is IP-locked); a scheduled meta job in CI is v2+.
+**v1 = runs locally on Windows**, and the same static site is also published to **GitHub Pages** (§15): https://tropicalhibi.github.io/Hibiscus-clash-advisor/. No accounts, no backend. Game data (§9b) and the Legend I meta (§8.4) are kept current on the live site by daily GitHub Actions. The meta Action logs in to the developer site to get a key for its own IP, so an IP-locked key is no longer a problem.
 
 ---
 
@@ -22,7 +22,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 **Out of scope (v1, revisit later)**
 - Builder Base, Clan Capital.
 - Sleep/awake windows for timing finishes.
-- Scheduled meta job in GitHub Actions (the API key is IP-locked), multi-device sync. (The daily game-data update is in scope: §9b.)
+- Multi-device sync. (The daily game-data update (§9b) and the daily meta (§8.4) are in scope.)
 - Entering current resources.
 
 ---
@@ -80,7 +80,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 - Builder count = Builder's Huts (Σ `cnt`) + B.O.B's Hut in `buildings`. Goblins are never counted as schedulable slots (§10.1).
 
 ### 3.3 Official API — meta pipeline only
-- Base URL `https://api.clashofclans.com/v1`, bearer token from `.env` (`COC_API_TOKEN`). In v1 the key is locked to the player's home IP.
+- Base URL `https://api.clashofclans.com/v1`. The bearer token comes from a developer-site login (`COC_DEV_EMAIL` / `COC_DEV_PASSWORD`, a key created for the current IP) or, without a login, from `.env` (`COC_API_TOKEN`, locked to one IP). See §8.1.
 - **The browser never calls the API** (CORS + would expose the key). Only `npm run meta` does.
 - Endpoints:
   - `GET /locations` — list locations.
@@ -110,6 +110,7 @@ coc-planner/
     refresh.ts           # predev refresh (§9a)
     data-update.ts       # the daily data-update Action's steps (§9b)
     push-meta.ts         # npm run push-meta (§15)
+    meta-ci.ts           # the daily meta Action's steps (§8.4)
   src/
     data/                # load + normalize clash-of-clans-data into Item model
     state/               # parse export JSON → AccountState
@@ -127,7 +128,7 @@ coc-planner/
     main.ts
   data/
     snapshots/           # dated normalized game-data snapshots (for diffs; git-ignored, newest 2 kept)
-    meta/battles.jsonl   # raw deduped Legend I attacks (git-ignored)
+    meta/battles.jsonl   # raw deduped Legend I attacks (git-ignored; the Action keeps its own copy on the meta-data branch, §8.4)
     refresh-state.json   # last game-data check (git-ignored)
   public/
     meta.json            # aggregated meta the site reads (committed; the live site serves the pushed copy)
@@ -284,13 +285,16 @@ Current recipes (derived from TH17/18 counts — see `merges.yaml`):
 ## 8. Meta pipeline (`npm run meta`)
 
 ### 8.1 Collect
-1. Load token from `.env`. Fail with a clear message if missing.
+1. **Get a token** (`scripts/lib/auth.ts`). Fail with a clear message if there are no credentials.
+   - **Login** (preferred): with `COC_DEV_EMAIL` + `COC_DEV_PASSWORD` (repository secrets in CI, `.env` locally), `clashofclans.js` logs in to developer.clashofclans.com and returns a key for the current public IP under a **dedicated key name**: `hibiscus-ci` in GitHub Actions, `hibiscus-local` on the PC. It only revokes or creates keys with that exact name, so the owner's other keys are never touched, and a changed IP just replaces that one key. Only the token is taken from clashofclans.js; collection stays on the project's own raw-HTTP client.
+   - **Fallback:** `COC_API_TOKEN` from `.env` (a fixed key for one IP), as before.
+   - The email, password and token are never printed. In GitHub Actions the token is masked (`::add-mask::`) the moment it exists. Error messages are redacted: secrets, JWT-like strings, email addresses, player tags and IPs are removed.
 2. Get locations; for each (global + countries), fetch player rankings (paginate as allowed). Keep players with `leagueTier.id === 105000036`. Dedupe tags. Stop at `meta.maxPlayers` (default 1000).
 3. For each player: `GET /players/{tag}/battlelog`. Keep entries where `attack === true && battleType.toLowerCase() === 'legend'`.
 4. **No Town Hall filter.** Legend I attackers are effectively max TH, and a troop used by a lower-TH Legend I player is still a valid recommendation.
 5. Dedupe key: `playerTag + battleTimestamp`. Append new rows to `data/meta/battles.jsonl`: `{ tag, ts, stars, destruction, armyShareCode }`.
 6. Throttle (~10 req/s, configurable). Retry 429/5xx/network errors with exponential backoff, using the server's `Retry-After` when it is longer (capped at 60 s). 401/403 abort the run. A location whose rankings keep failing is skipped and logged. Log progress.
-7. Run **daily** (battle logs only reach back ~2 days). Automated by the `npm run dev` refresh (§9a), never by an OS scheduler. No patch-triggered runs.
+7. Run **daily** (battle logs only reach back ~2 days). Automated by the daily GitHub Action (§8.4); the `npm run dev` refresh (§9a) runs it locally only when the Action missed a day. Never by an OS scheduler. No patch-triggered runs.
 8. **Resumable:** an interrupted run resumes within 24 h. Players a run couldn't fetch are retried first by the next run (if it starts within 7 days), so partial failures aren't lost to the daily cadence.
 
 ### 8.2 Parse `armyShareCode`
@@ -318,6 +322,25 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
   - A `meta.json` without `armyShare` (older file) falls back to `usage`.
 - Keep `usage` and `threeStarRate` in the output for display and later tuning.
 - Write `public/meta.json`: `{ generatedAt, windowDays, halfLifeDays, attacks, players, units: { [dataId]: { name, usage, threeStarRate, avgQty?, armyShare?, kind?, baseId? } } }`.
+
+### 8.4 Daily meta Action (`.github/workflows/meta.yml`)
+
+Runs **daily at 11:07 UTC** and on **manual dispatch**. Secrets: `COC_DEV_EMAIL`, `COC_DEV_PASSWORD` only, passed to the meta step and the issue step (for redaction) and never echoed. Concurrency group `meta`; job timeout 30 min.
+
+1. **Restore** `data/meta/battles.jsonl` from the **`meta-data` branch** (`battles.jsonl.gz`), if the branch exists; otherwise start empty.
+2. **Collect** (`scripts/meta-ci.ts run`): log in (key `hibiscus-ci`, token masked), then run the same collector and aggregation as `npm run meta`, with three CI differences:
+   - rows older than the **14-day window** are pruned;
+   - new rows store a **pseudonym** instead of the player tag (`h` + 16 hex of a SHA-256), because the branch is public. Dedupe and the player count still work, since the same tag always maps to the same pseudonym;
+   - no run state is kept between runs (no resume or carry-over in CI: each daily run gathers players afresh).
+3. **Decide** whether the new `meta.json` may replace the committed one. It's never replaced by a worse one. **Commit only if all hold:**
+   - players were gathered and battle logs fetched (not "API down");
+   - at least **2,000 attacks** in the window (`MIN_META_ATTACKS`; a normal run has ~13.7k);
+   - a partial run fetched at least **50 %** of the players it gathered;
+   - at least **50 %** of the current meta's attack count;
+   - something besides `generatedAt` changed.
+4. **Commit** `public/meta.json` alone to `main` as `meta: <generatedAt>` (rebase on `main`, our copy wins a conflict on that file) and start the Pages workflow by `workflow_dispatch`, like the data-update Action (§9b): a `GITHUB_TOKEN` push alone wouldn't trigger it.
+5. **Store**: gzip the pruned `battles.jsonl` and force-push it to `meta-data` as **one parentless commit** (built with `git commit-tree`, so the branch never grows history), whenever the run collected new attacks, even if the meta wasn't committed.
+6. **Failures** (no credentials, login failed, 401/403, API down, too few attacks or players, worse than current, a failing git step) and **partial runs** open or update **one** issue titled **"Meta update failed"**. It holds the step, the redacted reason, the numbers and the minimums. A partial run that passes the minimums still commits, and the issue says so. The next clean run closes the issue with a "Recovered" comment.
 
 ---
 
@@ -348,10 +371,10 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 - `npm run dev` runs a `predev` refresh (`scripts/refresh.ts`) before Vite starts:
   0. **Git:** `git pull --ff-only` (30 s timeout, no credential prompt), so the local copy has whatever the daily Action committed. Silent when already up to date; prints one line when commits came in. If the pull changed `package.json` / `package-lock.json`, it runs `npm install` (node_modules must match the committed data version), then `npm run sync -- --offline` to record the local snapshot. If the pull can't fast-forward (uncommitted changes, diverged history, offline, not a git checkout), it prints a one-line warning and continues with the local copy.
   1. **Game data:** if the last check was >24h ago (`data/refresh-state.json`, git-ignored), ask npm for the newest `clash-of-clans-data` within the installed major; if it is newer than the installed one, run the full `npm run sync`. A version that sync already recorded as unusable isn't reinstalled on every start; a newer release, or `npm run sync` by hand after a fix, retries.
-  2. **Meta:** if `public/meta.json` (`generatedAt`) is >24h old or missing **and** `.env` has `COC_API_TOKEN`, run `npm run meta`. Staleness means "last aggregation" (`generatedAt`), so `npm run meta -- --aggregate-only` also resets the 24 h clock.
+  2. **Meta:** the daily Action (§8.4) normally keeps `public/meta.json` fresh, and step 0 pulled its copy. So `npm run meta` runs only if that `meta.json` (`generatedAt`) is **>24h old** or missing, **and** `.env` has `COC_DEV_EMAIL` + `COC_DEV_PASSWORD` (login, key `hibiscus-local`) or `COC_API_TOKEN`. Staleness means "last aggregation" (`generatedAt`), so `npm run meta -- --aggregate-only` also resets the 24 h clock.
   3. **Any failure** (offline, 403, no token, sync error) prints a **one-line warning** and the site starts anyway. A failed check is retried on the next start. A meta run where some players failed counts as updated; those players are retried by the next run (§8.1).
   4. While sync has a recorded data failure, **every start** prints a one-line warning that the site is running on the last known-good data.
-  5. After a meta pull that wrote `public/meta.json` (exit 0, or exit 2 = partial), print one line: `run npm run push-meta to update the live site`. The refresh **never pushes** by itself (§15).
+  5. After a local meta pull that wrote `public/meta.json` (exit 0, or exit 2 = partial), print one line: the daily Meta Action normally does this; run `npm run push-meta` only to put this copy on the live site now. The refresh **never pushes** by itself (§15).
 - `npm run dev:fast` skips the refresh.
 - The refresh runs only locally; the GitHub Pages workflow never runs it (§15).
 
@@ -486,16 +509,16 @@ Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
 
 - **Live site:** https://tropicalhibi.github.io/Hibiscus-clash-advisor/ — the repo `TropicalHibi/Hibiscus-clash-advisor` is public. Pages source = "GitHub Actions".
 - **Workflow** `.github/workflows/pages.yml`, on every push to `main` (and manual dispatch): `npm ci` → `npm test` → `npm run build:pages` → upload `dist/` → deploy. A failing test stops the job before the build, so nothing is deployed.
-- **No token in CI.** The workflow never runs the predev refresh (it never calls `npm run dev`), `npm run meta`, `npm run sync` or `npm run push-meta`. The site ships the committed `public/meta.json` and the `clash-of-clans-data` version locked in `package-lock.json`.
+- **No token in the Pages workflow.** It never runs the predev refresh (it never calls `npm run dev`), `npm run meta`, `npm run sync` or `npm run push-meta`. The site ships the committed `public/meta.json` and the `clash-of-clans-data` version locked in `package-lock.json`. Only the meta Action (§8.4) uses secrets.
 - **Base path:** only `vite build --mode pages` uses base `/Hibiscus-clash-advisor/`; `npm run dev`, `npm run build` and tests stay at `/`. Every runtime fetch uses `import.meta.env.BASE_URL` (§2).
-- **Meta on the site:** the live site only gets new meta when `public/meta.json` is pushed. `npm run push-meta` commits that file alone (`meta: <generatedAt>`) and pushes `main` if it changed; it does nothing when unchanged and refuses off `main`. The predev refresh reminds after a successful meta pull (§9a step 5) but never pushes.
+- **Meta on the site:** the daily meta Action (§8.4) commits `public/meta.json` and redeploys. By hand, `npm run push-meta` still commits that file alone (`meta: <generatedAt>`) and pushes `main` if it changed; it does nothing when unchanged and refuses off `main`. The predev refresh reminds after a local meta pull (§9a step 5) but never pushes.
 - **Game-data updates** reach the site **automatically** through the daily data-update Action (§9b): it commits the new version and starts this workflow by `workflow_dispatch`. A local `npm run sync` + commit + push still works too. `npm run dev` pulls the Action's commits first (§9a step 0).
-- **Privacy:** user data stays in each browser's `localStorage`; nothing is uploaded. Committed fixtures are redacted (§8.1 / `scripts/lib/redact.ts`); `.env`, `samples/`, `battles.jsonl` and run-state files are git-ignored and were never committed.
+- **Privacy:** user data stays in each browser's `localStorage`; nothing is uploaded. Committed fixtures are redacted (§8.1 / `scripts/lib/redact.ts`); `.env`, `samples/`, the local `battles.jsonl` and run-state files are git-ignored and were never committed. The Action's `battles.jsonl` on the public `meta-data` branch stores **pseudonyms, not player tags** (§8.4); it holds timestamps, stars, destruction and army codes. The pseudonyms are stable, so someone hashing every tag from the public rankings could match them; that's pseudonymity, not anonymity.
 
 ### 15.2 v2+ (not now)
 
 - ~~Daily version check / rebuild in GitHub Actions~~ → done (§9b).
-- Daily meta in GitHub Actions (needs an API key that isn't IP-locked to the home network).
+- ~~Daily meta in GitHub Actions~~ → done (§8.4), using developer-site login for a per-runner key.
 - Sleep/awake windows for finish-time fitting.
 - Multi-device state.
 - Builder Base / Clan Capital.

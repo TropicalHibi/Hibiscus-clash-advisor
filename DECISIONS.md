@@ -384,3 +384,46 @@ One line each: decision, then why. The owner asked for no questions, so these ar
 
 ## Run on GitHub
 - Triggered once with `workflow_dispatch` after pushing (run 43973368778): passed in 15 s, "no new version" (0.19.1 is the newest 0.x); test / commit / deploy / issue steps skipped, nothing committed, no issue opened.
+
+
+# Decisions (daily Legend I meta Action)
+
+One line each: decision, then why. The owner asked for no questions, so these are my calls.
+
+## Auth (`scripts/lib/auth.ts`)
+- **clashofclans.js 5.1.15 is used only to get the token** (`new RestManager().login({ email, password, keyName, keyCount: 1, keyDescription })`). The existing raw-HTTP collector does all the API calls. *Why:* the collector already has the throttle, retries, `Retry-After`, resume and tests; the library's value here is the developer-site key management.
+- **Key names:** `hibiscus-ci` when `GITHUB_ACTIONS=true`, `hibiscus-local` otherwise. I read the library source: it revokes only keys with *that* name whose IP doesn't match, reuses a matching one, and creates one if needed. The owner's other keys are never touched. Each CI run lands on a new runner IP, so it revokes yesterday's `hibiscus-ci` key and creates one: the account never holds more than one key of that name. The description says "auto-managed … safe to revoke".
+- **Order of sources:** login (email + password from the environment, or `.env` locally) → `COC_API_TOKEN` → a clear "no credentials" error. *Why:* the owner's rule; login survives a changed home IP. The owner's `.env` has only `COC_API_TOKEN` today, so local runs are unchanged until they add the two lines.
+- **Masking:** in Actions, `::add-mask::<token>` is printed right after `login()` returns, before anything else (a fixed `COC_API_TOKEN` is masked too). The email and password come from repository secrets, which Actions masks itself.
+- **Redaction:** any error text from login or the API passes through `redact()`, which removes the email, the password, the token, JWT-like strings, email addresses, player tags and IPv4 addresses. The library's login error includes the response body, and an API 403 message includes the caller's IP. An unexpected crash in `meta-ci.ts` is printed redacted too.
+- `hasToken()` in the predev refresh now means "login credentials or `COC_API_TOKEN`".
+
+## Workflow (`.github/workflows/meta.yml`)
+- **Daily `7 11 * * *` + `workflow_dispatch`**, Node 24, same action versions as the others, concurrency group `meta`, 30-minute timeout. Secrets are passed only to the meta step and to the issue step (there, only for redaction).
+- **Deploy like the data-update Action:** `gh workflow run pages.yml --ref main` after the push (needs `actions: write`).
+- **Committing meta.json:** `git add public/meta.json` only; message `meta: <generatedAt>`; author `github-actions[bot]`. Skipped when the staged file is identical. `git pull --rebase -X theirs` before pushing. *Why:* `-X theirs` during a rebase means "our replayed commit wins", so a concurrent `npm run push-meta` from the PC can't make the Action fail on a conflict in that one file; the Action's copy is the newer one.
+
+## battles.jsonl on the `meta-data` branch
+- **One file, `battles.jsonl.gz`, plus a README, in a single parentless commit** made with `git hash-object` / `git mktree` / `git commit-tree` and force-pushed to `refs/heads/meta-data`. *Why:* "single commit, no history growth"; plumbing builds it without touching the checked-out tree or needing a second clone, and uses the checkout's push credentials. The first run's file: 13,707 rows, 304 KB gzipped.
+- **Pruned to the 14-day aggregation window** in CI (`pruneDays: windowDays`), instead of the local 60 days.
+- **Player tags are pseudonyms in CI rows** (`h` + the first 16 hex of SHA-256("hibiscus-meta:" + tag)), applied before dedupe through a new `tagMap` option. *Why:* the repo is public, and the project never committed raw tags before (SPEC §15, REVIEW #11). Aggregation needs a tag only to dedupe (`tag + ts`) and to count distinct players, and both work on a stable pseudonym. It's pseudonymity, not anonymity: someone hashing every tag from the public rankings could match them. That's written in SPEC §15.
+- **No run state in CI** (`noRunState`): no resume or carry-over between CI runs. *Why:* `run-state.json` holds the raw player list, and each daily run gathers 1,000 players afresh anyway.
+- **Stored whenever new attacks were collected**, even if `meta.json` isn't committed (a run that's "worse" than the current meta still adds real attacks for tomorrow). Not stored after a login failure, a 403 or "API down" (nothing new).
+
+## Never commit a worse meta.json (`decideMeta`)
+- **Minimum 2,000 attacks in the window** (`MIN_META_ATTACKS`). *Why:* a normal daily run has ~13.7k (two days of Legend I logs from ~900 players). 2,000 is ~15 % of that: still a few hundred armies per popular troop, so shares are stable to a point or two, yet far above what a broken run produces.
+- **A partial run may commit if it fetched ≥ 50 % of the players it gathered** and meets the other minimums. It still opens/updates the issue, which says it was committed anyway. *Why:* the owner's "a partial run with enough attacks can still commit"; under half the players skews the sample towards whichever countries answered.
+- **Never below 50 % of the current meta's attack count.** *Why:* it catches a run that "worked" on a small sample (e.g. an empty meta-data branch while the current meta came from two weeks of data).
+- **API down:** no players gathered, or no battle log fetched → failure; nothing stored.
+- **Unchanged** apart from `generatedAt` → no commit, not a failure.
+
+## Issue "Meta update failed"
+- **One issue with that exact title**, edited (fresh body) plus an "Again: <run>" comment on each later failure; created when none is open. **Closed automatically** with a "Recovered: <run>" comment by the next clean run. *Why:* "open or update one issue"; closing it keeps the list honest without a manual step.
+- **Body:** step, whether `meta.json` changed, run link, redacted reason, numbers (players fetched / gathered / failed, new attacks, attacks vs current), the minimums, which auth was used. It's built from the result file; if the meta step never wrote one (e.g. `npm ci` failed), the shell writes a minimal body.
+
+## Predev refresh
+- `npm run meta` runs locally only when the pulled `meta.json` is over 24 h old (the git pull in step 0 brings the Action's copy first). The 24 h check itself didn't change; the new part is that the pull runs first. The stale and no-credentials messages say the Action probably missed a day.
+- **The push-meta reminder now reads:** "meta.json updated locally (the daily Meta Action normally does this). Run npm run push-meta only if you want this copy on the live site now."
+
+## First run (workflow_dispatch, 16 Nov 2026)
+- Run 43976109553 passed in 2 m 20 s. It logged in (key "hibiscus-ci"), fetched 1,000 of 1,000 players with 1,037 API requests, and kept 13,707 Legend I attacks (900 players). It committed `meta: 2026-11-16T23:07:32.292Z`, started Pages (deployed; the live `meta.json` shows 13,707 attacks) and created `meta-data` (1 commit, 304 KB). No issue was opened. There was no `meta-data` branch before, so the run started from an empty battles.jsonl; the new meta (13,707) passed the "≥ 50 % of current" check against the local one (13,629).

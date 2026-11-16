@@ -962,3 +962,31 @@ The 1 MB of JS is the bundled game data (REVIEW finding 16, left for v2), not im
 **Manual run (workflow_dispatch, 16 Nov 2026, 10:47 PM UTC): passed in 15 s.** Log: `clash-of-clans-data 0.19.1 is the newest 0.x release (unchanged)` → `No new clash-of-clans-data version: 0.19.1 is the newest 0.x release. Nothing to do.` The test, commit, deploy and issue steps were skipped; no commit was made and no issue was opened. Run: https://github.com/TropicalHibi/Hibiscus-clash-advisor/actions/runs/43973368778
 
 **Check:** the first real release (Hero Hall 13 data) will be the first end-to-end run. Look for the `data: …` commit and a Pages deploy that morning, or an issue if something needs fixing.
+
+
+## Follow-up: daily Legend I meta in GitHub Actions
+
+**Status:** `.github/workflows/meta.yml` runs every day at **11:07 UTC** (and by hand from the Actions tab: "Daily Legend I meta" → Run workflow). The first run worked end to end. `npm test` passes (**276 tests in 18 files**) and `npm run build` succeeds.
+
+**First run** (manual, 16 Nov 2026, 11:05 PM UTC): **passed in 2 m 20 s.** https://github.com/TropicalHibi/Hibiscus-clash-advisor/actions/runs/43976109553
+- **Login:** "Logged in to the developer site; using API key "hibiscus-ci" for this runner's IP." No token, email or password appears in the log.
+- **Collected:** 1,000 of 1,000 Legend I players, 48,437 battle-log entries, **13,707 Legend I attacks by 900 players** (10 without an army code skipped), 1,037 API requests.
+- **Committed** `meta: 2026-11-16T23:07:32.292Z` to `main` (the previous meta had 13,629 attacks), then started the Pages workflow. It deployed, and the live site's `meta.json` now shows 13,707 attacks.
+- **Stored** the attacks on the new `meta-data` branch: 1 commit, 304 KB gzipped, player tags replaced by pseudonyms.
+- **Nothing failed.** No issue was opened. The 10 "unknown IDs" in the summary are the event troops already noted in Step 2 (4000195–4000206 and CC spell 26000153); they don't affect the ranking.
+
+**How it works**
+- It logs in with your `COC_DEV_EMAIL` / `COC_DEV_PASSWORD` secrets and gets a key for that run's IP, named **"hibiscus-ci"**. Only keys with that name are ever replaced; your other keys are untouched. (You'll see one "hibiscus-ci" key on developer.clashofclans.com, recreated every day.)
+- It restores the last 14 days of attacks from the `meta-data` branch, collects today's, drops anything older than 14 days, and rebuilds `meta.json`.
+- **It never replaces a better meta.json.** It commits only with at least 2,000 attacks, at least half the players fetched, and at least half the current meta's attacks. A partial run that meets those still commits, and also reports.
+- On a failure (login, 403, API down, too little data, a git step), you get one GitHub issue **"Meta update failed"** with the step and a redacted error. It's updated on later failures and closed automatically by the next good run.
+- The `meta-data` branch is overwritten each day with a single commit, so it never grows.
+
+**On your PC**
+- `npm run dev` pulls first, so it gets the Action's fresh `meta.json` and **skips the local meta run** (it's under 24 h old). It runs `npm run meta` itself only if the Action missed a day.
+- If you add `COC_DEV_EMAIL` and `COC_DEV_PASSWORD` to `.env`, local runs log in too (key **"hibiscus-local"**), so a changed home IP no longer breaks them. Without them, `COC_API_TOKEN` works as before (your `.env` has only that today).
+- `npm run push-meta` is now only for putting a local copy live right away; the reminder says so.
+
+**Check**
+- [ ] On developer.clashofclans.com you should now see a key named **hibiscus-ci** (description "auto-managed … safe to revoke"). Your other keys should be unchanged.
+- [ ] Privacy: the `meta-data` branch is public. It holds army codes, stars, destruction and battle times with **pseudonymous** player tags (a stable hash, not the tag). Say if you'd rather keep it encrypted or private.
