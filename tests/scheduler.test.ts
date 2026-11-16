@@ -26,6 +26,36 @@ describe('scheduler', () => {
     expect(gb[0].inProgress).toBe(true);
   });
 
+  it('Goblin Builder and Goblin Researcher jobs run out their timers but never get new work (SPEC §10.1)', () => {
+    const ex = makeExport(16);
+    const plain = parse(ex);
+    // Goblin Builder: one Gold Mine upgrading, 2h left. Goblin Researcher: Barbarian, 3h left.
+    const mineId = data.byId.get('gold-mine')!.dataId;
+    const mine = ex.buildings.find((b) => b.data === mineId)!;
+    mine.cnt = (mine.cnt ?? 1) - 1;
+    ex.buildings.push({ data: mineId, lvl: mine.lvl, cnt: 1, timer: 2 * 3600, extra: true });
+    setLevel(ex, 'units', 'barbarian', { timer: 3 * 3600, extra: true });
+    const acct = parse(ex);
+    expect(acct.builders).toBe(plain.builders); // goblins are not schedulable slots
+
+    const plan = buildPlan(data, acct, settings(), EMPTY_META, T0);
+    const goblinSlots = plan.sim.slots.filter((s) => s.goblin).map((s) => s.id);
+    expect(goblinSlots.sort()).toEqual(['GB', 'GL']);
+
+    for (const [id, name, end] of [['GB', 'Gold Mine', 2 * 3600], ['GL', 'Barbarian', 3 * 3600]] as const) {
+      const jobs = plan.sim.timeline.filter((e) => e.slotId === id);
+      expect(jobs).toHaveLength(1); // only the running job: nothing new after it finishes
+      expect(jobs[0]).toMatchObject({ inProgress: true, itemName: name, end });
+      expect(end).toBeLessThan(plan.forecast.windowSec); // finishes inside the 24h window
+    }
+    // Not in "Now", not in the 24h forecast.
+    expect(plan.startNow.some((e) => goblinSlots.includes(e.slotId))).toBe(false);
+    for (const list of Object.values(plan.forecast.neededBy)) expect(list!.some((n) => goblinSlots.includes(n.slotId))).toBe(false);
+    // Regular slots keep working: builders and the lab take new upgrades in the window.
+    expect(plan.sim.timeline.some((e) => !e.inProgress && e.slotId.startsWith('B'))).toBe(true);
+    expect(plan.sim.timeline.filter((e) => !e.inProgress && e.itemName === 'Barbarian').every((e) => e.slotId === 'LAB')).toBe(true);
+  });
+
   it('each building instance gets one upgrade at a time', () => {
     const sim = simulate(data, fixture(), settings(), EMPTY_META, { nowSec: T0, horizonSec: 30 * DAY });
     const byKey = new Map<string, TimelineEntry[]>();
