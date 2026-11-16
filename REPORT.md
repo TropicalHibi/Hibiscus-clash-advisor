@@ -290,3 +290,185 @@ Export taken 11/15/2026, 7:55:48 AM (5h 50m ago) · now 11/15/2026, 1:46:15 PM
 == Warnings ==
   - Unknown dataId 93000003 in "helpers" (not in game data 0.19.1); ignored.
 ```
+
+---
+
+# Step 2 Report: Legend League I meta + Lab / Pets / Equipment tab
+
+**Status:** Step 2 is built and has been run for real. `npm test` passes (91 tests in 6 files, up from 49) and `npm run build` succeeds. The API key works from this machine, with no 403. Design choices are in `DECISIONS.md` under "Step 2".
+
+## How to use it
+
+```powershell
+npm run meta                        # ~2 min: 1000 Legend I players → data/meta/battles.jsonl → public/meta.json
+npm run meta -- --max-players 50    # quick test (~6 s)
+npm run meta -- --aggregate-only    # rebuild meta.json from the saved battles, no API calls
+npm run meta -- --fresh             # ignore a half-finished run and start over
+npm run dev                         # then open the "Lab / Pets / Equipment" tab
+```
+
+If a run is interrupted (Ctrl+C, a crash, a closed window), run `npm run meta` again. It picks up where it stopped. I tested this by killing a run at 242/300 players: the rerun fetched only the remaining 58.
+
+## What was built
+
+- **`npm run probe`** (`scripts/probe.ts`): makes 10 real API calls and saves **redacted** samples to `tests/fixtures/api/`. Tags are pseudonyms, names are replaced, and the token is never written. All tests use these fixtures, never the live API.
+- **Army code parser** (`src/meta/armyCode.ts`): a port of ClashKing's clashy.go `ParseArmyRecipe` (MIT). It accepts a full link or a raw code. All Go test cases are ported, plus tests on real Legend I codes from the fixtures.
+- **Collector** (`scripts/meta.ts`, `scripts/lib/`):
+  - global + country rankings → Legend I players (tier 105000036), deduped and capped at `meta.maxPlayers`
+  - fetches each player's battle log and keeps Legend I attacks
+  - appends new rows deduped by tag + timestamp
+  - 10 req/s throttle, retries on 429/5xx, progress line with ETA, resumable, `--max-players`
+- **Aggregation** (`src/meta/aggregate.ts`): 14-day window with a 5-day half-life. Gives usage, 3★ rate and average quantity for troops, spells, sieges, pets and equipment, written to `public/meta.json` in the SPEC §8.3 shape.
+- **Super troops:** the data package has no IDs for them, so `config/super-troops.yaml` maps the 17 super troop IDs to their base troop. A test checks the IDs against the API's own troop order. Super troop usage counts toward the base troop's lab upgrade (Rocket Balloon usage → Balloon).
+- **Lab / Pets / Equipment tab:** three ranked lists, each item with a usage bar, usage %, 3★ rate, time and cost (ore for equipment), and a **Pin** button.
+  - Unused items are at the bottom, at normal contrast, marked "Not seen in Legend I · 0% used".
+  - Pins are saved in the browser.
+  - The same ranking drives the Plan tab's lab and pet queue order and its ore picks.
+  - The footer shows the meta date, attack count and player count.
+  - With no `meta.json`, everything falls back to the Step 1 order, and a note says to run `npm run meta`.
+- **Goblin test (mid-step request):** a Goblin Builder job and a Goblin Researcher job in the export each run out their timer inside the 24h window. After that, neither Goblin gets a new upgrade in the schedule, in "Now" or in the 24h forecast, and neither counts as a builder. I checked that the test fails if the rule is broken. The engine already followed SPEC §10.1, so no engine change was needed.
+
+## What the probe confirmed
+
+| Question | Answer |
+|---|---|
+| Battle log field names | `battleType`, `attack`, `armyShareCode`, `opponentPlayerTag`, `opponentName`, `opponentTownHallLevel`, `stars`, `destructionPercentage`, `lootedResources`, `extraLootedResources`, `availableLoot`, `battleTime` (seconds), `battleTimestamp` (`20261116T180741.000Z`) |
+| `battleType` values | **lowercase**: `legend`, `ranked`, `homeVillage` (not `LEGEND` as SPEC §3.3 says) |
+| Ranked player tier field | `leagueTier: { id: 105000036, name: "Legend League I" }`, plus a legacy `league: { id: 29000000, name: "Unranked" }` |
+| Is `legend` = Legend League I? | **Yes.** A Legend League II player's attacks are all `ranked`, and so are an Electro 33 player's. A player promoted to Legend I this week has `ranked` attacks before the promotion and `legend` after it. The filter is `attack && battleType === 'legend'` |
+| Battle log depth | **Up to 50 entries** (average 48.4 across 1000 players). That's about **16 Legend attacks ≈ 2 days** for an active Legend I player |
+| Rankings pagination | At most **200 players per location**. Without `limit`, one call returns all 200. With `limit`, it pages via `cursors.after`, and paging past 200 returns nothing. `/locations` returns all 268 in one page. Small countries' top 200 include lower tiers, so the tier filter matters |
+
+## Full run summary (`npm run meta`, Mon 16 Nov 2026, ~2 PM)
+
+```
+Found 1000 Legend I players.            (global + the first ~25–30 countries)
+Players fetched:      1000/1000
+Battle log entries:   48449 (avg 48.4 per player)
+Legend I attacks kept: 13566 (11 without an army code skipped)
+New rows:             26 · duplicates skipped: 13540
+API requests:         1037 this session
+battles.jsonl:        13629 rows
+Aggregated:           13629 attacks by 889 players in the last 14 days (half-life 5d)
+Units in meta.json:   122
+Unknown IDs (8) — not in clash-of-clans-data 0.19.1 or config/super-troops.yaml:
+  4000203  in 43 attacks · 4000205 in 36 · 4000197 in 31 · 4000199 in 24 · 4000204 in 18
+  4000195  in 3 · 4000206 in 1   (home troops, counted)
+  26000153 in 12 attacks (CC spell, not counted)
+Elapsed:              1m 46s
+```
+
+This was the second full run of the day. The first one, about an hour earlier, collected the ~13.5k attacks (its summary scrolled away), so this run mostly found duplicates, which confirms the dedupe works. The data covers attacks from **11 Nov to 16 Nov 2026**. 56% of all stored attacks were three-stars (unweighted).
+
+The unknown IDs come after Sky Wagon in the game's ID order. They look like event troops (e.g. "Barch Squad"). They can't be researched, so they never affect your lab order.
+
+## Top Legend I usage (as of 16 Nov 2026)
+
+**Top 15 troops / spells / sieges**
+
+| # | Unit | Type | Usage | 3★ rate | Avg qty |
+|---|---|---|---|---|---|
+| 1 | Archer | troop | 87.8% | 56.5% | 2.6 |
+| 2 | Totem Spell | spell | 82.6% | 56.8% | 2.5 |
+| 3 | Freeze Spell | spell | 70.5% | 57.0% | 1.8 |
+| 4 | Ice Golem | troop | 58.1% | 57.2% | 1.7 |
+| 5 | Rage Spell | spell | 57.4% | 54.9% | 1.5 |
+| 6 | Poison Spell | spell | 55.4% | 58.5% | 1.0 |
+| 7 | Healer | troop | 54.0% | 56.5% | 5.0 |
+| 8 | Balloon | troop | 50.2% | 57.3% | 5.1 |
+| 9 | Sky Wagon | siege | 49.6% | 54.4% | – |
+| 10 | Super Wall Breaker | super troop | 49.2% | 57.0% | 2.2 |
+| 11 | Baby Dragon | troop | 47.5% | 56.9% | 1.3 |
+| 12 | Revive Spell | spell | 46.5% | 53.1% | 1.5 |
+| 13 | Invisibility Spell | spell | 44.0% | 56.9% | 3.0 |
+| 14 | Headhunter | troop | 43.2% | 56.9% | 1.5 |
+| 15 | Apprentice Warden | troop | 35.7% | 55.9% | 1.1 |
+
+Sieges: Sky Wagon 49.6% · Troop Launcher 30.9% · Log Launcher 8.8% · Flame Flinger 6.0% · Siege Barracks 4.4%.
+
+**Top 5 pets**
+
+| # | Pet | Usage | 3★ rate |
+|---|---|---|---|
+| 1 | Phoenix | 83.4% | 56.7% |
+| 2 | Frosty | 79.3% | 56.2% |
+| 3 | Sneezy | 69.1% | 56.4% |
+| 4 | Greedy Raven | 48.7% | 55.6% |
+| 5 | Spirit Fox | 39.2% | 55.4% |
+
+**Top 10 equipment**
+
+| # | Equipment | Usage | 3★ rate |
+|---|---|---|---|
+| 1 | Action Figure | 90.3% | 55.9% |
+| 2 | Fire Heart | 62.8% | 55.7% |
+| 3 | Eternal Tome | 59.2% | 54.8% |
+| 4 | Revenge Deck | 55.7% | 56.8% |
+| 5 | Spiky Ball | 53.3% | 57.3% |
+| 6 | Giant Arrow | 52.7% | 55.0% |
+| 7 | Snake Bracelet | 38.0% | 56.8% |
+| 8 | Rocket Backpack | 37.5% | 55.9% |
+| 9 | Meteor Staff | 37.2% | 55.5% |
+| 10 | Rage Gem | 36.4% | 58.8% |
+
+3★ rates sit in a narrow band (52–59%) for almost everything. That's expected at this level: they mostly reflect who's attacking whom, not the unit. Usage is the more useful signal, and it's what the ranking uses.
+
+## How your plan changed (`samples/myexport.json`)
+
+The builder plan is unchanged. Only the lab, pet house and blacksmith order changed.
+
+**Laboratory (top of the ranked list)**
+- Before (stub meta, shortest first): Wizard 8→9, Skeleton Spell 5→6, Miner 5→6, Giant 9→10, Flame Flinger 1→2, …
+- After: **Archer 11→12** (88.0%), **Balloon 10→11** (80.6%, incl. Rocket Balloon 30.4%), **Ice Golem 6→7** (58.1%), **Baby Dragon 7→8** (57.1%, incl. Inferno Dragon), **Poison Spell 7→8** (55.4%), **Sky Wagon 1→2** (49.6%), Minion 10→11 (44.1%, incl. Super Minion), Apprentice Warden 3→4, Dragon 11→12, Troop Launcher 1→2, … Unused at the bottom: Jump Spell, Bat Spell, Wall Wrecker.
+- 30-day lab simulation (Gold Pass off): before, Wizard → Skeleton Spell → Miner → Giant → Flame Flinger → Barbarian → Hog Rider → P.E.K.K.A → Wizard. After: **Archer 12 → 13 → 14** (see "Check" below).
+
+**Pet House**
+- Before: Mighty Yak 1→2, Poison Lizard 2→3, Diggy 1→2, Electro Owl 2→3, …
+- After: **Frosty 10→11** (79.3%), **Greedy Raven 1→2** (48.7%), Poison Lizard 2→3 (29.3%), Angry Jelly 1→2 (23.1%), Diggy 1→2 (10.3%), Electro Owl 2→3. Unused: Mighty Yak, L.A.S.S.I.
+- 30-day pet simulation: before, Mighty Yak / Poison Lizard / Diggy levels. After: Frosty 11 → 12 → 13 → 14.
+
+**Blacksmith (ore picks in the 24h forecast)**
+- Before: Frozen Arrow, Haste Vial and Heroic Torch 1→2 (360 shiny ore in total).
+- After: **Action Figure 26→27** (3600 shiny / 600 glowy / 150 starry), **Eternal Tome 17→18** (2700 / 600 / 0), **Spiky Ball 16→17** (2600 / 0 / 0). Total: **8.9K shiny · 1.2K glowy · 150 starry**. Next: Snake Bracelet, Rocket Backpack, Meteor Staff, Heroic Torch 1→2 (31.7%), Monolith Arrow 1→2.
+
+Plan output excerpt (`npm run plan -- samples/myexport.json`, 16 Nov 2026, 2:01 PM):
+
+```
+== Resources needed (upgrades starting in the next 1d) ==
+  DE                685K   first needed 2:01 PM (Barbarian King 83)
+  gold               52M   first needed Tue 9:25 AM (Firespitter 3)
+  Ore (top 3 equipment): 8.9K shiny · 1.2K glowy · 150 starry
+    - Action Figure 26→27: 3600 shiny / 600 glowy / 150 starry
+    - Eternal Tome 17→18: 2700 shiny / 600 glowy / 0 starry
+    - Spiky Ball 16→17: 2600 shiny / 0 glowy / 0 starry
+
+== Lab (top 5) ==
+  Archer 11→12 · 4d 12h · 9M elixir — Legend I usage 88.0% (incl. Super Archer 0.2%)
+  Balloon 10→11 · 8d 12h · 14M elixir — Legend I usage 80.6% (incl. Rocket Balloon 30.4%)
+  Ice Golem 6→7 · 7d 12h · 140K DE — Legend I usage 58.1%
+  Baby Dragon 7→8 · 6d · 9.5M elixir — Legend I usage 57.1% (incl. Inferno Dragon 9.6%)
+  Poison Spell 7→8 · 6d 12h · 100K DE — Legend I usage 55.4%
+== Pet House (top 3) ==
+  Frosty 10→11 · 7d · 200K DE — Legend I usage 79.3%
+  Greedy Raven 1→2 · 8d · 260K DE — Legend I usage 48.7%
+  Poison Lizard 2→3 · 1d 12h · 75K DE — Legend I usage 29.3%
+```
+
+(The lab and pet house are still busy with Druid 4 until Thu and Sneezy 7 until Tue, so these picks apply when they free up.)
+
+## Recommended run frequency: daily
+
+A battle log holds the last ~50 battles. For a Legend I player that's about 2 days of Legend attacks (8 a day). **Run `npm run meta` once a day**, and never leave more than 2 days between runs. Weekly runs (the SPEC §8.1 default) would capture only ~2 of every 7 days. A daily run takes about 2 minutes and ~1,040 requests.
+
+To automate it with Windows Task Scheduler: create a daily task with the action `cmd /c cd /d "C:\Users\Ben\Documents\torn\Clash Stuff\Clash Advisor" && npm run meta >> data\meta\last-run.log 2>&1` (`*.log` is git-ignored). The key is tied to your home IP, so the task only works on this network.
+
+`data/meta/battles.jsonl` is **git-ignored**. It's already 3.1 MB and grows ~1.8 MB a day with daily runs. Rows older than 60 days are pruned automatically. `public/meta.json` (18 KB) is committed.
+
+## Check
+
+- [ ] **Archer at #1 in the lab.** Archer is in 88% of Legend I armies, but only ~2.6 per army: it's a filler. Because the meta score is plain usage share (SPEC §8.3), the planner would research Archer 12 → 13 → 14 back to back before Balloon. If that's not what you want, pin Balloon (or whatever you care about) in the Lab tab, or decide whether the score should weight by housing space or average quantity. That's a one-line change in `metaStats`, but it changes the SPEC formula, so I didn't make it.
+- [ ] **Frosty 11 → 14 in a row** in the Pet House, for the same reason. Pin Greedy Raven if you'd rather spread levels.
+- [ ] **Super troop credit:** Balloon gets Rocket Balloon's 30% on top of its own 50%. Agree that super troop usage should drive the base troop's lab priority?
+- [ ] **Equipment ranking ignores ore cost.** Action Figure 26→27 costs 150 starry ore, but it's ranked first purely on usage. Pin cheaper pieces if starry ore is tight.
+- [ ] **Unknown event troop IDs** (4000195–4000206) are listed in every run summary. If one turns out to be a permanent, lab-upgradable troop, it needs a clash-of-clans-data update (`npm run sync`).
+- [ ] **Hero Hall 13 is out today (Nov 16):** run `npm run sync` once clash-of-clans-data publishes it. That's Step 3 work for the diff output, but the cap logic should pick it up automatically.
