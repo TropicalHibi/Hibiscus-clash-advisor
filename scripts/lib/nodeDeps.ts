@@ -84,6 +84,13 @@ export function nodeRefreshDeps(o: NodeOpts): RefreshDeps {
         return false;
       }
     },
+    gitPull: () => nodeGitPull(o.root, exec),
+    installDeps: () => {
+      exec('npm install --no-audit --no-fund', { cwd: o.root, stdio: 'inherit', timeout: 10 * 60_000 });
+    },
+    syncOffline: () => {
+      exec('npm run sync -- --offline', { cwd: o.root, stdio: 'inherit', timeout: 5 * 60_000 });
+    },
     runMeta: () => {
       // stdout (progress + summary) is shown live; stderr is captured for the one-line warning.
       const r = spawn('npm run meta', { cwd: o.root, shell: true, encoding: 'utf8', stdio: ['ignore', 'inherit', 'pipe'], timeout: 30 * 60_000 });
@@ -92,6 +99,28 @@ export function nodeRefreshDeps(o: NodeOpts): RefreshDeps {
     },
     log: o.log ?? ((line) => console.log(line)),
   };
+}
+
+/**
+ * `git pull --ff-only` with a timeout and no credential prompt. Returns how many commits came in and
+ * whether package.json / package-lock.json changed. Throws with git's first stderr line on failure.
+ */
+export function nodeGitPull(root: string, exec: ExecSync = realExecSync as unknown as ExecSync): { pulled: number; lockChanged: boolean } {
+  const git = (cmd: string, timeout = 10_000) =>
+    String(exec(`git ${cmd}`, { cwd: root, encoding: 'utf8', timeout, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } } as never)).trim();
+  try {
+    const before = git('rev-parse HEAD');
+    git('pull --ff-only', 30_000);
+    const after = git('rev-parse HEAD');
+    if (before === after) return { pulled: 0, lockChanged: false };
+    const pulled = Number(git(`rev-list --count ${before}..${after}`)) || 1;
+    const lockChanged = git(`diff --name-only ${before} ${after} -- package.json package-lock.json`) !== '';
+    return { pulled, lockChanged };
+  } catch (e) {
+    const stderr = String((e as { stderr?: unknown }).stderr ?? '');
+    const line = stderr.split(/\r?\n/).map((l) => l.trim()).find((l) => l && !/^hint:/i.test(l));
+    throw new Error(line ?? ((e as { code?: string }).code === 'ETIMEDOUT' ? 'timed out' : (e as Error).message));
+  }
 }
 
 /** Never throws: `npm run dev` must always start (SPEC §9a). */
@@ -128,7 +157,14 @@ export function nodeSnapshotIO(root: string): SnapshotIO {
       fs.writeFileSync(path.join(dir, name), JSON.stringify(s) + '\n');
     },
     remove: (name) => fs.rmSync(path.join(dir, name), { force: true }),
-    writeChanges: (f: DataChangesFile) => fs.writeFileSync(path.join(root, 'public', 'data-changes.json'), JSON.stringify(f, null, 2) + '\n'),
+    writeChanges: (f: DataChangesFile) => {
+      const file = path.join(root, 'public', 'data-changes.json');
+      // Same diff already saved (e.g. by the daily Action, then again locally after git pull): keep the file,
+      // so only the date wouldn't differ and the working tree stays clean.
+      const old = readJson<DataChangesFile>(file);
+      if (old && old.version === f.version && old.previousVersion === f.previousVersion && JSON.stringify(old.changes) === JSON.stringify(f.changes)) return;
+      fs.writeFileSync(file, JSON.stringify(f, null, 2) + '\n');
+    },
   };
 }
 
@@ -137,9 +173,7 @@ export function nodeSyncDeps(o: NodeOpts): SyncDeps {
   const log = o.log ?? ((line: string) => console.log(line));
   return {
     // Reads the installed package fresh (after an install the cached copy would be stale).
-    snapshot: () => {
-      recordSnapshot(nodeSnapshotIO(o.root), toSnapshot(loadGameDataFresh(), isoDate(new Date())), log);
-    },
+    snapshot: () => recordSnapshot(nodeSnapshotIO(o.root), toSnapshot(loadGameDataFresh(), isoDate(new Date())), log),
     ...stateIO(o.root),
     installedVersion: () => installedVersion(o.root),
     latestInMajor: (major) => npmLatestInMajor(o.root, major, exec),

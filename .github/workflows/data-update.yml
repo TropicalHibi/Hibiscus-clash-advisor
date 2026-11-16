@@ -1,0 +1,105 @@
+# Daily game-data update (SPEC §9b). Keeps clash-of-clans-data on the live site current without a local
+# machine. No secrets: it only talks to the npm registry and this repo (never `npm run meta`).
+#   no newer version         → exits successfully, nothing else happens
+#   newer + everything passes → commits package.json, package-lock.json, public/data-changes.json to main,
+#                               then starts the Pages workflow (a GITHUB_TOKEN push alone wouldn't trigger it)
+#   anything fails            → commits nothing; opens or updates the issue "Data update failed: <version>"
+name: Daily game-data update
+
+on:
+  schedule:
+    - cron: '17 10 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write # push the data commit
+  issues: write # report failures
+  actions: write # start the Pages workflow
+
+concurrency:
+  group: data-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - id: install
+        run: npm ci
+
+      # Same code path as a local `npm run sync`: snapshot the installed version, install the newest one in
+      # the same major, normalize + validate it (known-good restore on failure), diff, write
+      # public/data-changes.json. Unattended, a merge missing from config/merges.yaml is also a failure.
+      - id: check
+        name: Check npm and update clash-of-clans-data
+        run: npx tsx scripts/data-update.ts check --out "$RUNNER_TEMP/data-update.json"
+
+      - id: test
+        name: npm test on the new data
+        if: steps.check.outputs.status == 'updated'
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee "$RUNNER_TEMP/test.log"
+
+      - id: commit
+        name: Commit and push the data update
+        if: steps.check.outputs.status == 'updated'
+        env:
+          MESSAGE: ${{ steps.check.outputs.message }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json public/data-changes.json
+          git commit -m "$MESSAGE"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      # Pushes made with GITHUB_TOKEN don't trigger other workflows; a workflow_dispatch does.
+      - id: deploy
+        name: Deploy (start the Pages workflow on main)
+        if: steps.check.outputs.status == 'updated'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main
+
+      - name: Report the failure as an issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          INSTALL: ${{ steps.install.outcome }}
+          CHECK: ${{ steps.check.outcome }}
+          TEST: ${{ steps.test.outcome }}
+          COMMIT: ${{ steps.commit.outcome }}
+          DEPLOY: ${{ steps.deploy.outcome }}
+        run: |
+          committed=""
+          if [ "$INSTALL" = failure ]; then step="npm ci"
+          elif [ "$CHECK" = failure ]; then step=""   # the result file names the step
+          elif [ "$TEST" = failure ]; then step="npm test on the new data"
+          elif [ "$COMMIT" = failure ]; then step="commit and push"
+          elif [ "$DEPLOY" = failure ]; then step="start the Pages workflow"; committed="--committed"
+          else step="unknown step"; fi
+          if ! npx tsx scripts/data-update.ts issue --result "$RUNNER_TEMP/data-update.json" ${step:+--step "$step"} \
+               --test-log "$RUNNER_TEMP/test.log" --run-url "$RUN_URL" $committed \
+               --title-out "$RUNNER_TEMP/title.txt" --body-out "$RUNNER_TEMP/body.md"; then
+            echo "Data update failed: npm check" > "$RUNNER_TEMP/title.txt"
+            printf 'The daily game-data update failed at **%s**. Nothing was committed.\n\nRun: %s\n' "${step:-unknown step}" "$RUN_URL" > "$RUNNER_TEMP/body.md"
+          fi
+          title="$(cat "$RUNNER_TEMP/title.txt")"
+          # One issue per version: update the open one instead of opening a duplicate.
+          num="$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
+                 --jq "map(select(.title == \"$title\")) | .[0].number // empty")"
+          if [ -n "$num" ]; then
+            gh issue edit "$num" --body-file "$RUNNER_TEMP/body.md"
+            gh issue comment "$num" --body "Failed again: $RUN_URL"
+          else
+            gh issue create --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          fi

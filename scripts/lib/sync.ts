@@ -1,6 +1,7 @@
 // `npm run sync` logic (SPEC §9): update clash-of-clans-data within the current major, validate it,
 // and keep the last known-good version. Side effects are injected so every branch can be tested.
 import { isNewerVersion, type RefreshState } from './refresh';
+import type { SnapshotResult } from './snapshots';
 
 export interface DataCheck {
   /** False when the installed data can't be used: normalize threw, or levels are broken. */
@@ -23,7 +24,7 @@ export interface SyncDeps {
   readState(): RefreshState;
   writeState(s: RefreshState): void;
   /** Writes the normalized snapshot of the installed data and prints the diff vs the previous one. */
-  snapshot?(): void;
+  snapshot?(): SnapshotResult | void;
   log(line: string): void;
 }
 
@@ -99,6 +100,15 @@ export function syncData(d: SyncDeps, opts: SyncOptions = {}): SyncOutcome {
     return restore(d, before ?? 'none', current.error ?? 'unknown error', lastGood);
   }
 
+  // Snapshot the installed version first, so there is always a "before" to diff against, even on a fresh
+  // checkout with no data/snapshots/ (the daily GitHub Action). A no-op when it's already recorded.
+  if (current.ok) {
+    try {
+      d.snapshot?.();
+    } catch (e) {
+      d.log(`  [WARN] snapshot of ${before} failed: ${(e as Error).message}`);
+    }
+  }
   d.log(`Installing clash-of-clans-data ${latest} (newest ${majorOf(latest)}.x)…`);
   try {
     d.install(latest);

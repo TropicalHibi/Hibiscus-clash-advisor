@@ -70,3 +70,85 @@ export function checkLevels(data: GameData): ValidationIssue[] {
   }
   return issues;
 }
+
+export interface MissingMerge {
+  /** TH where the sources' counts drop without a recipe explaining it. */
+  th: number;
+  /** Sources consumed beyond what merges.yaml explains, with how many per merged copy when a candidate fits. */
+  sources: { id: string; name: string; consumed: number }[];
+  /** Defenses first available at that TH that aren't in merges.yaml, most likely first (see explainMissingMerges). */
+  candidates: { id: string; name: string; dataId: number; count: number; recipe: { id: string; name: string; qty: number }[] }[];
+}
+
+/**
+ * When merges.yaml is missing a merge (§7): which source counts drop unexplained, and which new defense is
+ * the likely merged result. Per TH (lowest first): sources with unexplained consumption, and defenses (not
+ * already a recipe) first available at that TH whose count divides every source's extra consumption. Used
+ * by the data-update workflow to say plainly what to add to config/merges.yaml.
+ * The data has no "merged from" field, so candidates are ranked: items new in this data release
+ * (`newKeys`, from the snapshot diff) first, then names containing a source's name (Super Wizard Tower ⊃
+ * Wizard Tower), then recipes using at most 2 of each source (true of every known merge).
+ */
+export function explainMissingMerges(data: GameData, newKeys: Set<string> = new Set()): MissingMerge[] {
+  const out: MissingMerge[] = [];
+  const recipeIds = new Set(data.merges.map((m) => m.dataId));
+  const sourceIds = new Set(data.merges.flatMap((m) => m.sources.map((s) => s.dataId)));
+  const firstTH = (rec: Record<number, number> | undefined) =>
+    Object.entries(rec ?? {})
+      .filter(([, n]) => n > 0)
+      .map(([th]) => Number(th))
+      .sort((a, b) => a - b)[0];
+  const seen = new Set<string>();
+  for (let th = 1; th <= data.maxTH; th++) {
+    const sources: MissingMerge['sources'] = [];
+    for (const item of data.byDataId.values()) {
+      if (!item.countAfterMergesPerTH) continue;
+      const total = countAt(item.countPerTH, th) ?? 0;
+      const after = countAt(item.countAfterMergesPerTH, th);
+      if (after === undefined) continue;
+      const explained = data.merges.reduce((sum, m) => {
+        const q = m.sources.find((s) => s.dataId === item.dataId)?.qty ?? 0;
+        return sum + q * (countAt(data.byDataId.get(m.dataId)!.countPerTH, th) ?? 0);
+      }, 0);
+      const extra = total - after - explained;
+      if (extra > 0) sources.push({ id: item.id, name: item.name, consumed: extra });
+    }
+    if (!sources.length) continue;
+    const key = sources.map((s) => `${s.id}:${s.consumed}`).join(',');
+    if (seen.has(key)) continue; // same gap carried to higher THs
+    seen.add(key);
+    const candidates: MissingMerge['candidates'] = [];
+    for (const item of data.byDataId.values()) {
+      if ((item.category !== 'defense' && item.category !== 'mergedDefense') || recipeIds.has(item.dataId) || sourceIds.has(item.dataId)) continue;
+      if (sources.some((s) => s.id === item.id) || firstTH(item.countPerTH) !== th) continue;
+      const count = countAt(item.countPerTH, th) ?? 0;
+      if (count <= 0 || !sources.every((s) => s.consumed % count === 0)) continue;
+      candidates.push({ id: item.id, name: item.name, dataId: item.dataId, count, recipe: sources.map((s) => ({ id: s.id, name: s.name, qty: s.consumed / count })) });
+    }
+    const score = (c: MissingMerge['candidates'][0]) => [
+      newKeys.has(String(c.dataId)) ? 1 : 0,
+      sources.some((src) => c.name.toLowerCase().includes(src.name.toLowerCase())) ? 1 : 0,
+      c.recipe.every((r) => r.qty <= 2) ? 1 : 0,
+    ];
+    candidates.sort((a, b) => {
+      const x = score(a);
+      const y = score(b);
+      for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return y[i] - x[i];
+      return a.name < b.name ? -1 : 1;
+    });
+    out.push({ th, sources, candidates });
+  }
+  return out;
+}
+
+/** One plain-language line per missing merge, e.g. "TH18: Super Wizard Tower (dataId …) looks like a new merge of 2× Wizard Tower…". */
+export function describeMissingMerges(found: MissingMerge[]): string[] {
+  return found.map((m) => {
+    const src = m.sources.map((s) => `${s.name} (${s.consumed} merged away)`).join(', ');
+    if (!m.candidates.length) return `TH${m.th}: ${src} drop with no recipe in config/merges.yaml, and no new TH${m.th} defense fits as the merged result. Add the recipe by hand.`;
+    const fmt = (x: MissingMerge['candidates'][0]) => `${x.name} (${x.id}, dataId ${x.dataId}) = ${x.recipe.map((r) => `${r.qty}× ${r.name}`).join(' + ')}`;
+    const [best, ...rest] = m.candidates;
+    const others = rest.length ? ` Other fits (less likely): ${rest.map(fmt).join('; ')}.` : '';
+    return `TH${m.th}: merge missing from config/merges.yaml. New merged defense, most likely: ${fmt(best)}. Sources: ${src}.${others}`;
+  });
+}
