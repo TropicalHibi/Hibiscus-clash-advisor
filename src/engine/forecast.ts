@@ -1,9 +1,10 @@
 // 24h needs + wall dump line (SPEC §10.3, §10.4).
+// Ore is never forecast: it's time-gated (daily attacks, wars, raids, events), so a "needed in 24 h" total
+// would be meaningless. Equipment ore costs are shown on the Lab / Pets / Equipment tab instead (§6.9).
 import { levelInfo, maxLevelAt } from '../data/normalize';
-import type { GameData, OreCost, Resource } from '../data/types';
+import type { GameData, Resource } from '../data/types';
 import type { AccountState } from '../state/parseExport';
 import { fmtNum } from './format';
-import type { QueueCandidate } from './queues';
 import type { TimelineEntry } from './scheduler';
 
 export interface NeededEntry {
@@ -19,11 +20,10 @@ export interface Forecast {
   totals: Partial<Record<Resource, number>>;
   /** Per resource: upgrades in start order with running totals ("needed by"). */
   neededBy: Partial<Record<Resource, NeededEntry[]>>;
-  ore: OreCost;
-  oreItems: QueueCandidate[];
 }
 
-export function forecast(timeline: TimelineEntry[], windowSec: number, equipment: QueueCandidate[], topN: number): Forecast {
+/** Gold / elixir / dark elixir for every builder, lab and pet upgrade that starts in the window. */
+export function forecast(timeline: TimelineEntry[], windowSec: number): Forecast {
   const totals: Partial<Record<Resource, number>> = {};
   const neededBy: Partial<Record<Resource, NeededEntry[]>> = {};
   const starts = timeline.filter((e) => !e.inProgress && e.start < windowSec && e.cost > 0).sort((a, b) => a.start - b.start);
@@ -37,14 +37,7 @@ export function forecast(timeline: TimelineEntry[], windowSec: number, equipment
       slotId: e.slotId,
     });
   }
-  const oreItems = equipment.slice(0, Math.max(0, topN));
-  const ore: OreCost = { shinyOre: 0, glowyOre: 0, starryOre: 0 };
-  for (const c of oreItems) {
-    ore.shinyOre += c.ore?.shinyOre ?? 0;
-    ore.glowyOre += c.ore?.glowyOre ?? 0;
-    ore.starryOre += c.ore?.starryOre ?? 0;
-  }
-  return { windowSec, totals, neededBy, ore, oreItems };
+  return { windowSec, totals, neededBy };
 }
 
 export interface WallDump {

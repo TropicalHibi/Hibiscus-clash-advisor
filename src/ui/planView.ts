@@ -75,14 +75,8 @@ export function renderPlan(p: Plan): string {
     const first = p.forecast.neededBy[r]![0];
     out.push(`<div class="res"><div class="k">${esc(RESOURCE_LABEL[r])}</div><div class="v">${esc(fmtNum(v))}</div><div class="small muted">first by ${esc(at(first.at))}</div></div>`);
   }
-  const o = p.forecast.ore;
-  const oreTiles: [string, number][] = [
-    ['shiny ore', o.shinyOre],
-    ['glowy ore', o.glowyOre],
-    ['starry ore', o.starryOre],
-  ];
-  for (const [k, v] of oreTiles) out.push(`<div class="res"><div class="k">${k}</div><div class="v">${esc(fmtNum(v))}</div><div class="small muted">top ${p.forecast.oreItems.length} equipment</div></div>`);
   out.push('</div>');
+  if (!RES_ORDER.some((r) => p.forecast.totals[r])) out.push('<div class="card muted">Nothing new starts in the window.</div>');
 
   const needed = RES_ORDER.flatMap((r) => (p.forecast.neededBy[r] ?? []).map((n) => ({ r, ...n }))).sort((a, b) => a.at - b.at);
   if (needed.length) {
@@ -93,12 +87,7 @@ export function renderPlan(p: Plan): string {
       );
     out.push('</tbody></table></div>');
   }
-  if (p.forecast.oreItems.length) {
-    out.push('<div class="card small"><b>Ore picks</b> (top of the Blacksmith ranking: Legend I usage, pins first; unseen items cheapest first):<ul>');
-    for (const c of p.forecast.oreItems)
-      out.push(`<li>${icon(c.item.key, 20)}${esc(c.item.name)} ${c.instance.level}→${c.toLevel}: ${c.ore?.shinyOre ?? 0} shiny · ${c.ore?.glowyOre ?? 0} glowy · ${c.ore?.starryOre ?? 0} starry</li>`);
-    out.push('</ul></div>');
-  }
+  out.push('<p class="muted small">Ore isn\'t forecast: it comes from daily attacks, wars, raids and events, not from farming. Equipment ore costs are on the Lab / Pets / Equipment tab.</p>');
 
   // Book-ready heroes
   out.push('<h2>Book-ready heroes: your call</h2>');

@@ -48,11 +48,12 @@ function section(title: string, list: PinList, items: QueueCandidate[], subOf: (
   return `${head}<div class="card"><ol class="rank-list">${items.map((c, i) => row(c, i, list, subOf(c))).join('')}</ol></div>`;
 }
 
+/** Next level's ore cost (informational: ore is time-gated, so it's never forecast). */
 const ore = (c: QueueCandidate) => {
   const o = c.ore;
   if (!o) return '';
   const parts = [o.shinyOre && `${fmtNum(o.shinyOre)} shiny`, o.glowyOre && `${fmtNum(o.glowyOre)} glowy`, o.starryOre && `${fmtNum(o.starryOre)} starry`].filter(Boolean);
-  return parts.join(' · ') || 'free';
+  return `ore cost: ${parts.join(' · ') || 'free'}`;
 };
 
 const KIND_LABEL: Record<LabKind, string> = { troop: 'troop', spell: 'spell', siege: 'siege' };
@@ -83,7 +84,7 @@ export function renderLab(p: Plan, meta: MetaFile, heroName: (id: string) => str
   if (meta.attacks > 0 && meta.generatedAt) {
     out.push(`<div class="card small">Ranked by Legend League I meta: <b>${fmtNum(meta.attacks)}</b> attacks by <b>${fmtNum(meta.players)}</b> players, last ${meta.windowDays} days (recent days weigh more; half-life ${meta.halfLifeDays}d). Generated ${esc(new Date(meta.generatedAt).toLocaleString())}.
       Troops and spells are ranked by their average share of army housing space (so filler troops count for little); sieges, pets and equipment by the share of attacks that use them. The lab picks across the three lab sections by each unit's score ÷ the Legend I top score of its kind, times a kind weight (troops ${esc(String(weights.troop))}, spells ${esc(String(weights.spell))}, sieges ${esc(String(weights.siege))}; change them under Settings).
-      <span class="muted">Items not seen in Legend I are listed at the bottom (lab and pets shortest first, equipment cheapest first). Pins move an item to the top and also change the Plan tab's lab/pet order and ore picks.</span></div>`);
+      <span class="muted">Items not seen in Legend I are listed at the bottom (lab and pets shortest first, equipment cheapest first). Pins move an item to the top; lab and pet pins also change the Plan tab's lab / pet order. Equipment rows show the next level's ore cost (ore is time-gated, so it's never part of the Plan tab's forecast).</span></div>`);
   } else {
     out.push(`<div class="card small warn">No Legend I meta yet. Run <code>npm run meta</code> to rank by usage. Until then: lab and pets shortest first, equipment cheapest first. Pins still work.</div>`);
   }

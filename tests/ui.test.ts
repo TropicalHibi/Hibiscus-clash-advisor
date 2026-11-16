@@ -55,6 +55,12 @@ describe('UI', () => {
     expect(plan.textContent).toContain('Rush mode');
     expect(plan.textContent).toContain('Town Hall');
     expect(plan.textContent).toContain('Resources needed');
+    // Ore is time-gated: no ore tiles or ore rows in the forecast.
+    const tiles = [...plan.querySelectorAll('.res-grid .res .k')].map((k) => k.textContent);
+    expect(tiles.length).toBeGreaterThan(0);
+    expect(tiles.some((t) => /ore/i.test(t ?? ''))).toBe(false);
+    expect(plan.textContent).not.toContain('Ore picks');
+    expect(plan.textContent).toContain("Ore isn't forecast");
     expect(plan.textContent).toContain('Overflow → walls');
     expect(plan.querySelectorAll('.slot-card').length).toBeGreaterThanOrEqual(6);
   });
@@ -78,6 +84,10 @@ describe('UI', () => {
     expect(tab.textContent).toContain('Laboratory');
     expect(tab.textContent).toContain('Pet House');
     expect(tab.textContent).toContain('Blacksmith');
+    // Equipment keeps its informational ore cost per next level, with no "needed by" time.
+    const smith = [...tab.querySelectorAll('.rank-list')].at(-1)!;
+    expect(smith.textContent).toContain('ore cost:');
+    expect(smith.textContent).not.toMatch(/needed by|first by/i);
     const titles = () => [...tab.querySelectorAll('.rank-list')[0].querySelectorAll('.title b')].map((b) => b.textContent);
     expect(titles()[0]).toBe('Archer'); // credited with Super Archer's 10% (Balloon is busy in this fixture)
     expect(tab.textContent).toContain('Includes Super Archer 5.0% of space, 10% used');

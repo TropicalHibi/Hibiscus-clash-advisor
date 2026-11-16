@@ -15,7 +15,7 @@ heroOrder:                # heroes tier order; the Archer Queen's Tier 0 rule is
 
 forecast:
   windowHours: 24
-  blacksmithTopN: 3       # equipment picks included in ore totals
+
 
 lab:
   pinned: []              # item ids pinned to the top of the lab queue

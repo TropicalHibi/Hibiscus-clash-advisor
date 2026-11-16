@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { GOLD_PASS_MAX_BOOST } from '../src/engine/constants';
 import { forecast, wallDump } from '../src/engine/forecast';
+import { planToText } from '../src/engine/planText';
+import { coerceSettings } from '../src/state/settings';
 import { buildPlan } from '../src/engine/plan';
 import { simulate, type TimelineEntry } from '../src/engine/scheduler';
 import { EMPTY_META } from '../src/meta/meta';
@@ -94,7 +96,7 @@ describe('24h forecast', () => {
       { slotId: 'B3', lockUid: 'L', start: 70, end: 100, itemKey: 'd', itemName: 'D', toLevel: 5, cost: 150_000, resource: 'darkElixir', reason: '', kind: 'upgrade', inProgress: false },
       { slotId: 'B2', lockUid: 'L', start: DAY, end: DAY + 9, itemKey: 'e', itemName: 'E', toLevel: 5, cost: 7_000_000, resource: 'elixir', reason: '', kind: 'upgrade', inProgress: false },
     ];
-    const f = forecast(tl, DAY, [], 3);
+    const f = forecast(tl, DAY);
     expect(f.totals).toEqual({ gold: 5_000_000, darkElixir: 150_000 });
     expect(f.neededBy.gold!.map((n) => [n.at, n.cumulative])).toEqual([
       [10, 3_000_000],
@@ -110,11 +112,27 @@ describe('24h forecast', () => {
     expect(Object.keys(sums).length).toBeGreaterThan(0);
   });
 
-  it('ore totals cover the top-N equipment picks', () => {
+  it('ore is never forecast (time-gated): no ore in the totals, the "needed by" rows or the CLI resources', () => {
     const plan = buildPlan(data, fixture(), settings(), EMPTY_META, T0);
-    const shiny = plan.forecast.oreItems.reduce((s, c) => s + (c.ore?.shinyOre ?? 0), 0);
-    expect(plan.forecast.ore.shinyOre).toBe(shiny);
-    expect(plan.forecast.oreItems.length).toBeLessThanOrEqual(3);
+    expect(plan.equipment.length).toBeGreaterThan(0); // there are equipment upgrades with ore costs…
+    expect(plan.equipment[0].ore).toBeDefined();
+    const oreKeys = ['shinyOre', 'glowyOre', 'starryOre'];
+    expect(Object.keys(plan.forecast).sort()).toEqual(['neededBy', 'totals', 'windowSec']); // …but none in the forecast
+    expect(Object.keys(plan.forecast.totals).filter((k) => oreKeys.includes(k))).toEqual([]);
+    expect(Object.keys(plan.forecast.neededBy).filter((k) => oreKeys.includes(k))).toEqual([]);
+    const text = planToText(plan);
+    const resources = text.slice(text.indexOf('== Resources needed'), text.indexOf('== Book-ready'));
+    expect(resources).not.toMatch(/ore|shiny|glowy|starry/i);
+    expect(resources).toContain('gold');
+    // Ore stays informational in the Blacksmith list: per-piece "ore cost", no "needed by" time.
+    const smith = text.slice(text.indexOf('== Blacksmith'));
+    expect(smith).toContain('ore cost:');
+    expect(smith.split('\n').find((l) => l.includes('ore cost:'))).not.toMatch(/needed/i);
+  });
+
+  it('an old saved forecast.blacksmithTopN setting is ignored (the setting is gone)', () => {
+    const s = coerceSettings({ forecast: { windowHours: 12, blacksmithTopN: 5 } });
+    expect(s.forecast).toEqual({ windowHours: 12 });
   });
 });
 

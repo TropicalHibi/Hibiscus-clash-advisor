@@ -375,7 +375,7 @@ describe('scheduler details', () => {
     const plan = buildPlan(data, fx, settings(), EMPTY_META, fx.exportTimestamp!);
     expect(plan.startNow.length).toBeGreaterThan(0);
     expect(plan.startNow.every((e) => e.start === 0 && !e.inProgress)).toBe(true);
-    const f = forecast([{ ...s.timeline[0], inProgress: false, start: DAY, cost: 5, resource: 'gold' }], DAY, [], 3);
+    const f = forecast([{ ...s.timeline[0], inProgress: false, start: DAY, cost: 5, resource: 'gold' }], DAY);
     expect(f.totals).toEqual({});
   });
 });

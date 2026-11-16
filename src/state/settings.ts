@@ -17,7 +17,7 @@ export interface Settings {
   /** Apply the export's helpers (Builder's Apprentice, Lab Assistant) and active boosts in the scheduler (SPEC §10.1). */
   simulateHelpers: boolean;
   heroOrder: string[]; // hero file ids
-  forecast: { windowHours: number; blacksmithTopN: number };
+  forecast: { windowHours: number };
   lab: { pinned: string[]; kindWeights: LabKindWeights };
   petHouse: { pinned: string[] };
   blacksmith: { pinned: string[] };
@@ -29,7 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
   goldPass: 'none',
   simulateHelpers: true,
   heroOrder: DEFAULT_HERO_ORDER,
-  forecast: { windowHours: 24, blacksmithTopN: 3 },
+  forecast: { windowHours: 24 },
   lab: { pinned: [], kindWeights: DEFAULT_LAB_WEIGHTS },
   petHouse: { pinned: [] },
   blacksmith: { pinned: [] },
@@ -61,7 +61,7 @@ export function coerceSettings(input: unknown): Settings {
     heroOrder: heroOrder(s.heroOrder),
     forecast: {
       windowHours: num(s.forecast?.windowHours, DEFAULT_SETTINGS.forecast.windowHours),
-      blacksmithTopN: num(s.forecast?.blacksmithTopN, DEFAULT_SETTINGS.forecast.blacksmithTopN),
+
     },
     lab: {
       pinned: strList(s.lab?.pinned, []),

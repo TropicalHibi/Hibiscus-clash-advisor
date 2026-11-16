@@ -143,7 +143,7 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
     sim,
     startNow: sim.timeline.filter((e) => !e.inProgress && e.start === 0),
     topCandidates: builderCandidates(data, state, settings, { builderBoost: boosts.builder }).slice(0, 15),
-    forecast: forecast(sim.timeline, windowSec, equipment, settings.forecast.blacksmithTopN),
+    forecast: forecast(sim.timeline, windowSec),
     bookReady,
     wallDump: wallDump(data, account),
     lab,

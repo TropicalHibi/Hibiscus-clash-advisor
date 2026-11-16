@@ -47,10 +47,6 @@ export function planToText(p: Plan): string {
     const first = p.forecast.neededBy[r]![0];
     L.push(`  ${RESOURCE_LABEL[r].padEnd(14)} ${fmtNum(v).padStart(7)}   first needed ${at(first.at)} (${first.label})`);
   }
-  const o = p.forecast.ore;
-  L.push(`  Ore (top ${p.forecast.oreItems.length} equipment): ${fmtNum(o.shinyOre)} shiny · ${fmtNum(o.glowyOre)} glowy · ${fmtNum(o.starryOre)} starry`);
-  for (const c of p.forecast.oreItems)
-    L.push(`    - ${c.item.name} ${c.instance.level}→${c.toLevel}: ${c.ore?.shinyOre ?? 0} shiny / ${c.ore?.glowyOre ?? 0} glowy / ${c.ore?.starryOre ?? 0} starry`);
   L.push('');
 
   L.push('== Book-ready heroes (your call) ==');
@@ -67,6 +63,13 @@ export function planToText(p: Plan): string {
   for (const c of p.lab.slice(0, 5)) L.push(`  ${c.item.name} ${c.instance.level}→${c.toLevel} · ${fmtDuration(c.timeSec)} · ${fmtCost(c.cost, c.resource)} — ${c.reason}`);
   L.push('== Pet House (top 3) ==');
   for (const c of p.pets.slice(0, 3)) L.push(`  ${c.item.name} ${c.instance.level}→${c.toLevel} · ${fmtDuration(c.timeSec)} · ${fmtCost(c.cost, c.resource)} — ${c.reason}`);
+  // Informational only: ore is time-gated, so it's never part of the resources forecast (SPEC §6.9, §10.3).
+  L.push('== Blacksmith (top 3, by Legend I usage) ==');
+  for (const c of p.equipment.slice(0, 3)) {
+    const o = c.ore ?? { shinyOre: 0, glowyOre: 0, starryOre: 0 };
+    const parts = [o.shinyOre && `${fmtNum(o.shinyOre)} shiny`, o.glowyOre && `${fmtNum(o.glowyOre)} glowy`, o.starryOre && `${fmtNum(o.starryOre)} starry`].filter(Boolean);
+    L.push(`  ${c.item.name} ${c.instance.level}→${c.toLevel} · ore cost: ${parts.join(' · ') || 'free'} — ${c.reason}`);
+  }
   L.push('');
 
   if (p.warnings.length) {

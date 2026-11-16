@@ -333,12 +333,13 @@ describe('meta ranking', () => {
     expect(s.threeStarRate).toBeCloseTo((0.1 * 0.5 + 0.3 * 0.9) / 0.4, 10);
   });
 
-  it('equipment and the ore forecast follow meta usage', () => {
+  it('equipment follows meta usage (ore is shown per piece, never forecast)', () => {
     const ex = makeExport(16);
     ex.equipment.push({ data: data.byId.get('earthquake-boots')!.dataId, lvl: 3 });
     const plan = buildPlan(data, parse(ex), settings(), meta({ [id('earthquake-boots')]: { name: 'Earthquake Boots', usage: 0.5, threeStarRate: 0.8 } }), T0);
     expect(plan.equipment[0].item.id).toBe('earthquake-boots');
-    expect(plan.forecast.oreItems[0].item.id).toBe('earthquake-boots');
+    expect(plan.equipment[0].ore).toBeDefined();
+    expect(plan.forecast).not.toHaveProperty('ore');
   });
 
   it('missing or junk meta falls back to Step 1 behaviour', () => {
