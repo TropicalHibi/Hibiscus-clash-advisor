@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DATA_FOLDERS, normalize, type RawFile } from './normalize';
+import { DATA_FOLDERS, normalize, type RawFile } from './normalize.ts';
 import type { GameData } from './types';
 
 const here = path.dirname(fileURLToPath(import.meta.url));

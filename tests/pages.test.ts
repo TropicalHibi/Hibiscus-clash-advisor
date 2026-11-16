@@ -21,4 +21,9 @@ describe('GitHub Pages', () => {
     expect(runs).toEqual(['npm ci', 'npm test', 'npm run build:pages']);
     expect(wf).not.toMatch(/npm run (dev|meta|sync|refresh|push-meta)\b|COC_API_TOKEN/);
   });
+
+  it('caches the resized item icons between runs', () => {
+    const wf = fs.readFileSync('.github/workflows/pages.yml', 'utf8');
+    expect(wf).toMatch(/uses: actions\/cache@v\d+[\s\S]*?path: \.cache\/item-images/);
+  });
 });

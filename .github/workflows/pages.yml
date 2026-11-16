@@ -26,6 +26,13 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      # Resized item icons (SPEC §13): restore the ones earlier runs made, so the build only resizes new
+      # or changed images (the build prunes stale ones before the cache is saved).
+      - uses: actions/cache@v6
+        with:
+          path: .cache/item-images
+          key: item-images-${{ hashFiles('package-lock.json', 'scripts/lib/itemImageCache.ts') }}
+          restore-keys: item-images-
       # `predev` (the refresh) only runs with `npm run dev`, which CI never calls.
       - run: npm ci
       - run: npm test

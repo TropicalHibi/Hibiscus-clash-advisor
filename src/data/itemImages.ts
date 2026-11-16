@@ -3,21 +3,20 @@
 import type { Item } from './types';
 
 /**
- * Largest image file bundled for an icon. The package's images are full-size WebP (some 4096 px, ~1 MB);
- * shown at 28 px, a bigger file is mostly wasted bytes on a phone. An item whose candidates are all over
- * the cap shows its name only.
+ * No size cap by default: the build resizes every chosen image to a small WebP icon
+ * (scripts/lib/itemImageCache.ts), so even the 4096 px / ~1 MB source files ship as a few KB.
+ * `maxBytes` stays available for callers that bundle originals.
  */
-export const IMAGE_MAX_BYTES = 300_000;
 
 export interface ImagePick {
   /** Item key → chosen package-relative image path. */
   byKey: Map<string, string>;
-  /** Items with candidates that were all missing or over the cap (shown name only). */
+  /** Items with candidates that were all missing (or over maxBytes, if given): shown name only. */
   skipped: { key: string; name: string; reason: 'missing' | 'too large' }[];
 }
 
 /** For each item, the first candidate image that exists (size ≥ 0) and is ≤ maxBytes. */
-export function pickItemImages(items: Iterable<Item>, sizeOf: (path: string) => number | undefined, maxBytes = IMAGE_MAX_BYTES): ImagePick {
+export function pickItemImages(items: Iterable<Item>, sizeOf: (path: string) => number | undefined, maxBytes = Infinity): ImagePick {
   const byKey = new Map<string, string>();
   const skipped: ImagePick['skipped'] = [];
   for (const item of items) {
