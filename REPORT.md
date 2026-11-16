@@ -458,9 +458,9 @@ Plan output excerpt (`npm run plan -- samples/myexport.json`, 16 Nov 2026, 2:01 
 
 ## Recommended run frequency: daily
 
-A battle log holds the last ~50 battles. For a Legend I player that's about 2 days of Legend attacks (8 a day). **Run `npm run meta` once a day**, and never leave more than 2 days between runs. Weekly runs (the SPEC §8.1 default) would capture only ~2 of every 7 days. A daily run takes about 2 minutes and ~1,040 requests.
+A battle log holds the last ~50 battles. For a Legend I player that's about 2 days of Legend attacks (8 a day). **Run `npm run meta` once a day**, and never leave more than 2 days between runs. Weekly runs (the original SPEC §8.1 default) would capture only ~2 of every 7 days. A daily run takes about 2 minutes and ~1,040 requests.
 
-To automate it with Windows Task Scheduler: create a daily task with the action `cmd /c cd /d "C:\Users\Ben\Documents\torn\Clash Stuff\Clash Advisor" && npm run meta >> data\meta\last-run.log 2>&1` (`*.log` is git-ignored). The key is tied to your home IP, so the task only works on this network.
+This is automated by `npm run dev` (see "Step 2 follow-up" below): it runs `npm run meta` first whenever `public/meta.json` is over 24h old. No OS scheduler needed.
 
 `data/meta/battles.jsonl` is **git-ignored**. It's already 3.1 MB and grows ~1.8 MB a day with daily runs. Rows older than 60 days are pruned automatically. `public/meta.json` (18 KB) is committed.
 
@@ -472,3 +472,108 @@ To automate it with Windows Task Scheduler: create a daily task with the action 
 - [ ] **Equipment ranking ignores ore cost.** Action Figure 26→27 costs 150 starry ore, but it's ranked first purely on usage. Pin cheaper pieces if starry ore is tight.
 - [ ] **Unknown event troop IDs** (4000195–4000206) are listed in every run summary. If one turns out to be a permanent, lab-upgradable troop, it needs a clash-of-clans-data update (`npm run sync`).
 - [ ] **Hero Hall 13 is out today (Nov 16):** run `npm run sync` once clash-of-clans-data publishes it. That's Step 3 work for the diff output, but the cap logic should pick it up automatically.
+
+---
+
+# Step 2 follow-up: army-share score + automatic refresh
+
+## What changed
+
+1. **SPEC updated:**
+   - Battle log facts: lowercase `battleType`; `legend` = Legend I only; ~50 entries, about 2 days, so meta runs daily.
+   - New §9a, automatic refresh with no OS schedulers.
+   - New meta score in §8.3.
+   - Equipment wording in §6.9/§11. Equipment behaviour is unchanged.
+2. **`npm run dev` now refreshes first** (`predev`):
+   - Game data: if the last check was over 24h ago, it asks npm for a newer `clash-of-clans-data` and runs the full `npm run sync` if there is one.
+   - Meta: if `public/meta.json` is over 24h old and `.env` has a token, it runs `npm run meta` (about 2 min).
+   - Any failure (offline, 403, no token) prints one warning line and the site starts anyway.
+   - `npm run dev:fast` skips the refresh, and `npm run refresh` runs the refresh on its own.
+   - The Task Scheduler instructions are gone from this report.
+3. **New lab meta score: average share of army housing space.**
+   - **Troops:** for each attack, (qty × housing space) ÷ that army's troop space, 0 if the troop isn't used. This is averaged over all attacks in the 14-day window with the same recency weights.
+   - **Super troops:** they use their own housing space and count toward the base troop.
+   - **Spells:** the same formula against spell space.
+   - **Sieges, pets and equipment:** they keep plain usage share.
+   - **Housing data:** it comes from the game data, and was found for every troop and spell. Any unit without it would be listed in the run summary and ranked by usage.
+   - **Lab tab:** each row shows the score ("15% of troop space") next to usage % and 3★.
+4. **Equipment:** unchanged (usage share, ore cost shown).
+
+**Tests:** 107 pass (up from 91). New tests cover:
+- the share formula, recency averaging, super troop housing and crediting;
+- the missing-housing fallback, siege/pet/equipment usage scoring and the old-file fallback;
+- filler-vs-core ranking, plus a check that all game data has housing;
+- every refresh branch (fake npm and API, no network);
+- the UI score display.
+
+I mutation-checked the ranking test: sorting by usage again makes it fail. `npm run build` passes.
+
+## Regenerated meta.json (`npm run meta -- --aggregate-only`, no API calls)
+
+```
+battles.jsonl:        13629 rows
+Aggregated:           13629 attacks by 889 players in the last 14 days (half-life 5d)
+Units in meta.json:   122
+Housing space:        found for every known troop and spell
+Unknown IDs (8):      4000195–4000206 (event troops) and CC spell 26000153, unchanged
+```
+
+As a check, the troop shares across all units sum to 99.95% (the rest is the unknown event troops) and the spell shares to 99.93%.
+
+## New top 15 lab order for your export (`samples/myexport.json`)
+
+| # | Upgrade | Score | Used in | Old rank |
+|---|---|---|---|---|
+| 1 | Sky Wagon 1→2 | 49.6% usage (siege) | 49.6% | 6 |
+| 2 | Troop Launcher 1→2 | 30.9% usage (siege) | 30.9% | 10 |
+| 3 | Dragon 11→12 | 15.0% of troop space (incl. Super Dragon 1.3%) | 33.9% | 9 |
+| 4 | Dragon Rider 2→3 | 12.0% of troop space | 30.3% | 11 |
+| 5 | Bowler 5→6 | 10.5% of troop space (all Super Bowler) | 24.8% | 12 |
+| 6 | Log Launcher 3→4 | 8.8% usage (siege) | 8.8% | 17 |
+| 7 | Balloon 10→11 | 7.8% of troop space (incl. Rocket Balloon 4.1%) | 80.6% | 2 |
+| 8 | Flame Flinger 1→2 | 6.0% usage (siege) | 6.0% | 18 |
+| 9 | Yeti 6→7 | 5.8% of troop space (incl. Super Yeti 5.4%) | 16.5% | 15 |
+| 10 | Poison Spell 7→8 | 5.2% of spell space | 55.4% | 5 |
+| 11 | Siege Barracks 3→4 | 4.4% usage (siege) | 4.4% | 20 |
+| 12 | Ice Golem 6→7 | 4.1% of troop space | 58.1% | 3 |
+| 13 | Baby Dragon 7→8 | 2.6% of troop space (incl. Inferno Dragon 0.9%) | 57.1% | 4 |
+| 14 | Apprentice Warden 3→4 | 2.1% of troop space | 35.7% | 8 |
+| 15 | Minion 10→11 | 1.8% of troop space (incl. Super Minion 1.5%) | 44.1% | 7 |
+
+**Archer has dropped from #1 to #18** (0.8% of troop space, even though it's in 88% of armies), and Barbarian from #13 to #19.
+
+For reference, the top lab units across Legend I by the new score (whether or not you can upgrade them):
+1. Sky Wagon 49.6% usage
+2. Troop Launcher 30.9% usage
+3. Totem Spell 19.6% of spell space
+4. Rage 16.3% of spell space
+5. Dragon 15.0% of troop space
+6. Revive 13.2%
+7. Freeze 12.1%
+8. Invisibility 12.1%
+9. Dragon Rider 12.0%
+10. Healer 10.8%
+11. Bowler 10.5%
+12. Log Launcher 8.8% usage
+13. Earthquake 8.5%
+14. Balloon 7.8%
+15. Thrower 7.4%
+
+## How your lab queue changed
+
+- **Next 24 hours: no change.** The Laboratory is busy with Druid 4 for 89.8h more and the Goblin Researcher with Wall Breaker 14. Nothing new starts in the forecast window.
+- **Builder plan, 24h resources, pets and ore picks: identical.** I diffed `npm run plan -- samples/myexport.json --at-export` before and after: only the five "lab picks" lines changed.
+- **30-day lab simulation:**
+  - Before: Druid 4 (running, done day 3.7) → **Archer 12 → 13 → 14** (days 3.7–30.7).
+  - After: Druid 4 → **Sky Wagon 2 → 3 → 4** (days 3.7–43.2; 22M elixir for the first level alone).
+- Lab picks in the plan: Archer, Balloon, Ice Golem, Baby Dragon, Poison was the old order. It's now **Sky Wagon, Troop Launcher, Dragon, Dragon Rider, Bowler**.
+
+## Check
+
+- [ ] **Sieges now lead the lab, and the reason is the scale, not the meta.** As specified, sieges keep plain usage share (Sky Wagon 49.6%), while troops are scored by share of troop space (top troop: Dragon 15.0%). The two numbers measure different things, so any well-used siege beats every troop. Spell shares are also bigger than troop shares, because an army has far fewer spell slots. Options I didn't take, because they change your formula:
+  - rank sieges by usage × a factor (e.g. ÷ 3);
+  - normalise each kind against its own top unit;
+  - interleave kinds.
+- [ ] **Back-to-back levels are still possible.** The score is per unit, not per level, so whatever ranks first gets every level in a row: Sky Wagon 2, 3 and 4 fill about 40 days of lab time. Pin something else in the Lab tab to break it up, or consider a per-level decay.
+- [ ] **Balloon fell from #2 to #7.** It's in 81% of armies but averages only 7.8% of troop space. That's what the new formula measures; pin it if you're running a balloon army.
+- [ ] **Refresh on a newer data release** hasn't run for real yet (0.19.1 is still the newest), and neither has a stale-meta pull from `predev`. Both paths are covered by tests with fake npm/API. The first `npm run dev` after tomorrow ~3 PM will do a real meta pull (about 2 min) before the site starts.

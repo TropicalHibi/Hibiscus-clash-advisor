@@ -4,14 +4,17 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "predev": "tsx scripts/refresh.ts",
     "dev": "vite",
+    "dev:fast": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "sync": "tsx scripts/sync.ts",
     "plan": "tsx scripts/plan.ts",
     "meta": "tsx scripts/meta.ts",
-    "probe": "tsx scripts/probe.ts"
+    "probe": "tsx scripts/probe.ts",
+    "refresh": "tsx scripts/refresh.ts"
   },
   "dependencies": {
     "clash-of-clans-data": "^0.19.1",

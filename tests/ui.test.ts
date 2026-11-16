@@ -10,8 +10,8 @@ const fixture = fs.readFileSync(path.resolve('tests/fixtures/export-th16.json'),
 const meta = JSON.stringify({
   generatedAt: '2026-11-16T12:00:00.000Z', windowDays: 14, halfLifeDays: 5, attacks: 1234, players: 99,
   units: {
-    '4000005': { name: 'Balloon', usage: 0.42, threeStarRate: 0.81, avgQty: 6, kind: 'troop' },
-    '4000027': { name: 'Super Archer', usage: 0.1, threeStarRate: 0.7, avgQty: 3, kind: 'superTroop', baseId: 4000001 },
+    '4000005': { name: 'Balloon', usage: 0.42, threeStarRate: 0.81, avgQty: 6, armyShare: 0.2, kind: 'troop' },
+    '4000027': { name: 'Super Archer', usage: 0.1, threeStarRate: 0.7, avgQty: 3, armyShare: 0.05, kind: 'superTroop', baseId: 4000001 },
   },
 });
 
@@ -67,7 +67,7 @@ describe('UI', () => {
     expect(document.querySelector('#footer')!.textContent).toContain('1,234 attacks');
   });
 
-  it('Lab / Pets / Equipment tab ranks by usage, keeps unused items listed, and pins persist', () => {
+  it('Lab / Pets / Equipment tab ranks by army share, keeps unused items listed, and pins persist', () => {
     (document.querySelector('[data-tab="lab"]') as HTMLButtonElement).click();
     const tab = document.querySelector('#tab-lab') as HTMLElement;
     expect(tab.hidden).toBe(false);
@@ -76,7 +76,11 @@ describe('UI', () => {
     expect(tab.textContent).toContain('Blacksmith');
     const titles = () => [...tab.querySelectorAll('.rank-list')[0].querySelectorAll('.title b')].map((b) => b.textContent);
     expect(titles()[0]).toBe('Archer'); // credited with Super Archer's 10% (Balloon is busy in this fixture)
-    expect(tab.textContent).toContain('Includes Super Archer 10%');
+    expect(tab.textContent).toContain('Includes Super Archer 5.0% of space, 10% used');
+    const first = tab.querySelectorAll('.rank-list')[0].querySelector('.rank-item')!.textContent!;
+    expect(first).toContain('5.0% of troop space'); // the score
+    expect(first).toContain('10% used'); // usage stays visible
+    expect(first).toContain('70% 3★');
     expect(tab.textContent).toContain('Not seen in Legend I'); // unused items still listed
     expect(titles()).toContain('Barbarian');
 

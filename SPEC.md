@@ -38,7 +38,8 @@ A local website that reads a Clash of Clans account export and tells the player 
 ### npm scripts
 | Script | Does |
 |---|---|
-| `npm run dev` | Start local site |
+| `npm run dev` | Refresh stale game data / meta (§9a), then start the local site |
+| `npm run dev:fast` | Start the local site without the refresh |
 | `npm run sync` | Update game data, run validation, print diff vs last snapshot |
 | `npm run meta` | Pull Legend I battle logs, aggregate, write `public/meta.json` |
 | `npm test` | Unit + validation tests |
@@ -74,7 +75,9 @@ A local website that reads a Clash of Clans account export and tells the player 
 - Endpoints:
   - `GET /locations` — list locations.
   - `GET /locations/{id}/rankings/players` — ranked players; each has `leagueTier {id, name}`.
-  - `GET /players/{tag}/battlelog` — entries: `battleType` (`HOME_VILLAGE` | `RANKED` | `LEGEND`), `attack` (bool), `armyShareCode`, `stars`, `destructionPercentage`, `battleTimestamp`, `opponentTownHallLevel`, `battleTime`.
+  - `GET /players/{tag}/battlelog` — entries: `battleType` (`homeVillage` | `ranked` | `legend`, **lowercase** as returned by the API), `attack` (bool), `armyShareCode`, `stars`, `destructionPercentage`, `battleTimestamp`, `opponentTownHallLevel`, `battleTime`.
+  - **`legend` = Legend League I only.** Legend League II/III attacks come back as `ranked`.
+  - **A battle log holds ~50 entries (~2 days of Legend I attacks)**, so `npm run meta` must run **daily** to avoid gaps.
 - **Legend League I** = league tier id `105000036` (8 battles/day, group size 1500).
 
 ---
@@ -90,6 +93,7 @@ coc-planner/
   scripts/
     sync.ts              # npm run sync
     meta.ts              # npm run meta
+    refresh.ts           # predev refresh (§9a)
   src/
     data/                # load + normalize clash-of-clans-data into Item model
     state/               # parse export JSON → AccountState
@@ -100,12 +104,13 @@ coc-planner/
       book.ts            # hero book-threshold logic
     meta/
       armyCode.ts        # armyShareCode parser
-      aggregate.ts       # weighting + usage stats
+      aggregate.ts       # weighting + usage / army-share stats
     ui/                  # pages/components
     main.ts
   data/
     snapshots/           # dated normalized game-data snapshots (for diffs)
-    meta/battles.jsonl   # raw deduped Legend I attacks
+    meta/battles.jsonl   # raw deduped Legend I attacks (git-ignored)
+    refresh-state.json   # last game-data check (git-ignored)
   public/
     meta.json            # aggregated meta the site reads
   tests/
@@ -225,7 +230,7 @@ interface Candidate {        // one possible next upgrade
 Same as lab: meta score descending, unused at bottom, pins allowed.
 
 ### 6.9 Blacksmith (equipment)
-- Upgrades are instant; the constraint is ore. Show a ranked list by meta score with ore costs per next level.
+- Upgrades are instant; the constraint is ore. Show a ranked list by meta score (= usage share) with ore costs per next level. Ore cost does not affect the order.
 - Include ore totals in the forecast for the top-ranked items (see §10).
 
 ---
@@ -251,11 +256,11 @@ Current recipes (derived from TH17/18 counts — see `merges.yaml`):
 ### 8.1 Collect
 1. Load token from `.env`. Fail with a clear message if missing.
 2. Get locations; for each (global + countries), fetch player rankings (paginate as allowed). Keep players with `leagueTier.id === 105000036`. Dedupe tags. Stop at `meta.maxPlayers` (default 1000).
-3. For each player: `GET /players/{tag}/battlelog`. Keep entries where `attack === true && battleType === 'LEGEND'`.
+3. For each player: `GET /players/{tag}/battlelog`. Keep entries where `attack === true && battleType.toLowerCase() === 'legend'`.
 4. **No Town Hall filter.** Legend I attackers are effectively max TH, and a troop used by a lower-TH Legend I player is still a valid recommendation.
 5. Dedupe key: `playerTag + battleTimestamp`. Append new rows to `data/meta/battles.jsonl`: `{ tag, ts, stars, destruction, armyShareCode }`.
 6. Throttle (~10 req/s, configurable). Retry 429/5xx with exponential backoff. Log progress.
-7. Run weekly (manually or via Windows Task Scheduler in v1). No patch-triggered runs.
+7. Run **daily** (battle logs only reach back ~2 days). Automated by the `npm run dev` refresh (§9a), never by an OS scheduler. No patch-triggered runs.
 
 ### 8.2 Parse `armyShareCode`
 Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The payload may be a full link (`...?army=<payload>`) or raw.
@@ -272,8 +277,16 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
   - `usage` = weighted share of attacks that include it (0–1).
   - `threeStarRate` = weighted 3★ rate of attacks that include it.
   - `avgQty` for troops/spells.
-- Meta score (default) = `usage`. Keep `threeStarRate` in the output for display and later tuning.
-- Write `public/meta.json`: `{ generatedAt, windowDays, halfLifeDays, attacks, players, units: { [dataId]: { name, usage, threeStarRate, avgQty } } }`.
+  - `armyShare` for troops, super troops and spells (see below).
+- **Meta score:**
+  - **Troops:** average share of army housing space. Per attack: `(qty × housingSpace) ÷ total troop housing space in that army`, 0 if the troop isn't in it; then the weighted average across all attacks in the window using the recency weights above.
+  - **Super troops** use their own housing space and count toward the base troop (base score = own + super, capped at 1).
+  - **Spells:** same formula with spell housing space (÷ total spell space in that army).
+  - **Sieges, pets, equipment:** plain `usage` (one siege per attack; pets/equipment are on or off).
+  - Housing space comes from the game data (super troops: the `superTroop` block of the base troop file). A unit missing it is listed in the run summary and ranked by `usage` instead. Unknown IDs are left out of the per-attack totals.
+  - A `meta.json` without `armyShare` (older file) falls back to `usage`.
+- Keep `usage` and `threeStarRate` in the output for display and later tuning.
+- Write `public/meta.json`: `{ generatedAt, windowDays, halfLifeDays, attacks, players, units: { [dataId]: { name, usage, threeStarRate, avgQty?, armyShare?, kind?, baseId? } } }`.
 
 ---
 
@@ -289,6 +302,16 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
    - **Merge consumption check** (§7).
    - Max TH changed → print "mode may flip to rush".
 5. Site footer shows: data version + snapshot date, meta `generatedAt`.
+
+## 9a. Automatic refresh — no OS schedulers
+
+The player never uses Windows Task Scheduler (or cron). Freshness comes from starting the site:
+
+- `npm run dev` runs a `predev` refresh (`scripts/refresh.ts`) before Vite starts:
+  1. **Game data:** if the last check was >24h ago (`data/refresh-state.json`, git-ignored), ask npm for the newest `clash-of-clans-data`; if it is newer than the installed one, run the full `npm run sync`.
+  2. **Meta:** if `public/meta.json` (`generatedAt`) is >24h old or missing **and** `.env` has `COC_API_TOKEN`, run `npm run meta`.
+  3. **Any failure** (offline, 403, no token, sync error) prints a **one-line warning** and the site starts anyway. A failed check is retried on the next start.
+- `npm run dev:fast` skips the refresh.
 
 ---
 
@@ -330,7 +353,7 @@ Mobile-friendly layout (the player checks on a phone later), single page with ta
    - Resources needed in 24h (gold, elixir, DE, each ore).
    - Book-ready heroes list.
    - Wall dump line.
-3. **Lab / Pets / Equipment** — ranked lists with Legend I usage % and 3★ rate, pin buttons.
+3. **Lab / Pets / Equipment** — ranked lists with the meta score (army share for troops/spells), Legend I usage % and 3★ rate, pin buttons. Equipment rows show ore cost.
 4. **Everything** — all remaining upgrades grouped by tier, with time-to-max per tier and total cost per resource.
 5. **Footer** — data version/date, meta date, "rerun `npm run sync` / `npm run meta`" hint.
 
@@ -372,8 +395,8 @@ Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
 ## 14. Verify during build
 
 - Export JSON: top-level timestamp field present? exact `boosts` shape?
-- `battleType === 'LEGEND'` corresponds to Legend League I battles (cross-check with `leagueTier.id`).
-- How many entries a battle log returns (affects how often to run `npm run meta`).
+- ~~`battleType === 'LEGEND'` corresponds to Legend League I battles~~ → resolved: lowercase `legend`, Legend I only (§3.3).
+- ~~How many entries a battle log returns~~ → resolved: ~50 (~2 days), run daily (§3.3, §9a).
 - Gold Pass max boost % (builder and research).
 - **Hero Hall 13 releases Monday (Nov 16, 2026):** first real test of `npm run sync` + diff + cap logic.
 
@@ -381,7 +404,7 @@ Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
 
 ## 15. v2+ (not now)
 
-- Hosting (GitHub Pages or similar) + GitHub Actions: daily version check / rebuild, weekly meta.
+- Hosting (GitHub Pages or similar) + GitHub Actions: daily version check / rebuild, daily meta.
 - Sleep/awake windows for finish-time fitting.
 - Multi-device state.
 - Builder Base / Clan Capital.

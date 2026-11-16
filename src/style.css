@@ -147,8 +147,12 @@ button:disabled { opacity: .4; cursor: default; }
 .rank-item .rk { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
 .rank-item.pinned .rk { color: var(--accent); font-weight: 700; }
 .rank-item .title { font-size: 14px; }
-.rank-item .stats { display: grid; grid-template-columns: minmax(60px, 1fr) auto auto; gap: 10px; align-items: center; margin-top: 3px; font-size: 13px; }
+.rank-item .stats { display: grid; grid-template-columns: minmax(40px, 1fr) auto auto auto; gap: 10px; align-items: center; margin-top: 3px; font-size: 13px; }
 .rank-item .stat { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .usage { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
 .usage .bar { display: block; height: 100%; background: var(--accent); }
+@media (max-width: 480px) {
+  .rank-item .stats { grid-template-columns: auto auto auto; gap: 4px 10px; }
+  .rank-item .stats .usage { grid-column: 1 / -1; }
+}
 button.pin[aria-pressed='true'] { color: var(--accent); border-color: var(--accent); font-weight: 650; }

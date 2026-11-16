@@ -114,3 +114,32 @@ One line each: decision, then why.
 
 ## Mid-step request
 - Added a test for SPEC §10.1 (new wording): a Goblin Builder and a Goblin Researcher job in the export each finish inside the 24h window, then those slots get no new job. They also don't appear in "Now" or the forecast, and they don't count as builders. Mutation-checked: removing the goblin guard in the scheduler fails the test. The engine already behaved this way, so no code change was needed.
+
+# Decisions (Step 2 follow-up: army-share score, predev refresh)
+
+## SPEC updates
+- §3.3/§8.1: `battleType` is lowercase (`homeVillage | ranked | legend`), `legend` = Legend League I only, a battle log holds ~50 entries (~2 days), so meta runs **daily**. §14's two open questions are marked resolved.
+- New §9a (predev refresh, no OS schedulers). §8.3 has the new meta score. §6.9/§11 say equipment stays usage-ranked with ore shown. The Task Scheduler instructions were removed from REPORT.md.
+
+## Army-share score (`src/meta/aggregate.ts`, `src/meta/meta.ts`)
+- **Housing space comes from the game data.** The normalizer now keeps `housingSpace` on troops, spells and sieges, and `superHousingSpace` from a base troop's `superTroop` block. The catalog gives super troops their own housing (Super Wizard 10, not the Wizard's 4). *Why:* the user asked for data-driven housing; the super troop block is the only source for super troops.
+- Ruin Witch's extra `ruinKnight` block (housingSpace 18) is a summoned unit, not a super troop, and is ignored.
+- **Per attack:** troop share = `qty × housing ÷ Σ(qty × housing)` over the home troops (`u`) that are troops or super troops. Spell share uses the same formula over home spells (`s`). Sieges placed in `u`, CC troops and CC spells are not part of either total.
+- **Unknown IDs and units without housing are left out of the totals.** *Why:* their size is unknown. Including them would mean guessing. Today this only affects the 7 unknown event-troop IDs, so per-army troop shares still sum to 0.9995.
+- **Aggregation:** `armyShare` = Σ(weight × share) ÷ Σ weight over **all** attacks in the window (0 where absent), with the existing recency weights. It's stored for troops, super troops and spells. Sieges, pets and equipment get no `armyShare`, and their score stays `usage`.
+- **Base troop score = own share + super shares (capped at 1).** If any part (own or a super) lacks `armyShare`, the whole item falls back to usage share. *Why:* adding a share to a usage would mix scales within one item.
+- **Missing housing:** the run summary lists every known troop or spell with no housing space ("these rank by usage share instead"); today the list is empty. A test asserts that every troop, spell, siege and mapped super troop in the current data has a housing space, so a data update that drops one is caught by `npm test` as well as by the summary.
+- A `meta.json` without `armyShare` (older file or hand-made) falls back to usage, so the site works with old files.
+- **Ranking:** score descending, then usage (tie-break), then the unused fallback order as before. The lab queue holds troops (share of troop space), spells (share of spell space) and sieges (usage share) **in one list compared by number, as specified**. Sieges' usage values (up to 50%) are naturally larger than troop shares (max 15%). See REPORT "Check"; not changed, because the user specified this formula.
+- **UI:** the bar shows the score. Troop and spell rows show "X% of troop space" (or "spell space") plus usage % and 3★. Siege, pet and equipment rows show usage % (their score) and 3★. Super troops read "Includes Super X a% of space, b% used". On phones the bar moves to its own line. Plan reasons read `Legend I: 15.0% of troop space; incl. Super Dragon 1.3% (in 33.9% of attacks)`; usage-scored items keep `Legend I usage 49.6%`.
+- Equipment: unchanged (usage share, ore cost shown, ore not part of the order).
+
+## Predev refresh (`scripts/refresh.ts`, logic in `scripts/lib/refresh.ts`)
+- `predev` runs `tsx scripts/refresh.ts`. npm runs it automatically before `npm run dev`. `dev:fast` is plain `vite` (npm runs no `predev:fast` hook). `npm run refresh` runs the refresh alone.
+- **Game data:** the last check time is in `data/refresh-state.json` (git-ignored). After 24h, `npm view clash-of-clans-data version` (no retries, 10s fetch timeout, 20s hard timeout). If the published version is newer than `node_modules/clash-of-clans-data/package.json`, the full `npm run sync` runs. The check time is saved **only on success**, so being offline or a failed sync retries on the next start rather than waiting 24h.
+- **Meta:** staleness comes from `meta.json`'s `generatedAt`; a missing file or no timestamp counts as stale. The token check looks at `process.env` and then `.env` (same sources as `loadToken`). The value is never printed or returned.
+  - Note: `npm run meta -- --aggregate-only` also refreshes `generatedAt`, so after a manual re-aggregation the next refresh won't pull for 24h.
+- **Output:** `npm run meta`'s stdout (progress and summary) is shown live. Its stderr is captured so a failure becomes **one** warning line, built from the first non-npm stderr line, plus a 403 hint. Exit code 2 (meta.json written, some players failed) counts as updated, with a one-line warning.
+- **Always exits 0.** Each step is in its own try/catch, plus an outer one. *Why:* a non-zero `predev` would stop `npm run dev`.
+- Ctrl+C during a predev meta run stops `npm run dev` too. The meta run is resumable, so the next start continues it.
+- The logic takes injected side effects, so `tests/refresh.test.ts` covers every branch without npm, network or the API. Live checks: the first run printed "game data up to date (0.19.1)", the second was silent, an unreachable registry printed one warning line with exit 0, and `npm run dev` ran the hook and then started Vite.

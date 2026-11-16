@@ -170,7 +170,18 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string)
           labRequired: l.laboratoryRequired,
         }),
       );
-      add({ key: String(j.dataId), dataId: j.dataId, id: j.id, name: j.name, category, queue: 'lab', levels: sortLevels(levels) });
+      const housing = (x: unknown) => (typeof x === 'number' && Number.isFinite(x) && x > 0 ? x : undefined);
+      add({
+        key: String(j.dataId),
+        dataId: j.dataId,
+        id: j.id,
+        name: j.name,
+        category,
+        queue: 'lab',
+        levels: sortLevels(levels),
+        housingSpace: housing(j.housingSpace),
+        superHousingSpace: housing(j.superTroop?.housingSpace),
+      });
       continue;
     }
 

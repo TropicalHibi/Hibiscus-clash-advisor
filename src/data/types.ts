@@ -75,6 +75,10 @@ export interface Item {
   craftedDefenseId?: number;
   /** For equipment: owning hero file id. */
   hero?: string;
+  /** Troops, spells, sieges: army housing space (from the data file). */
+  housingSpace?: number;
+  /** Base troops with a super version: the super troop's housing space. */
+  superHousingSpace?: number;
 }
 
 export interface MergeRecipe {

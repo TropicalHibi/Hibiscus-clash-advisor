@@ -9,14 +9,24 @@ export type PinList = 'lab' | 'petHouse' | 'blacksmith';
 
 const pct = (x: number) => `${(x * 100).toFixed(x > 0 && x < 0.1 ? 1 : 0)}%`;
 
+/** Score label: army share for troops/spells; for usage-scored items the usage column is the score. */
+function scoreStat(c: QueueCandidate): string {
+  if (c.scoreKind !== 'armyShare') return '<span class="stat"></span>';
+  const space = c.item.category === 'spell' ? 'spell' : 'troop';
+  return `<span class="stat" title="Average share of ${space} housing space in Legend I armies (the ranking score)"><b>${pct(c.score)}</b> of ${space} space</span>`;
+}
+
 function row(c: QueueCandidate, i: number, list: PinList, sub: string): string {
   const used = c.usage > 0;
   const stats = used
-    ? `<span class="usage"><span class="bar" style="width:${Math.max(2, Math.round(c.usage * 100))}%"></span></span>
+    ? `<span class="usage"><span class="bar" style="width:${Math.max(2, Math.round(c.score * 100))}%"></span></span>
+       ${scoreStat(c)}
        <span class="stat"><b>${pct(c.usage)}</b> used</span>
        <span class="stat">${c.threeStarRate !== undefined ? `<b>${pct(c.threeStarRate)}</b> 3★` : ''}</span>`
-    : `<span class="stat muted" style="grid-column: span 3">Not seen in Legend I · 0% used</span>`;
-  const supers = c.supers?.length ? `<div class="small muted">Includes ${esc(c.supers.map((s) => `${s.name} ${pct(s.usage)}`).join(', '))}</div>` : '';
+    : `<span class="stat muted" style="grid-column: 1 / -1">Not seen in Legend I · 0% used</span>`;
+  const supers = c.supers?.length
+    ? `<div class="small muted">Includes ${esc(c.supers.map((s) => (c.scoreKind === 'armyShare' && s.armyShare !== undefined ? `${s.name} ${pct(s.armyShare)} of space, ${pct(s.usage)} used` : `${s.name} ${pct(s.usage)}`)).join(', '))}</div>`
+    : '';
   return `<li class="rank-item${c.pinned ? ' pinned' : ''}">
     <span class="rk">${i + 1}</span>
     <div class="body">
@@ -45,7 +55,8 @@ const ore = (c: QueueCandidate) => {
 export function renderLab(p: Plan, meta: MetaFile, heroName: (id: string) => string): string {
   const out: string[] = [];
   if (meta.attacks > 0 && meta.generatedAt) {
-    out.push(`<div class="card small">Ranked by Legend League I usage: <b>${fmtNum(meta.attacks)}</b> attacks by <b>${fmtNum(meta.players)}</b> players, last ${meta.windowDays} days (recent days weigh more; half-life ${meta.halfLifeDays}d). Generated ${esc(new Date(meta.generatedAt).toLocaleString())}.
+    out.push(`<div class="card small">Ranked by Legend League I meta: <b>${fmtNum(meta.attacks)}</b> attacks by <b>${fmtNum(meta.players)}</b> players, last ${meta.windowDays} days (recent days weigh more; half-life ${meta.halfLifeDays}d). Generated ${esc(new Date(meta.generatedAt).toLocaleString())}.
+      Troops and spells are ranked by their average share of army housing space (so filler troops count for little); sieges, pets and equipment by the share of attacks that use them.
       <span class="muted">Items not seen in Legend I are listed at the bottom (lab and pets shortest first, equipment cheapest first). Pins move an item to the top and also change the Plan tab's lab/pet order and ore picks.</span></div>`);
   } else {
     out.push(`<div class="card small warn">No Legend I meta yet. Run <code>npm run meta</code> to rank by usage. Until then: lab and pets shortest first, equipment cheapest first. Pins still work.</div>`);

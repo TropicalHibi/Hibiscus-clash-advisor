@@ -193,6 +193,10 @@ async function main(): Promise<void> {
   L.push(`battles.jsonl:        ${rows.length} rows${pruned ? ` (${pruned} older than ${PRUNE_DAYS} days or duplicate removed)` : ''}`);
   L.push(`Aggregated:           ${result.meta.attacks} attacks by ${result.meta.players} players in the last ${conf.windowDays} days (half-life ${conf.halfLifeDays}d)${result.emptyArmies ? `, ${result.emptyArmies} empty armies skipped` : ''}`);
   L.push(`Units in meta.json:   ${Object.keys(result.meta.units).length}`);
+  if (result.noHousing.size) {
+    L.push(`No housing space in the data (${result.noHousing.size}) — these rank by usage share instead of army share:`);
+    for (const [id, name] of result.noHousing) L.push(`  ${id}  ${name}`);
+  } else L.push('Housing space:        found for every known troop and spell');
   if (result.unknown.size) {
     L.push(`Unknown IDs (${result.unknown.size}) — not in clash-of-clans-data ${data.version} or config/super-troops.yaml:`);
     for (const [id, u] of [...result.unknown].sort((a, b) => b[1].attacks - a[1].attacks))

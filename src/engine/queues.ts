@@ -1,7 +1,7 @@
 // Lab, Pet House and Blacksmith ordering (SPEC §6.7–6.9).
 import { levelInfo, maxLevelAt } from '../data/normalize';
 import type { GameData, Item, OreCost, OwnedInstance, Resource } from '../data/types';
-import { metaStats, type MetaFile } from '../meta/meta';
+import { metaStats, type MetaFile, type ScoreKind } from '../meta/meta';
 import type { Settings } from '../state/settings';
 import { fmtDuration } from './format';
 import { levelsOf, type EngineState } from './tiers';
@@ -15,10 +15,14 @@ export interface QueueCandidate {
   cost: number;
   resource: Resource;
   ore?: OreCost;
+  /** Meta score used for ranking (army share for troops/spells, usage otherwise). */
+  score: number;
+  scoreKind: ScoreKind;
+  /** Legend I usage share (incl. super troops). */
   usage: number;
   threeStarRate?: number;
-  /** Super troops whose usage is credited to this base troop. */
-  supers?: { name: string; usage: number }[];
+  /** Super troops whose usage / army share is credited to this base troop. */
+  supers?: { name: string; usage: number; armyShare?: number }[];
   pinned: boolean;
   reason: string;
 }
@@ -35,6 +39,7 @@ function rank(list: QueueCandidate[], pins: string[], unusedKey: (c: QueueCandid
     const ua = a.usage > 0 ? 1 : 0;
     const ub = b.usage > 0 ? 1 : 0;
     if (ua !== ub) return ub - ua;
+    if (a.score !== b.score) return b.score - a.score;
     if (a.usage !== b.usage) return b.usage - a.usage;
     const ka = unusedKey(a);
     const kb = unusedKey(b);
@@ -46,8 +51,14 @@ function rank(list: QueueCandidate[], pins: string[], unusedKey: (c: QueueCandid
 function reasonFor(c: QueueCandidate, unusedText: string): string {
   if (c.pinned) return 'Pinned';
   if (c.usage > 0) {
-    const sup = c.supers?.length ? ` (incl. ${c.supers.map((x) => `${x.name} ${(x.usage * 100).toFixed(1)}%`).join(', ')})` : '';
-    return `Legend I usage ${(c.usage * 100).toFixed(1)}%${sup}`;
+    const p = (x: number) => `${(x * 100).toFixed(1)}%`;
+    if (c.scoreKind === 'armyShare') {
+      const sup = c.supers?.length ? `; incl. ${c.supers.map((x) => `${x.name} ${p(x.armyShare ?? 0)}`).join(', ')}` : '';
+      const space = c.item.category === 'spell' ? 'spell' : 'troop';
+      return `Legend I: ${p(c.score)} of ${space} space${sup} (in ${p(c.usage)} of attacks)`;
+    }
+    const sup = c.supers?.length ? ` (incl. ${c.supers.map((x) => `${x.name} ${p(x.usage)}`).join(', ')})` : '';
+    return `Legend I usage ${p(c.usage)}${sup}`;
   }
   return unusedText;
 }
@@ -80,6 +91,8 @@ export function researchCandidates(
       timeSec: Math.round(next.timeSec * (1 - boost)),
       cost: next.cost,
       resource: next.resource,
+      score: ms.score,
+      scoreKind: ms.scoreKind,
       usage: ms.usage,
       threeStarRate: ms.threeStarRate,
       supers: ms.supers,
@@ -114,6 +127,8 @@ export function equipmentCandidates(data: GameData, instances: OwnedInstance[], 
       cost: next.cost,
       resource: next.resource,
       ore: next.ore,
+      score: ms.score,
+      scoreKind: ms.scoreKind,
       usage: ms.usage,
       threeStarRate: ms.threeStarRate,
       supers: ms.supers,

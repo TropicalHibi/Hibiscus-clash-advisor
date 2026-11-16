@@ -349,3 +349,100 @@ describe('meta ranking', () => {
     expect(plan.lab[0].reason).toContain('shortest first');
   });
 });
+
+// ── Army-share score (SPEC §8.3, Step 2 follow-up) ──
+describe('army-share score', () => {
+  const NOW = Date.parse('2026-11-16T12:00:00Z');
+  const DAY = 86_400_000;
+  const opts = { nowMs: NOW, windowDays: 14, halfLifeDays: 5 };
+  const row = (tag: string, daysAgo: number, code: string): BattleRow => ({ tag, ts: new Date(NOW - daysAgo * DAY).toISOString(), stars: 3, destruction: 100, armyShareCode: code });
+  const hs = (fileId: string) => data.byId.get(fileId)!.housingSpace!;
+  const short = (fileId: string) => data.byId.get(fileId)!.dataId % 1_000_000;
+
+  it('every troop, spell and siege in the game data has a housing space, and so does every mapped super troop', () => {
+    const missing = [...data.items.values()].filter((i) => ['troop', 'spell', 'siege'].includes(i.category) && !i.housingSpace).map((i) => i.name);
+    expect(missing).toEqual([]);
+    const supers = [...catalog.values()].filter((u) => u.kind === 'superTroop');
+    expect(supers.length).toBe(Object.keys(superTroops).length);
+    expect(supers.filter((u) => !u.housing).map((u) => u.name)).toEqual([]);
+    expect(catalog.get(4000083)!.housing).toBe(data.byId.get('wizard')!.superHousingSpace); // Super Wizard uses its own space
+    expect(catalog.get(4000083)!.housing).not.toBe(hs('wizard'));
+  });
+
+  it('per attack: (qty × housing) ÷ total troop space; spells use spell space; sieges are left out', () => {
+    // 10 Barbarians + 4 Giants + Wall Wrecker in u; 2 Rage + 1 Poison.
+    const code = `u10x0-4x${short('giant')}-1x51s2x${short('rage-spell')}-1x${short('poison-spell')}`;
+    const u = attackUsage(parseArmyCode(code), catalog);
+    const troopTotal = 10 * hs('barbarian') + 4 * hs('giant');
+    expect(u.shares.get(4000000)).toBeCloseTo((10 * hs('barbarian')) / troopTotal, 10);
+    expect(u.shares.get(data.byId.get('giant')!.dataId)).toBeCloseTo((4 * hs('giant')) / troopTotal, 10);
+    expect(u.shares.has(4000051)).toBe(false); // siege: plain usage
+    const spellTotal = 2 * hs('rage-spell') + hs('poison-spell');
+    expect(u.shares.get(data.byId.get('rage-spell')!.dataId)).toBeCloseTo((2 * hs('rage-spell')) / spellTotal, 10);
+    expect(u.noHousing).toEqual([]);
+  });
+
+  it('weighted average over all attacks in the window (0 where absent), super troops with their own space', () => {
+    // A today (weight 1): 5 Wizards + 5 Super Wizards. B 5 days ago (weight ½): 20 Barbarians only.
+    const rows = [row('#A', 0, 'u5x6-5x83'), row('#B', 5, 'u20x0'), row('#C', 30, 'u20x6')];
+    const { meta } = aggregate(rows, catalog, opts);
+    const sw = data.byId.get('wizard')!.superHousingSpace!;
+    const aTotal = 5 * hs('wizard') + 5 * sw;
+    expect(meta.units['4000006'].armyShare).toBeCloseTo((5 * hs('wizard')) / aTotal / 1.5, 4);
+    expect(meta.units['4000083'].armyShare).toBeCloseTo((5 * sw) / aTotal / 1.5, 4);
+    expect(meta.units['4000000'].armyShare).toBeCloseTo(0.5 / 1.5, 4);
+    // Shares of one army add up to 1, so the averages do too.
+    const total = Object.values(meta.units).reduce((s, x) => s + (x.armyShare ?? 0), 0);
+    expect(total).toBeCloseTo(1, 3);
+    // Base troop score = own share + super share; usage stays visible.
+    const s = metaStats(meta, 4000006);
+    expect(s.scoreKind).toBe('armyShare');
+    expect(s.score).toBeCloseTo((meta.units['4000006'].armyShare ?? 0) + (meta.units['4000083'].armyShare ?? 0), 4);
+    expect(s.usage).toBe(1); // 2/3 own + 2/3 super, capped
+  });
+
+  it('a unit without housing data is listed and falls back to usage share; it is left out of the totals', () => {
+    const giantId = data.byId.get('giant')!.dataId;
+    const cat = new Map(catalog);
+    cat.set(giantId, { ...cat.get(giantId)!, housing: undefined });
+    const res = aggregate([row('#A', 0, `u10x0-4x${short('giant')}`)], cat, opts);
+    expect(res.noHousing.get(giantId)).toBe('Giant');
+    expect(res.meta.units[String(giantId)].armyShare).toBeUndefined();
+    expect(res.meta.units['4000000'].armyShare).toBe(1);
+    const g = metaStats(res.meta, giantId);
+    expect(g.scoreKind).toBe('usage');
+    expect(g.score).toBe(1);
+  });
+
+  it('sieges, pets and equipment keep plain usage share; old meta files without armyShare fall back to usage', () => {
+    const { meta } = aggregate([row('#A', 0, 'h1p9e17_48u10x0i1x51')], catalog, opts);
+    for (const id of [4000051, 73000009, 90000017]) {
+      expect(meta.units[String(id)].armyShare).toBeUndefined();
+      expect(metaStats(meta, id)).toMatchObject({ scoreKind: 'usage', score: 1 });
+    }
+    const old: MetaFile = { ...EMPTY_META, attacks: 1, units: { '4000006': { name: 'Wizard', usage: 0.4, threeStarRate: 0.5, kind: 'troop' } } };
+    expect(metaStats(old, 4000006)).toMatchObject({ scoreKind: 'usage', score: 0.4 });
+    // A super troop without armyShare makes the base troop fall back to usage as a whole.
+    old.units['4000083'] = { name: 'Super Wizard', usage: 0.2, threeStarRate: 0.5, kind: 'superTroop', baseId: 4000006 };
+    old.units['4000006'].armyShare = 0.1;
+    expect(metaStats(old, 4000006)).toMatchObject({ scoreKind: 'usage' });
+    expect(metaStats(old, 4000006).score).toBeCloseTo(0.6, 10);
+  });
+
+  it('lab ranks a high-share troop above a filler troop that appears in more armies', () => {
+    const m: MetaFile = {
+      ...EMPTY_META,
+      generatedAt: '2026-11-16T00:00:00Z',
+      attacks: 100,
+      players: 10,
+      units: {
+        '4000001': { name: 'Archer', usage: 0.9, threeStarRate: 0.6, armyShare: 0.02, kind: 'troop' },
+        [String(data.byId.get('balloon')!.dataId)]: { name: 'Balloon', usage: 0.3, threeStarRate: 0.7, armyShare: 0.15, kind: 'troop' },
+      },
+    };
+    const plan = buildPlan(data, parse(makeExport(16)), settings(), m, T0);
+    expect(plan.lab.slice(0, 2).map((c) => c.item.id)).toEqual(['balloon', 'archer']);
+    expect(plan.lab[0]).toMatchObject({ scoreKind: 'armyShare', score: 0.15, usage: 0.3 });
+    expect(plan.lab[0].reason).toBe('Legend I: 15.0% of troop space (in 30.0% of attacks)');
+  });
+});
