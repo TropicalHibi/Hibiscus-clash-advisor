@@ -768,3 +768,111 @@ Before this fix, the priority list at the same moment would have left out BK 83 
 - [ ] **Weight 0 + pins:** a pinned item is researched even if its kind's weight is 0. Say if you'd rather weight 0 win.
 - [ ] **What blocks a data update:** only data that can't be loaded or has broken levels. A merge `merges.yaml` doesn't know yet installs anyway and shows a Plan-tab warning. Say if you'd rather that block the update too.
 - [ ] **Git history:** say if you want `#8UG890J` removed from history (it needs a force-push to `main`).
+
+
+# Step 3 Report: Polish (last step of v1)
+
+**Status:** all five Step 3 items are built and pushed to `main`. `npm test` passes (**229 tests in 14 files**, up from 189; none of the old tests changed). `npm run build` succeeds. The GitHub Pages workflow passed on the first run after its actions were bumped and deployed the site. SPEC.md has the new rules (§3.1, §3.2, §4, §9, §10.1, §11, §12, §13, §14). The reasoning is in DECISIONS.md under "Step 3".
+
+## What was built
+
+### 1. Full `npm run sync` (SPEC §9)
+- After validation, sync writes a snapshot of the normalized data (the `Item` model only) to `data/snapshots/<date>_<version>.json`, once per data version.
+- It then prints the changes since the previous version's snapshot: new / removed items, new / removed levels, renames, and cost, time and requirement changes per level. Lines look like `Archer Tower 21: 18d → 16d`, `Gold Mine 17: 8M gold → 7.2M gold`, `NEW: Town Hall 19 (…)`, `NEW ITEM: …`, `REMOVED ITEM: …`. A test checks each kind on a modified copy of the data (changed cost, changed time, new level, new item, removed item).
+- The diff is saved to **`public/data-changes.json`**. The Plan tab shows a dismissible **"Game data updated: N changes"** banner with the list, the first time the site loads that version (until you dismiss it).
+- **Snapshots are not committed:** each one is ~0.33 MB, and a new one comes with every data release. The folder is git-ignored and keeps the newest two. `data-changes.json` is small and is committed, so the live site gets the banner too.
+- The validation checks and the known-good rollback are unchanged. A snapshot problem is a warning, never a failed sync.
+- New flag: **`npm run sync -- --offline`** checks and snapshots the installed version without asking npm. I used it to record the baseline snapshot for 0.19.1. I didn't run a real `npm run sync`, so no new data version was installed during this step (Hero Hall 13 is due today). **Your next `npm run dev` or `npm run sync` will install it, print the diff against this baseline and write the banner file.** Commit `public/data-changes.json` together with `package.json` / `package-lock.json`.
+
+### 2. Everything tab (SPEC §11)
+- A new tab lists every upgrade left at your **current** Town Hall, from "now". It comes from one full scheduler run with the Town Hall frozen, so the time to max respects every builder, tier, lock and helper. It isn't a plain sum.
+- **On top:** builder time to max (with and without Gold Pass), when the Lab and the Pet House finish, total cost per resource and total ore.
+- **One collapsible section per tier**, named after the tier. Each shows the number of upgrades, builder time (raw and with Gold Pass), cost per resource and when the tier's last job finishes. Inside, rows are summed per item (e.g. "Cannon · 14 upgrades · 19 → 21").
+- Laboratory, Pet House, Blacksmith (ore) and Walls sections, each with its own totals. A **Not scheduled** section holds book-ready hero levels, lab kinds with weight 0, and the next Town Hall in rush mode.
+
+### 3. Hero order drag-reorder
+- **Drag a hero row** to reorder it on desktop. The **↑ / ↓ buttons** are still there for phones. The new **"Reset hero order to default"** button restores AQ > GW > DD > BK > RC > MP. The order is saved in your browser.
+- The card now says the Archer Queen's Tier 0 rule belongs to the Queen herself, wherever she sits in the list, and her row is marked "· Tier 0". A test moves her to last place and checks that she still gets Tier 0, and that the custom order changes the other heroes' order.
+
+### 4. Active boosts and helpers in the scheduler (SPEC §10.1)
+- **Boosts** from the export speed up their queue while they last: Builder Potion ×10 for builders, Research Potion ×24 for the lab and pet house, Builder Bite ×2, Study Soup ×4. The Clock Tower is Builder Base only, so it's ignored. An unknown boost shows a warning, not a crash.
+- **Helpers:** once a day, the Builder's Apprentice takes its level in hours off one builder job, and the Lab Assistant does the same for the running research (L8 = 8 h, L7 = 7 h, from the game data). They help the job the export says they repeat on, if it's running. Otherwise the Apprentice takes the builder job with the most time left and the Assistant takes the research. They never help a Goblin job. Helper hours that passed since the export count too.
+- **Alchemist:** `config/id-overrides.yaml` maps `93000003 → alchemist`, so its unknown-ID warning is gone. It doesn't affect timing.
+- **New setting "Simulate helpers and boosts"** (on by default). Off = exactly the old raw timers, so you can compare. The Plan tab summary names your helpers and their next work hour, and timeline rows show `helpers −8h` where a helper helped. `npm run plan -- <file> --no-helpers` does the same in the terminal.
+
+### 5. Item images
+- Every item in the Plan, Lab / Pets / Equipment and Everything tabs (and the hero order list) has its icon next to it. The images load lazily, have a fixed size so the layout doesn't jump, and disappear if they fail to load (name only, no broken-image icon).
+- **Only one image per item is bundled**, not the 52 MB folder: its icon, else its top-level picture. Your levels are only known in your browser, so a per-level picture would mean shipping every level.
+- **Size cap of 300 KB per image.** The package's images are full-size (some 4096 px, about 1 MB each, shown at 28 px). An item whose images are all bigger shows its name only. That's 16 game items, mostly equipment (Barbarian Puppet, Giant Gauntlet, Rage Vial, Royal Gem, Vampstache …), plus Crafting Station, Super Wizard Tower, Overgrowth Spell, the Super Wizard Tower supercharge and the helpers.
+
+### 6. CI
+- `.github/workflows/pages.yml` now uses `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-pages-artifact@v5` and `actions/deploy-pages@v5`. All run on Node 24. The run after the bump passed (test → build → deploy). Its only annotation is GitHub's notice that `ubuntu-latest` moves to Ubuntu 26; there's no Node 20 deprecation warning.
+
+## What your real export says about boosts and helpers
+- **`boosts` is empty (`{}`):** nothing was running when you exported, so the real shape is still unseen. The planner reads the keys the coc.py parser documents (`builder_boost`, `lab_boost`, `builder_consumable`, `lab_consumable`, `clocktower_boost`, `clocktower_cooldown`, `helper_cooldown`).
+- **Helpers:** Builder's Apprentice L8, Lab Assistant L7, Prospector L2, Alchemist L1. Each has `helper_cooldown: 8426` (≈2 h 20 m until they could work again), which I read as one shared cooldown.
+- **The repeat flag is called `helper_recurrent`** in your file (coc.py calls it `recurrent_helper`; both work). It's on **Grand Warden** (upgrading then) and on **Archer** (not researching). There's no `helper_timer` field (a helper mid-hour) in your file.
+
+## Plan before / after with helpers (your export, `npm run plan -- samples/myexport.json`, Mon 16 Nov 4:57 PM, export 1 d 9 h old)
+
+```diff
+-Helpers: not simulated (Settings → Simulate helpers and boosts is off)
++Helpers: Builder's Apprentice L8 (−8h/day), Lab Assistant L7 (−7h/day); next work hour Tue 10:16 AM
+ …
+   B2 (Builder 2):
+     busy: Scattershot → 3, done Tue 9:25 AM (in 16h 28m)
+-    free Tue 9:25 AM → Firespitter 3 (29M gold, 15d)
++    free Tue 9:25 AM → Scattershot 4 (11.5M gold, 8d)
+   B4 (Builder 4):
+-    Grand Warden → 77 finished since the export
++    Grand Warden → 77 finished since the export · helpers −8h
+   B6 (Builder 6):
+-    busy: Dragon Duke → 22, done Tue 1:36 PM (in 20h 39m)
+-    free Tue 1:36 PM → Scattershot 4 (11.5M gold, 8d)
++    busy: Dragon Duke → 22, done Tue 5:36 AM (in 12h 39m) · helpers −8h
++    free Tue 5:36 AM → Firespitter 3 (29M gold, 14d 16h) · helpers −8h
+   LAB (Laboratory):
+-    busy: Druid → 4, done Thu 1:41 AM (in 2d 8h)
++    busy: Druid → 4, done Wed 4:41 AM (in 1d 11h) · helpers −21h
+ …
+-  gold   52M   first needed Tue 9:25 AM (Firespitter 3)
++  gold   52M   first needed Tue 5:36 AM (Firespitter 3)
+```
+
+What happened:
+- Sunday's work hour went to Grand Warden (the repeat target), which finished earlier.
+- Monday's went to Dragon Duke: Grand Warden was done, so it fell back to the builder job with the most time left. DD now frees up 8 h earlier and takes the 15-day Firespitter, which gets Tuesday's hour.
+- The Lab Assistant's repeat target (Archer) isn't researching, so it helped Druid on all three days (3 × 7 h).
+- "Now", the top priorities, the 24 h totals (685K DE, 52M gold) and the walls line are unchanged.
+
+**Long run** (Everything tab, everything left at TH18):
+
+| | Helpers off | Helpers on |
+|---|---|---|
+| Builders done (no Gold Pass) | 552d 15h | **521d 9h** |
+| Builders done (Max Gold Pass) | 442d 2h | **417d 11h** |
+| Laboratory done | 1311d 16h | **1019d 10h** |
+| Pet House done | 519d 19h | 519d 19h (the Assistant doesn't help pets) |
+
+Everything tab for your account (helpers on): Heroes 49 upgrades (286d raw / 229d with Gold Pass, 10.4M DE); Permanent defenses 558 (2205d / 1764d, 4.2B gold); Temporary 224 (619d / 495d); Laboratory 145; Pet House 90; Blacksmith 448 levels (1M shiny, 72K glowy, 6.8K starry ore); Walls 4.3B gold or elixir; Not scheduled 51 book-ready hero levels.
+
+**Committed fixture** (`npm run plan -- tests/fixtures/export-th16.json`): it has no helpers or boosts, so its plan is the same as before Step 3 (Laboratory → 14 and Town Hall → 17 first, Rage Spell 4 in the lab).
+
+## Bundle size
+
+| | Before Step 3 | After |
+|---|---|---|
+| `dist/` total | 992 KB (4 files) | **9.8 MB** (175 files) |
+| JS bundle | 981.8 kB (140.3 kB gzip) | 1,009 kB (149.7 kB gzip) |
+| Images | none | **171 files, 8.8 MB** (one per item, ≤ 300 KB each) |
+| Without the size cap | | 21 MB (190 files) |
+
+The images are lazy-loaded, so a page only downloads the icons on screen. The Everything tab's sections start closed, so their icons load when you open one. **One thing I couldn't do:** I wanted to add `sharp` as a dev dependency to shrink every icon to ~3 KB at build time (about 0.5 MB in total, and no item left without an image). Installing it was blocked by this environment's permission rules. If you want it, allow `npm install -D sharp` and I can wire it into the image plugin.
+
+## Check in-game
+- [ ] **Helper time savings:** does the Builder's Apprentice L8 take 8 h off an upgrade per day, and the Lab Assistant L7 7 h? Is it really one work hour every 24 h, and do all helpers share one cooldown?
+- [ ] **Repeat target not upgrading:** your Lab Assistant is set to repeat on Archer, which isn't researching. The planner assumes it then helps the running research. In-game, does it do that, or does it sit idle?
+- [ ] **Boosts:** next time you export with a potion or snack running, send the `boosts` part so I can confirm the key names. Also check: Builder Bite ×2 and Study Soup ×4 (my guesses); does the Research Potion also speed up the Pet House? Is an export `timer` real seconds left, or does it already include a running potion?
+- [ ] **Hero Hall 13 / new data:** run `npm run dev` (or `npm run sync`). Check that the printed diff and the Plan-tab banner make sense, then commit `public/data-changes.json` with `package.json` / `package-lock.json`.
+- [ ] **Icons:** 16 items show their name only (images too big, see above). Say if you'd rather have them at full size (the deploy grows to ~21 MB).
+- [ ] Not changed, but noticed: timeline end times show only the weekday ("done Wed 9:25 AM" for a 15-day job lands two weeks later). Say if you want dates there.

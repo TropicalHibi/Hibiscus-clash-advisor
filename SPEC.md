@@ -41,7 +41,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 |---|---|
 | `npm run dev` | Refresh stale game data / meta (§9a), then start the local site |
 | `npm run dev:fast` | Start the local site without the refresh |
-| `npm run sync` | Update game data, run validation, print diff vs last snapshot |
+| `npm run sync` | Update game data, run validation, snapshot it and print the diff vs the last snapshot (`-- --offline`: no npm, validate + snapshot the installed version) |
 | `npm run meta` | Pull Legend I battle logs, aggregate, write `public/meta.json` |
 | `npm run push-meta` | Commit `public/meta.json` (only that file) as `meta: <generatedAt>` and push `main`, if it changed — redeploys the live site (§15) |
 | `npm run build` | Typecheck + production build at base `/` |
@@ -62,13 +62,18 @@ A local website that reads a Clash of Clans account export and tells the player 
 - Supercharge data is present on some defense files.
 - Walls: `buildCostResource: "Gold or Elixir"`.
 
+- `other/helpers`: Builder's Apprentice and Lab Assistant levels carry `workRate` (hours of progress per work hour), used by the scheduler (§10.1). The Prospector and Alchemist are recognised but don't affect timing.
+- **Missing dataIds** go in `config/id-overrides.yaml` (`<dataId>: <file id>`). Today: `93000003: alchemist` (the Alchemist file has no `dataId`). If the data later ships its own dataId, the data wins, and a differing value shows a warning.
+- **Images:** item files carry `images.icon` (troops, spells, sieges, heroes, pets, equipment) or per-level `levels[].images.normal` (buildings). The files are WebP saved as `.png`, some up to 4096 px. See §13 Step 3.
+
 **Known data quirk:** Hero Hall `heroLevelCaps` is stale (says Archer Queen cap 105 at Hero Hall 12; in-game max is 110). **Derive hero caps from each hero level's `heroHallLevelRequired`, not from the Hero Hall's cap table.** Validation test (§9) logs the mismatch.
 
 ### 3.2 Account state — in-game export JSON
 - Player copies it from in-game settings and pastes it into the site.
 - Shape (from coc.py 4.0 `AccountData` parser): top-level sections are lists — `buildings`, `traps`, `heroes`, `troops`, `spells`, `pets`, `equipment`, `guardians`, `helpers`, `decorations`, `obstacles`, etc. Sections ending in `2` (e.g. `buildings2`) are Builder Base → ignore in v1.
-- Item fields: `data` (dataId), `lvl`, `cnt` (number of instances at that level), `timer` (seconds remaining if upgrading), `extra` (true = Goblin Builder), `helper_timer`, `recurrent_helper`.
-- Top-level `boosts` object: builder boost, lab boost, clock tower, etc.
+- Item fields: `data` (dataId), `lvl`, `cnt` (number of instances at that level), `timer` (seconds remaining if upgrading), `extra` (true = Goblin Builder), `helper_timer` (seconds left of a helper's work hour on this upgrade), and the recurrent-helper flag. The real export spells it **`helper_recurrent`**; coc.py documents `recurrent_helper`. Both are accepted.
+- `helpers` section: `{ data, lvl, helper_cooldown }`. All helpers share one cooldown (seconds until they can work again), as in coc.py.
+- Top-level `boosts` object, keys as in coc.py's `Boosts` (seconds remaining at the export time): `builder_boost` (Builder Potion), `lab_boost` (Research Potion), `builder_consumable` (Builder Bite), `lab_consumable` (Study Soup), `clocktower_boost`, `clocktower_cooldown`, `helper_cooldown`. The real export had `boosts: {}`. Unknown keys or shapes produce a Plan-tab warning, never an error.
 - **No resource amounts** — that's why the forecast reports totals needed, not a deficit.
 - **Verify on first real export:** is there a top-level timestamp? If yes, timers count down from it. If not, use the paste time as the baseline and show "imported at HH:MM".
 - Builder count = Builder's Huts (Σ `cnt`) + B.O.B's Hut in `buildings`. Goblins are never counted as schedulable slots (§10.1).
@@ -95,6 +100,7 @@ coc-planner/
     pages.yml            # test + build + deploy to GitHub Pages on push to main (§15)
   config/
     merges.yaml          # merge recipes (hand-maintained)
+    id-overrides.yaml    # dataIds missing from the game data (§3.1)
     settings.sample.yaml # defaults the UI starts from
   scripts/
     sync.ts              # npm run sync
@@ -107,6 +113,8 @@ coc-planner/
     engine/
       tiers.ts           # mode detection + tier assignment + eligibility
       scheduler.ts       # simulate builders/lab/pet house
+      boosts.ts          # active boosts (work clock) + helpers (§10.1)
+      everything.ts      # Everything tab model (§11)
       forecast.ts        # 24h needs + wall dump
       book.ts            # hero book-threshold logic
     meta/
@@ -115,11 +123,12 @@ coc-planner/
     ui/                  # pages/components
     main.ts
   data/
-    snapshots/           # dated normalized game-data snapshots (for diffs)
+    snapshots/           # dated normalized game-data snapshots (for diffs; git-ignored, newest 2 kept)
     meta/battles.jsonl   # raw deduped Legend I attacks (git-ignored)
     refresh-state.json   # last game-data check (git-ignored)
   public/
     meta.json            # aggregated meta the site reads (committed; the live site serves the pushed copy)
+    data-changes.json    # latest game-data diff for the "Game data updated" banner (written by sync, committed)
   tests/
 ```
 
@@ -315,15 +324,19 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
    - Load and validate it. If it can't be used (normalize throws, or levels are broken), **restore the last known-good version**, record the failure in `data/refresh-state.json`, and exit non-zero.
    - The `npm run dev` refresh (§9a) warns about the recorded failure on every start until a sync succeeds.
    - Merge-consumption and hero-cap findings are warnings, not failures (the site warns about merges itself, §7).
-2. Normalize into the `Item` model; write `data/snapshots/<date>_<version>.json`.
-3. Diff vs the previous snapshot and print human-readable changes, e.g. `Archer Tower 21: 18d → 16d`, `Gold Mine 17: 8.0M → 7.2M`, `NEW: Hero Hall 13`.
+2. Normalize into the `Item` model; write `data/snapshots/<date>_<version>.json` (Item model only, no raw JSON or image paths), once per data version. Snapshots are ~0.3 MB each, so `data/snapshots/` is **git-ignored** and only the newest two are kept on disk.
+3. Diff vs the newest snapshot of another version and print human-readable changes: new / removed items, new / removed levels, renames, and per-level cost, time and requirement changes. Examples: `Archer Tower 21: 18d → 16d`, `Gold Mine 17: 8M gold → 7.2M gold`, `NEW: Town Hall 19 (…)`, `NEW ITEM: …`, `REMOVED ITEM: …`. Items match by key (dataId), never by name. Equipment compares all three ores.
+   - The diff is saved to `public/data-changes.json` (`{ version, previousVersion, date, changes[] }`). It's committed with `package.json` / `package-lock.json`, so the live site gets it too.
+   - The Plan tab shows a dismissible **"Game data updated: N changes"** banner with the list when `data-changes.json` matches the bundled data version and that version hasn't been dismissed yet (dismissal is per version, in localStorage).
+   - The first snapshot has nothing to compare with and writes no diff. A snapshot/diff failure is a warning, not a failed sync.
+   - `npm run sync -- --offline` validates and snapshots the installed version without asking npm.
 4. Run validation tests; print warnings (don't block the site):
    - Every dataId in a sample export resolves to an item.
    - Levels are contiguous and costs/times are non-negative.
    - **Hero cap mismatch:** Hero Hall `heroLevelCaps` vs per-level `heroHallLevelRequired` (known mismatch today — log, don't fail).
    - **Merge consumption check** (§7).
    - Max TH changed → print "mode may flip to rush".
-5. Site footer shows: data version + snapshot date, meta `generatedAt`.
+5. Site footer shows: data version + snapshot date (from `data-changes.json` when it matches), meta `generatedAt`.
 
 ## 9a. Automatic refresh — no OS schedulers
 
@@ -350,7 +363,12 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 - Tier 0 rule: free builders take the Laboratory upgrade first (if available and not already upgrading), then new unbuilt buildings; then, if the Queen is eligible and not upgrading, the next free builder takes her.
 - Research slots never wait for a Laboratory / Pet House building upgrade, and those upgrades never wait for research (§6.6).
 - The lab slot starts the first pinned or auto-pickable item of the lab queue (§6.7); with nothing auto-pickable it stays idle.
-- Active boosts and helpers (Builder's Apprentice, Lab Assistant) are Step 3. Until then, use raw remaining timers.
+- **Active boosts and helpers** (setting `simulateHelpers`, default on; off = raw timers as before):
+  - **Boosts** run from the export time. Builder Potion = builders ×10, Research Potion = lab + pet house ×24, Builder Bite ×2, Study Soup ×4 (the snack values are assumptions; all live in `BOOST_MULTIPLIER`). They apply to running and new jobs while active, including Goblin jobs. The Clock Tower is Builder Base only and is ignored. Export timers are taken as remaining *work* time.
+  - **Helpers:** the Builder's Apprentice (builder jobs) and the Lab Assistant (Laboratory research, not pets) each work one hour a day (1 h work + 23 h rest). In that hour the job runs at 1 + `workRate` speed, so it gains `workRate` hours (less if it finishes inside the hour). `workRate` comes from the helper's level in `other/helpers`; an unknown higher level uses the highest known level and shows a warning.
+  - **When:** the first work hour is when the shared `helper_cooldown` ends (counted from the export; no cooldown = now), then every 24 h. Hours between the export and now apply to jobs that were running then. `helper_timer` on an upgrade = a helper already working on it: it adds the rest of that hour.
+  - **Which job:** the job on the instance the export marks recurrent, if it's running. Otherwise the Apprentice takes the builder job with the most time left, and the Assistant takes the running research. Never a Goblin job (it frees no slot).
+  - The Alchemist and Prospector don't affect timing.
 
 ### 10.2 Gold Pass toggle
 - Two states: **No Gold Pass** / **Max Gold Pass**.
@@ -374,15 +392,20 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 
 Mobile-friendly layout (the player checks on a phone later), single page with tabs:
 
-1. **Import & Settings** — paste export JSON → parse → save. Toggles: Gold Pass (none / max). Hero order (drag to reorder, default as §6.3). Show import time and TH / mode detected.
-2. **Plan** (default tab)
+1. **Import & Settings** — paste export JSON → parse → save. Toggles: Gold Pass (none / max), **Simulate helpers and boosts** (§10.1). Hero order: drag to reorder on desktop, ↑ / ↓ buttons everywhere (touch), "Reset hero order to default", saved in localStorage. The UI says that the Archer Queen's Tier 0 rule belongs to the Queen, not to slot 1. Show import time and TH / mode detected.
+2. **Plan** (default tab). The "Game data updated" banner (§9) sits on top when a new data version arrives.
    - "Now": what each free builder should start, with the `reason` string.
    - 24h timeline per slot.
    - Resources needed in 24h (gold, elixir, DE, each ore).
    - Book-ready heroes list.
    - Wall dump line.
 3. **Lab / Pets / Equipment** — "Next in lab" line (§6.7), then Lab sections Troops / Spells / Sieges, Pet House, Blacksmith. Ranked lists with the meta score (army share for troops/spells), Legend I usage % and 3★ rate, pin buttons. Equipment rows show ore cost.
-4. **Everything** — all remaining upgrades grouped by tier, with time-to-max per tier and total cost per resource.
+4. **Everything** — every upgrade left at the **current Town Hall** from "now", from one full scheduler run with the Town Hall frozen:
+   - Builder upgrades grouped by the tier the engine assigns (with the tier name). Per tier: count, total builder time raw and with Gold Pass, cost per resource, and when the tier's last job finishes. Rows are summed per item (e.g. "Cannon · 14 upgrades · 19 → 21").
+   - Totals on top: builder time to max from the scheduler (all builders, locks, tiers, helpers), shown for the current Gold Pass setting and the other one; Lab / Pet House done times; total cost per resource and total ore.
+   - Laboratory, Pet House (scheduler order), Blacksmith (every remaining level up to the max at the final Blacksmith level, ore totals) and Walls (count × cost per level), each with its own totals.
+   - **Not scheduled:** book-ready hero levels, lab kinds with weight 0, and in rush mode the next Town Hall. Not counted in time to max.
+   - Each section is a collapsible `<details>` (closed by default) so a phone shows the totals first. It's computed when the tab opens, not on the 60 s refresh.
 5. **Footer** — data version/date, meta date, "rerun `npm run sync` / `npm run meta`" hint.
 
 ---
@@ -390,7 +413,8 @@ Mobile-friendly layout (the player checks on a phone later), single page with ta
 ## 12. Config files
 
 - `config/merges.yaml` — recipes (§7).
-- `config/settings.sample.yaml` — defaults loaded into the UI on first run. The UI persists edits to localStorage; the YAML is the reset point. Includes `lab.kindWeights` (troop / spell / siege, §6.7), editable in the Settings tab.
+- `config/settings.sample.yaml` — defaults loaded into the UI on first run. The UI persists edits to localStorage; the YAML is the reset point. Includes `lab.kindWeights` (troop / spell / siege, §6.7) and `simulateHelpers` (§10.1), both editable in the Settings tab. A saved hero order keeps its order, drops duplicates and gets any missing default hero appended.
+- `config/id-overrides.yaml` — dataIds the game data is missing (§3.1).
 
 ---
 
@@ -414,19 +438,19 @@ Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
 - `npm run meta` (§8): collect, armyShareCode parser (port + tests from clashy.go), aggregation, real `meta.json`.
 - Lab / Pets / Equipment tab with usage %, 3★ rate, and pins.
 
-### Step 3 — Polish
+### Step 3 — Polish (done)
 - Full `npm run sync`: snapshots, diffs, validation checks (§9).
-- Everything tab (§11), hero order drag-reorder, active boosts and helpers in the scheduler.
-- **Item images** from `clash-of-clans-data/images/*` next to every item in the Plan, Lab / Pets / Equipment and Everything tabs:
-  - bundle only the images actually used (the item's icon / current-level image), not the whole folder;
-  - lazy-load (`loading="lazy"`, fixed size so the layout doesn't jump);
-  - text fallback: if an image is missing or fails to load, show the name only (no broken-image icon).
+- Everything tab (§11), hero order drag-reorder, active boosts and helpers in the scheduler (§10.1).
+- **Item images** from `clash-of-clans-data/images/*` next to every item in the Plan, Lab / Pets / Equipment and Everything tabs (and the hero order list):
+  - **one image per item**, chosen at build time by the `virtual:item-images` Vite plugin: the first of the item's candidates (icon, then level images from the top level down) that exists and is **≤ 300 KB** (`IMAGE_MAX_BYTES`). Only those files are bundled, not the folder. The account's levels are only known in the browser, so one image per item, not per level. An item whose candidates are all bigger shows its name only;
+  - lazy-load (`loading="lazy"`, `width`/`height` attributes so the layout doesn't jump), kept as separate files (never inlined into the JS);
+  - text fallback: if an image is missing or fails to load (`onerror` removes the `<img>`), show the name only.
 
 ---
 
 ## 14. Verify during build
 
-- Export JSON: top-level timestamp field present? exact `boosts` shape?
+- ~~Export JSON: top-level timestamp field present?~~ → yes (`timestamp`). `boosts` shape: empty in the real export; the coc.py keys are supported (§3.2), so check the first export taken with a potion running.
 - ~~`battleType === 'LEGEND'` corresponds to Legend League I battles~~ → resolved: lowercase `legend`, Legend I only (§3.3).
 - ~~How many entries a battle log returns~~ → resolved: ~50 (~2 days), run daily (§3.3, §9a).
 - Gold Pass max boost % (builder and research).

@@ -230,3 +230,66 @@ One line each: decision, then why. The user asked for no questions, so these are
 
 ## Docs
 - SPEC: intro, §1 scope, §2 (base rule + scripts table), §4 layout, §9a step 5, §15 split into 15.1 GitHub Pages (done) and 15.2 v2+. Scheduled CI (daily meta / version check) stays v2+ because the API key is IP-locked.
+
+# Decisions (Step 3: polish)
+
+One line each: decision, then why. The owner asked for no questions, so these are my calls.
+
+## What the real export says (`samples/myexport.json`)
+- **`boosts` is `{}`**: no potion, snack or clock tower was running, so its real shape is still unseen. I support the keys coc.py's `Boosts` parser reads (`builder_boost`, `lab_boost`, `builder_consumable`, `lab_consumable`, `clocktower_boost`, `clocktower_cooldown`, `helper_cooldown`, all seconds). *Why:* that's the only documented shape. Any other key, a non-number value or a non-object `boosts` gives a Plan-tab warning, never an error.
+- **Helpers:** `helpers` = Builder's Apprentice L8, Lab Assistant L7, Prospector L2, Alchemist L1, each with `helper_cooldown: 8426` (≈2 h 20 m). *Reading:* one shared cooldown, like coc.py (it copies any helper's `helper_cooldown` into one shared field). With several values, I take the largest.
+- **The recurrent flag is `helper_recurrent`** in the real export (on Grand Warden, which was upgrading, and on Archer, which wasn't researching). coc.py documents `recurrent_helper`. Both are accepted.
+- **No `helper_timer`** in the real export. Supported as coc.py documents it: seconds left of a helper's work hour on that upgrade.
+- Prospector L2 isn't in the data (which only has L1). Harmless: it doesn't affect timing.
+
+## Boosts (`src/engine/boosts.ts`)
+- **A work clock per queue** (builders, research) maps wall time ↔ work done. A boost window adds `(multiplier − 1)` work per second while it lasts, counted from the export time. *Why:* one exact, piecewise-linear model that handles running jobs, new jobs and boosts that ran out between the export and now. With no boosts it reduces to `end = start + time`, so nothing else changed.
+- **Multipliers:** Builder Potion ×10, Research Potion ×24 (lab **and** pet house), Builder Bite ×2, Study Soup ×4, all in `BOOST_MULTIPLIER`. *Why:* the potion values are well known; the snack values and the potion's pet-house effect are my best guess (listed under "Check in-game").
+- **Clock Tower:** parsed and ignored. *Why:* it only boosts the Builder Base, which v1 ignores.
+- Export `timer` values are taken as remaining **work** time, and a boost active at the export speeds them up from then on. Goblin jobs are boosted too (potions boost every builder).
+- Simultaneous boosts on one queue add their extras (potion + snack). Unverified.
+
+## Helpers
+- **Work model:** each helper works one hour a day (1 h + 23 h rest, `HELPER_PERIOD_SEC`). In that hour its job runs at `1 + workRate` speed, so it gains `workRate` hours, or less if the job finishes inside the hour. `workRate` comes from the helper's level in `other/helpers` (Apprentice L8 = 8 h, Assistant L7 = 7 h). *Why:* matches the data's `workRate` field and the in-game "×N for 1 hour" description.
+- **Timing:** first work hour = export time + `helper_cooldown` (or now, without a cooldown), then every 24 h. Work hours between the export and now are applied to the jobs running then, in time order, before the simulation starts. *Why:* the export can be a day old (the real one was 1 d 9 h old).
+- **Assignment rule:** (1) the job on the instance the export marks recurrent, while it's running; (2) otherwise the Apprentice takes the **builder job with the most time left**, and the Lab Assistant takes **the running Laboratory research**; (3) never a Goblin job. The Assistant never helps the Pet House. *Why:* the spec's default rule, with the export's own assignment first. A Goblin job ends on its own and frees no slot, so helping it gains nothing.
+- **A recurrent target that isn't upgrading** (the real export's Archer) falls back to rule (2). *Why:* in-game the helper would otherwise idle; falling back is the useful plan. Listed under "Check in-game".
+- **The recurrent flag stays with the instance**, so it carries over to that hero or building's next upgrade in the simulation. *Why:* "recurrent" reads as "keep helping this one".
+- A helper level the data doesn't know uses the highest known level at or below it, with a warning.
+- **One "Simulate helpers and boosts" toggle** (default on) covers both. *Why:* off must equal the old behaviour exactly (raw timers), and a test checks that.
+- The plan's summary line names the helpers, their hours per day, the next work-hour time and any running boost. Timeline rows show `helpers −8h` on the jobs that were helped.
+
+## Alchemist and id overrides
+- `config/id-overrides.yaml` (`ids: { 93000003: alchemist }`) is read by `normalize()` in both loaders. A file without a `dataId` gets the override; if the data later ships a dataId, the data wins, and a mismatch shows a warning. *Why:* one generic place for future missing ids, instead of a special case.
+- Helpers are no longer turned into building instances: they go into `AccountState.helpers`. *Why:* they were never upgradable by builders.
+
+## `npm run sync` snapshots and diff
+- **Snapshots are git-ignored** (`data/snapshots/*`, with a `.gitkeep`), and the newest **two** are kept on disk: the current one and the one it was diffed against. *Why:* one snapshot is ~330 KB compact (~510 KB pretty), and every data release would add one. That isn't "small". The diff lives on in the committed `public/data-changes.json`.
+- Snapshot = the normalized `Item` model sorted by key, without image paths. One per data version: re-running sync on the same version doesn't rewrite it and prints no diff.
+- **The diff compares against the newest snapshot of another version.** Items match by key (dataId-based); a name change is a `RENAMED:` line. Levels: new, removed, cost (or resource), time and requirement changes (TH, Hero Hall, Lab, Pet House, Blacksmith). Equipment compares all three ores.
+- `public/data-changes.json` is written only when a diff exists (a new version with a previous snapshot). Sync prints up to 200 lines and saves all of them.
+- **Baseline:** I wrote the first snapshot (`2026-11-16_0.19.1.json`) with the new **`npm run sync -- --offline`** flag, which validates and snapshots the installed version without npm. *Why:* a real `npm run sync` could install a new data release (Hero Hall 13 lands today) in the middle of this step, and that release needs its own review. The next `npm run dev` (predev refresh) or `npm run sync` will diff against this baseline and show the banner.
+- A snapshot/diff failure is logged as `[WARN]` and never fails the sync or triggers the known-good rollback. *Why:* the data itself loaded fine.
+- **Banner:** shown on the Plan tab when `data-changes.json` matches the bundled data version, has changes, and that version hasn't been dismissed. Dismissal is saved per version in localStorage. *Why:* "the first time the site loads a new version" means it stays until you've seen it, without coming back for the same version. A stale file (from another version) never shows.
+- The footer now shows "(synced <date>)" when `data-changes.json` matches the data version (SPEC §9 step 5).
+
+## Everything tab
+- **One full scheduler run from "now" with the Town Hall frozen** (`freezeTownHall`), to completion. Builder rows are grouped by each job's tier. *Why:* "time-to-max from the scheduler, not a plain sum" needs the real simulation, and freezing the TH keeps it to "everything left at this TH" instead of running into the next TH forever.
+- **Time to max** = the last builder job's end, including running and Goblin jobs. It's shown for the current Gold Pass setting and the other one (a second run). Raw and Gold Pass totals per tier are sums of data times (raw × 0.8).
+- **Not scheduled** (listed, not in time to max): book-ready hero levels up to the Hero Hall cap at the end of the run, lab kinds with weight 0, and in rush mode the next Town Hall.
+- **Blacksmith** = every remaining level of owned equipment up to the max at the final Blacksmith level (ore only). **Walls** = each wall level up to the max at this TH × wall count. Both are instant: no time.
+- Rows are summed per item ("Cannon · 14 upgrades · 19 → 21") inside closed `<details>` sections. *Why:* the real account has ~1,570 upgrades left. Per-level rows would be unreadable on a phone.
+- Computed when the tab opens and not on the 60-second refresh. *Why:* it takes ~1.7 s on the real account (two full runs) and changes slowly.
+
+## Hero order
+- HTML5 drag-and-drop on the list rows (desktop), with the existing ↑/↓ buttons kept (touch). There's a "Reset hero order to default" button, disabled while the order is already the default. The Queen's row shows "· Tier 0", and the card says her Tier 0 rule belongs to her, not to slot 1.
+- `moveHero()` (one function for both drag and buttons) and `heroOrder()` coercion. A saved order keeps its order, drops duplicates, keeps ids newer than the defaults and appends any missing default hero. *Why:* a new hero shouldn't vanish from a saved order, and a saved order missing a hero must still schedule it.
+
+## Item images
+- **One image per item**, chosen at build time by the `virtual:item-images` Vite plugin from `Item.images` (candidates: icon, then level images from the top level down). *Why:* the account's levels are only known in the browser, so per-level images would mean bundling every level (most of the 52 MB folder).
+- **Size cap 300 KB per file** (`IMAGE_MAX_BYTES`): the first candidate under the cap wins; if none is under it, the item shows its name only. *Why:* the package's "PNG"s are WebP, some 4096 px and ~1 MB, shown at 28 px. Uncapped, the build was 21 MB (190 files). Capped, it's 8.8 MB (171 files). 20 items show name only (16 pieces of equipment / spells / buildings + 1 supercharge + 3 helpers that are never shown).
+- **I tried to add `sharp` (dev dependency) to shrink every icon to ~3 KB at build time; the install was blocked by this environment's permission rules**, so it isn't done. See REPORT.
+- `assetsInlineLimit` keeps package images as separate files (never base64 in the JS), so `loading="lazy"` works. `width`/`height` attributes fix the size. `alt=""` (the name is right next to it). `onerror="this.remove()"` means no broken-image icon.
+
+## CI
+- Pages workflow actions bumped to their current majors (`actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5`). All run on Node 24 (upload-pages-artifact is a composite over `upload-artifact@v7`). The first run after the bump passed (build + deploy), with no Node 20 deprecation annotation.
