@@ -2,7 +2,8 @@
 // UI smoke test: boot main.ts, paste an export, switch to the Plan tab.
 import fs from 'node:fs';
 import path from 'node:path';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { T0 } from './helpers';
 
 const html = fs.readFileSync(path.resolve('index.html'), 'utf8');
 const fixture = fs.readFileSync(path.resolve('tests/fixtures/export-th16.json'), 'utf8');
@@ -18,7 +19,10 @@ const meta = JSON.stringify({
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 describe('UI', () => {
+  afterAll(() => vi.useRealTimers());
   beforeAll(async () => {
+    // A fixed clock (only Date is faked, so timers and ticks still run): the plan doesn't depend on today's date.
+    vi.useFakeTimers({ now: T0 * 1000, toFake: ['Date'] });
     document.body.innerHTML = html.replace(/^[\s\S]*<body>/, '').replace(/<\/body>[\s\S]*$/, '').replace(/<script[\s\S]*?<\/script>/, '');
     localStorage.clear();
     vi.stubGlobal('fetch', async () => new Response(meta, { status: 200 }));
@@ -107,6 +111,23 @@ describe('UI', () => {
     // Spells and sieges have their own sections, ranked within kind.
     const spellTitles = [...tab.querySelectorAll('.rank-list')[1].querySelectorAll('.title b')].map((b) => b.textContent);
     expect(spellTitles.length).toBeGreaterThan(0);
+  });
+
+  it('an export without a timestamp counts timers from the import time and says so', () => {
+    (document.querySelector('[data-tab="import"]') as HTMLButtonElement).click();
+    const noTs = JSON.parse(fixture);
+    delete noTs.timestamp;
+    (document.querySelector('#export-text') as HTMLTextAreaElement).value = JSON.stringify(noTs);
+    (document.querySelector('#btn-import') as HTMLButtonElement).click();
+    expect(document.querySelector('#tab-import')!.textContent).toContain('no timestamp in export');
+    (document.querySelector('[data-tab="plan"]') as HTMLButtonElement).click();
+    const text = document.querySelector('#tab-plan')!.textContent!;
+    expect(text).toContain('Export has no timestamp; timers count from the import at');
+    expect(text).not.toContain('timers count from the import time'); // the engine's generic line is replaced
+    // Put the timestamped fixture back for the remaining tests.
+    (document.querySelector('[data-tab="import"]') as HTMLButtonElement).click();
+    (document.querySelector('#export-text') as HTMLTextAreaElement).value = fixture;
+    (document.querySelector('#btn-import') as HTMLButtonElement).click();
   });
 
   it('lab kind weights are editable in Settings and persist', () => {

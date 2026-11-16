@@ -8,7 +8,7 @@ import { DEFAULT_SETTINGS, type Settings } from '../src/state/settings';
 
 export const data = loadGameDataNode();
 
-export const T0 = 1_800_000_000; // fixed "export time" for deterministic tests
+export const T0 = 1_790_000_000; // fixed "export time" (2026-09-21, in the past) for deterministic tests
 
 export interface Entry {
   data: number;

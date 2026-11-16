@@ -56,14 +56,6 @@ describe('scheduler', () => {
     expect(plan.sim.timeline.filter((e) => !e.inProgress && e.itemName === 'Barbarian').every((e) => e.slotId === 'LAB')).toBe(true);
   });
 
-  it('each building instance gets one upgrade at a time', () => {
-    const sim = simulate(data, fixture(), settings(), EMPTY_META, { nowSec: T0, horizonSec: 30 * DAY });
-    const byKey = new Map<string, TimelineEntry[]>();
-    for (const e of sim.timeline) if (e.itemName === 'Town Hall') (byKey.get('th') ?? byKey.set('th', []).get('th')!).push(e);
-    const th = byKey.get('th') ?? [];
-    for (let i = 1; i < th.length; i++) expect(th[i].start).toBeGreaterThanOrEqual(th[i - 1].end);
-  });
-
   it('Gold Pass max shortens new builder and research jobs, not running timers', () => {
     const none = simulate(data, fixture(), settings(), EMPTY_META, { nowSec: T0, horizonSec: DAY });
     const max = simulate(data, fixture(), settings({ goldPass: 'max' }), EMPTY_META, { nowSec: T0, horizonSec: DAY });

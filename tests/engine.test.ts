@@ -77,7 +77,8 @@ describe('hero book threshold', () => {
   const aq = data.byId.get('archer-queen')!;
   const threshold = data.bookThresholdSec;
 
-  it('threshold = longest hero level in the data (not hard-coded)', () => {
+  // Today's data only; tests/engine-rules.test.ts proves the threshold follows a modified copy of the data.
+  it('threshold = longest hero level in the data (today: 8d)', () => {
     const max = Math.max(...[...data.items.values()].filter((i) => i.category === 'hero').flatMap((h) => h.levels.map((l) => l.timeSec)));
     expect(threshold).toBe(max);
     expect(threshold).toBe(8 * 86400);
