@@ -57,19 +57,27 @@ export class WorkClock {
 
 export interface QueueClocks {
   builder: WorkClock;
-  research: WorkClock;
+  /** Laboratory: Research Potion + Study Soup. */
+  lab: WorkClock;
+  /** Pet House: its own Pet Potion only (the Research Potion doesn't speed it up). */
+  pet: WorkClock;
 }
 
-export const PLAIN_CLOCKS: QueueClocks = { builder: new WorkClock(), research: new WorkClock() };
+export const PLAIN_CLOCKS: QueueClocks = { builder: new WorkClock(), lab: new WorkClock(), pet: new WorkClock() };
 
-/** Clocks for the export's active boosts. Boost timers count from the export time (t = −elapsed). */
+/**
+ * Clocks for the export's active boosts. Boost timers count from the export time (t = −elapsed).
+ * Builder Potion (×10) and Builder Bite (+1×) stack additively: both together = ×11. The Clock Tower
+ * (boost and cooldown) is Builder Base only and never applied.
+ */
 export function clocksFor(account: AccountState, elapsedSec: number): QueueClocks {
   const b = account.boosts;
   const t0 = -elapsedSec;
   const win = (sec: number, mult: number): Window => ({ from: t0, to: t0 + sec, extra: mult - 1 });
   return {
     builder: new WorkClock([win(b.builderPotionSec, BOOST_MULTIPLIER.builderPotion), win(b.builderSnackSec, BOOST_MULTIPLIER.builderSnack)]),
-    research: new WorkClock([win(b.researchPotionSec, BOOST_MULTIPLIER.researchPotion), win(b.researchSnackSec, BOOST_MULTIPLIER.researchSnack)]),
+    lab: new WorkClock([win(b.researchPotionSec, BOOST_MULTIPLIER.researchPotion), win(b.researchSnackSec, BOOST_MULTIPLIER.researchSnack)]),
+    pet: new WorkClock([win(b.petPotionSec, BOOST_MULTIPLIER.petPotion)]),
   };
 }
 
@@ -89,7 +97,8 @@ const HELPER_QUEUE: Record<HelperSpec['id'], HelperSpec['queue']> = { 'builders-
 
 /**
  * The account's time helpers. Their first work hour is when the shared helper cooldown ends (counted from
- * the export), or now when the export has no cooldown; then once every HELPER_PERIOD_SEC.
+ * the export), or now when the export has no cooldown; then once every HELPER_PERIOD_SEC (a shared 23-hour
+ * cycle that starts when a helper is assigned).
  */
 export function helpersFor(data: GameData, account: AccountState, elapsedSec: number): { helpers: HelperSpec[]; warnings: string[] } {
   const helpers: HelperSpec[] = [];
@@ -115,8 +124,9 @@ export function helpersFor(data: GameData, account: AccountState, elapsedSec: nu
 }
 
 /**
- * Work a helper adds to a job with `remainingWork` seconds left when its hour starts: `workRate` hours,
- * or less when the job would finish inside the hour (it runs at 1 + workRate speed until done).
+ * Work a helper adds to a job with `remainingWork` seconds left when its hour starts: level L saves
+ * L hours (`workRate` = L), or less when the job would finish inside the hour. The gain is added on top of
+ * the queue's own progress, so a Builder Potion or Builder Bite never multiplies the helper's work.
  */
 export function helperGain(workRate: number, remainingWork: number): number {
   return Math.max(0, Math.min(workRate * HELPER_WORK_SEC, (remainingWork * workRate) / (1 + workRate)));
