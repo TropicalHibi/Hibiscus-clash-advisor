@@ -57,7 +57,7 @@ export interface Item {
    *  TH weapons ("<thId>:w<th>") and crafted-defense modules ("<defId>:m<moduleId>"). */
   key: string;
   dataId: number;
-  /** clash-of-clans-data file id, e.g. "cannon". */
+  /** Stable item id, e.g. "cannon" (ClashKing: slug of the name; clash-of-clans-data: file id). */
   id: string;
   name: string;
   category: Category;
@@ -81,6 +81,8 @@ export interface Item {
   superHousingSpace?: number;
   /** Helpers (Builder's Apprentice, Lab Assistant): work rate per helper level (hours of progress per work hour). */
   helperWorkRates?: Record<number, number>;
+  /** Seasonal / event troops and spells (ClashKing `is_seasonal`): recognised, never in the lab queue or the meta. */
+  seasonal?: boolean;
   /**
    * Package-relative image paths ("images/home/..."), best first: the item icon, then level images from
    * the top level down. The build bundles the first one that exists and is small enough (SPEC §13 Step 3).
@@ -96,8 +98,21 @@ export interface MergeRecipe {
   requiredSourceLevel: Record<string, number>; // source file id → level
 }
 
+export type DataSource = 'clashking' | 'clash-of-clans-data';
+
+/** A super troop: its own dataId, credited to its base troop's lab upgrade (SPEC §8.3). */
+export interface SuperTroop {
+  name: string;
+  /** Base troop item id, e.g. "barbarian". */
+  base: string;
+  baseDataId: number;
+  housingSpace?: number;
+}
+
 export interface GameData {
   version: string;
+  /** Where the items came from (SPEC §3.1): ClashKing normally, clash-of-clans-data only as the backup. */
+  source: DataSource;
   items: Map<string, Item>;
   byDataId: Map<number, Item>; // base items only
   byId: Map<string, Item>; // file id → base item
@@ -105,7 +120,9 @@ export interface GameData {
   /** BOOK_THRESHOLD (§6.5): max raw time across all hero levels, seconds. */
   bookThresholdSec: number;
   merges: MergeRecipe[];
-  /** Hero Hall heroLevelCaps table (stale in data; for validation only). */
+  /** Super troop dataId → base troop (from the data's `super_troop`, or config/super-troops.yaml). */
+  superTroops: Record<number, SuperTroop>;
+  /** Hero Hall heroLevelCaps table (clash-of-clans-data only, stale there; for validation only). */
   heroHallCaps: Record<number, Record<string, number>>;
   /** Problems found while normalizing (e.g. unknown cost resources). Shown on the Plan tab and by sync. */
   warnings: string[];

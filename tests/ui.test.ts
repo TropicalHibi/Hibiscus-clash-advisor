@@ -33,7 +33,7 @@ describe('UI', () => {
 
   it('starts on Import when nothing is saved, with the data version in the footer', () => {
     expect((document.querySelector('#tab-import') as HTMLElement).hidden).toBe(false);
-    expect(document.querySelector('#footer')!.textContent).toContain('clash-of-clans-data v');
+    expect(document.querySelector('#footer')!.textContent).toContain('Game data: ClashKing ');
   });
 
   it('shows a clear error for bad input', () => {

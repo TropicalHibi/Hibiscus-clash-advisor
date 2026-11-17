@@ -1,7 +1,7 @@
 // Legend I meta aggregation (SPEC §8.3): 14-day window, exponential recency weighting,
 // usage / 3★ rate / avg quantity per troop, spell, siege, pet and equipment piece, plus the
 // army-share score for troops and spells (SPEC §8.3).
-import { parse as parseYaml } from 'yaml';
+import type { SuperTroopEntry } from '../data/overrides';
 import type { GameData } from '../data/types';
 import { parseArmyCode, type ArmyRecipe } from './armyCode';
 import type { MetaFile, MetaUnit, UnitKind } from './meta';
@@ -38,21 +38,8 @@ export interface UnitInfo {
 }
 export type Catalog = Map<number, UnitInfo>;
 
-export interface SuperTroopEntry {
-  name: string;
-  base: string; // base troop file id, e.g. "wizard"
-}
-
-export function parseSuperTroops(yamlText: string): Record<number, SuperTroopEntry> {
-  const raw = (parseYaml(yamlText) ?? {}) as Record<string, unknown>;
-  const out: Record<number, SuperTroopEntry> = {};
-  for (const [k, v] of Object.entries(raw)) {
-    const id = Number(k);
-    const e = v as Partial<SuperTroopEntry>;
-    if (Number.isInteger(id) && e && typeof e.name === 'string' && typeof e.base === 'string') out[id] = { name: e.name, base: e.base };
-  }
-  return out;
-}
+// Super troops come from the game data (GameData.superTroops); config/super-troops.yaml entries win.
+export { parseSuperTroops, type SuperTroopEntry } from '../data/overrides';
 
 const KIND_BY_CATEGORY: Record<string, UnitInfo['kind'] | undefined> = {
   troop: 'troop',
@@ -63,20 +50,28 @@ const KIND_BY_CATEGORY: Record<string, UnitInfo['kind'] | undefined> = {
   hero: 'hero',
 };
 
+/**
+ * dataId → unit info for the meta. Seasonal units are left out (never ranked, SPEC §6.7). Super troops come
+ * from the data; `superTroops` (config/super-troops.yaml) adds or replaces entries.
+ */
 export function buildCatalog(data: GameData, superTroops: Record<number, SuperTroopEntry> = {}): Catalog {
   const cat: Catalog = new Map();
   for (const item of data.items.values()) {
     const kind = KIND_BY_CATEGORY[item.category];
-    if (!kind || item.key !== String(item.dataId)) continue;
+    if (!kind || item.key !== String(item.dataId) || item.seasonal) continue;
     const info: UnitInfo = { kind, name: item.name };
     if (item.housingSpace) info.housing = item.housingSpace;
     cat.set(item.dataId, info);
   }
-  for (const [id, s] of Object.entries(superTroops)) {
+  const table: Record<number, { name: string; base: string; housing?: number }> = {};
+  for (const [id, s] of Object.entries(data.superTroops ?? {})) table[Number(id)] = { name: s.name, base: s.base, housing: s.housingSpace };
+  for (const [id, s] of Object.entries(superTroops)) table[Number(id)] = { name: s.name, base: s.base, housing: data.superTroops?.[Number(id)]?.housingSpace };
+  for (const [id, s] of Object.entries(table)) {
     const base = data.byId.get(s.base);
     if (!base || base.category !== 'troop') continue; // bad config line: treat the ID as unknown
     const info: UnitInfo = { kind: 'superTroop', name: s.name, baseId: base.dataId };
-    if (base.superHousingSpace) info.housing = base.superHousingSpace;
+    const housing = s.housing ?? base.superHousingSpace;
+    if (housing) info.housing = housing;
     cat.set(Number(id), info);
   }
   return cat;

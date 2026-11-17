@@ -8,7 +8,7 @@ export function planToText(p: Plan): string {
   const at = (offset: number) => fmtClock(p.nowSec + offset, p.nowSec);
 
   L.push(`CoC Upgrade Planner — TH${p.townHall} (max TH${p.maxTH}) · mode: ${p.mode === 'rush' ? 'RUSH' : 'MAX-TH'} · Hero Hall ${p.heroHall}`);
-  L.push(`Builders: ${p.builders} · Gold Pass: ${p.goldPass} · book threshold ${fmtDuration(p.bookThresholdSec)} · data v${p.dataVersion}`);
+  L.push(`Builders: ${p.builders} · Gold Pass: ${p.goldPass} · book threshold ${fmtDuration(p.bookThresholdSec)} · data ${p.dataVersion}`);
   if (p.helperLine) L.push(`Helpers: ${p.helperLine}`);
   if (p.exportTimestamp)
     L.push(`Export taken ${new Date(p.exportTimestamp * 1000).toLocaleString()} (${fmtDuration(p.sim.elapsedSec)} ago) · now ${new Date(p.nowSec * 1000).toLocaleString()}`);

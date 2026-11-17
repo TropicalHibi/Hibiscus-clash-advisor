@@ -27,7 +27,7 @@ const shape = (t: TimelineEntry[]) => t.map((e) => `${e.slotId}|${e.itemKey}|${e
 
 const APPRENTICE = 93000000;
 const ASSISTANT = 93000001;
-const ALCHEMIST = 93000003;
+const ALCHEMIST = 93000002; // ClashKing's dataId (clash-of-clans-data had none; the old id-overrides.yaml said 93000003)
 const helper = (dataId: number, lvl: number, cooldown?: number) => ({ data: dataId, lvl, ...(cooldown !== undefined ? { helper_cooldown: cooldown } : {}) }) as unknown as Entry;
 
 /** TH16, Lab maxed, BK upgrading with `bkTimer` seconds left (raw), and Archer researching `archerTimer`. */
@@ -171,7 +171,7 @@ describe('export: boosts and helpers', () => {
     expect(ww[0]).toContain('unexpected value');
   });
 
-  it('parses helpers (shared cooldown, both recurrent spellings) and resolves the Alchemist via id-overrides.yaml', () => {
+  it('parses helpers (shared cooldown, both recurrent spellings) and resolves the Alchemist from the ClashKing dataId', () => {
     const ex = baseExport({ bkTimer: D });
     ex.helpers.push(helper(APPRENTICE, 8, 8426), helper(ASSISTANT, 7, 8426), helper(ALCHEMIST, 1, 8426));
     setLevel(ex, 'heroes', 'barbarian-king', { helper_recurrent: true } as Partial<Entry>);
@@ -204,19 +204,17 @@ describe('export: boosts and helpers', () => {
 
 // ── §9 snapshots + diff ──
 describe('npm run sync: snapshots and diff', () => {
-  const base = toSnapshot(data, '2026-11-16');
+  const base = { ...toSnapshot(data, '2026-11-16'), version: '0.19.1' };
   const cannon = data.byId.get('cannon')!;
   const top = cannon.levels[cannon.levels.length - 1];
-  const changed = modifiedData((files) => {
-    const c = rawItem(files, 'cannon');
-    const l = c.levels.find((x: any) => !x.supercharge && x.level === top.level);
-    l.buildCost = top.cost - 1_000_000;
-    l.buildTime = { days: 1, hours: 2, minutes: 0, seconds: 0 };
-    addTownHallLevel(files); // NEW: Town Hall <max+1>
-    const lassi = files.findIndex((f) => f.json?.id === 'lassi');
-    files.splice(lassi, 1); // REMOVED ITEM
-    const archer = files.find((f) => f.json?.id === 'archer')!;
-    files.push({ path: archer.path.replace('archer', 'test-troop'), json: { ...structuredClone(archer.json), id: 'test-troop', name: 'Test Troop', dataId: 4999999 } });
+  const changed = modifiedData((raw) => {
+    const l = rawItem(raw, 'cannon').levels.find((x: any) => x.level === top.level);
+    l.build_cost = top.cost - 1_000_000;
+    l.build_time = 26 * 3600;
+    addTownHallLevel(raw); // NEW: Town Hall <max+1>
+    raw.pets = raw.pets.filter((p) => p.name !== 'L.A.S.S.I'); // REMOVED ITEM
+    const archer = rawItem(raw, 'archer');
+    raw.troops.push({ ...structuredClone(archer), name: 'Test Troop', _id: 4999999 });
   });
   const next = { ...toSnapshot(changed, '2026-11-20'), version: '0.20.0' };
   const changes = diffSnapshots(base, next);
@@ -235,7 +233,7 @@ describe('npm run sync: snapshots and diff', () => {
   });
 
   it('no changes between identical data', () => {
-    expect(diffSnapshots(base, toSnapshot(data, '2026-11-17'))).toEqual([]);
+    expect(diffSnapshots(base, { ...toSnapshot(data, '2026-11-17'), version: '0.19.1' })).toEqual([]);
   });
 
   it('the snapshot holds the Item model only (no raw JSON, no image paths)', () => {
@@ -243,6 +241,7 @@ describe('npm run sync: snapshots and diff', () => {
     expect(Object.keys(it0)).not.toContain('images');
     expect(it0.levels[0]).toHaveProperty('timeSec');
     expect(JSON.stringify(base)).not.toContain('"buildCost"');
+    expect(JSON.stringify(base)).not.toContain('"build_cost"');
   });
 
   function memIO(initial: Record<string, Snapshot> = {}) {

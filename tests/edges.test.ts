@@ -7,7 +7,7 @@ import { aggregate, attackUsage, buildCatalog, parseSuperTroops, type BattleRow 
 import { parseArmyCode } from '../src/meta/armyCode';
 import { coerceSettings, settingsFromYaml } from '../src/state/settings';
 import { storage } from '../src/ui/storage';
-import { data, modifiedData, rawItem } from './helpers';
+import { cocData, data, modifiedData, rawItem } from './helpers';
 
 const catalog = buildCatalog(data, parseSuperTroops(readConfig('super-troops.yaml')));
 const NOW = Date.parse('2026-11-16T12:00:00Z');
@@ -60,8 +60,8 @@ describe('army code edges', () => {
 });
 
 describe('validation must fail on broken data', () => {
-  it('merge consumption: a missing recipe is an error', () => {
-    const d = modifiedData(() => {}, readConfig('merges.yaml').replace(/  super-wizard-tower:[\s\S]*$/, ''));
+  it('merge consumption: a missing recipe is an error (clash-of-clans-data backup without a recipe)', () => {
+    const d = cocData(() => {}, { dropRecipes: ['super-wizard-tower'] });
     const issues = checkMergeConsumption(d);
     expect(issues.length).toBeGreaterThan(0);
     expect(issues.every((i) => i.level === 'error')).toBe(true);
@@ -78,7 +78,7 @@ describe('validation must fail on broken data', () => {
 
   it('an unknown cost resource is reported as a data warning', () => {
     const d = modifiedData((f) => {
-      rawItem(f, 'cannon').levels[0].buildCostResource = 'Mithril';
+      rawItem(f, 'cannon').upgrade_resource = 'Mithril';
     });
     expect(d.warnings.some((w) => w.includes('Mithril'))).toBe(true);
     expect(data.warnings).toEqual([]);

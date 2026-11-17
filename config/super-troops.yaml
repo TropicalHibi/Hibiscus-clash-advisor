@@ -1,23 +1,7 @@
-# Super troop dataIds → base troop (hand-maintained).
-# clash-of-clans-data lists super troops inside their base troop's file but without a dataId,
-# so army share codes can't be resolved for them from the data package alone.
-# A super troop's level is its base troop's level, so the planner credits super troop usage
-# to the base troop's lab upgrade. `base` is the clash-of-clans-data file id.
-# IDs are checked against the API's troop order by tests/meta.test.ts ("IDs agree with the order of /players/{tag} troops").
-4000026: { name: Super Barbarian, base: barbarian }
-4000027: { name: Super Archer, base: archer }
-4000028: { name: Super Wall Breaker, base: wall-breaker }
-4000029: { name: Super Giant, base: giant }
-4000055: { name: Sneaky Goblin, base: goblin }
-4000056: { name: Super Miner, base: miner }
-4000057: { name: Rocket Balloon, base: balloon }
-4000063: { name: Inferno Dragon, base: baby-dragon }
-4000064: { name: Super Valkyrie, base: valkyrie }
-4000066: { name: Super Witch, base: witch }
-4000076: { name: Ice Hound, base: lava-hound }
-4000080: { name: Super Bowler, base: bowler }
-4000081: { name: Super Dragon, base: dragon }
-4000083: { name: Super Wizard, base: wizard }
-4000084: { name: Super Minion, base: minion }
-4000098: { name: Super Hog Rider, base: hog-rider }
-4000147: { name: Super Yeti, base: yeti }
+# Optional super-troop overrides (SPEC §8.3, §12). Normally EMPTY: ClashKing's data lists every super troop
+# with its own dataId and its base troop (`super_troop.original_id`).
+# An entry here wins over the data. `base` is the base troop's item id (slug of its name).
+# A super troop's level is its base troop's level, so its usage is credited to the base troop's lab upgrade.
+#
+# 4000026: { name: Super Barbarian, base: barbarian }
+{}

@@ -17,8 +17,10 @@ import { nextInLab } from '../src/ui/labView';
 import {
   addBuildingLevel,
   addTownHallLevel,
+  cocData,
   data,
   makeExport,
+  MAX_TH,
   maxLab,
   modifiedData,
   parse,
@@ -29,7 +31,6 @@ import {
   T0,
   type SyntheticExport,
 } from './helpers';
-import { readConfig } from '../src/data/loadNode';
 import fs from 'node:fs';
 const fixtureJson = () => JSON.parse(fs.readFileSync(new URL('./fixtures/export-th16.json', import.meta.url), 'utf8'));
 
@@ -72,7 +73,7 @@ describe('Tier 0: Laboratory upgrade → new buildings → Archer Queen', () => 
   });
 
   it('max TH: the same Tier 0 order, ahead of offense (tier 1)', () => {
-    const ex = makeExport(18, 17);
+    const ex = makeExport(MAX_TH, MAX_TH - 1);
     lowerQueen(ex);
     setLevel(ex, 'buildings', 'gold-storage', { cnt: entry(ex, 'gold-storage').cnt! - 1 });
     const c = cands(parse(ex));
@@ -132,21 +133,23 @@ describe('research runs in parallel with Laboratory / Pet House upgrades (SPEC �
 
 describe('merge sources: required level at the unlock TH (no TH gate deadlock)', () => {
   const swtUnmerged = () => {
-    const ex = makeExport(18, 18);
+    const ex = makeExport(MAX_TH, MAX_TH);
     ex.buildings = ex.buildings.filter((b) => b.data !== idOf('super-wizard-tower'));
     entry(ex, 'wizard-tower').cnt = 6;
     return ex;
   };
 
-  it('TH19 data adds Wizard Tower 18: a TH18 player still merges the Super Wizard Tower and upgrades the TH', () => {
-    const d19 = modifiedData((f) => {
+  it('a new TH adds a Wizard Tower level: a player at the old max TH still merges the Super Wizard Tower and upgrades the TH', () => {
+    const wtTop = data.byId.get('wizard-tower')!.levels.at(-1)!.level;
+    const dNext = modifiedData((f) => {
       addTownHallLevel(f);
-      addBuildingLevel(f, 'wizard-tower', 19);
+      addBuildingLevel(f, 'wizard-tower', MAX_TH + 1);
     });
-    expect(d19.maxTH).toBe(19);
-    expect(maxLevelAt(d19.byId.get('wizard-tower')!, { th: 19 })).toBe(18);
-    expect(d19.merges.find((m) => m.id === 'super-wizard-tower')!.requiredSourceLevel['wizard-tower']).toBe(17);
+    expect(dNext.maxTH).toBe(MAX_TH + 1);
+    expect(maxLevelAt(dNext.byId.get('wizard-tower')!, { th: MAX_TH + 1 })).toBe(wtTop + 1);
+    expect(dNext.merges.find((m) => m.id === 'super-wizard-tower')!.requiredSourceLevel['wizard-tower']).toBe(17);
 
+    const d19 = dNext;
     const a = parseWith(swtUnmerged(), d19);
     const c = candsWith(d19, a);
     expect(c.find((x) => x.kind === 'merge')?.item.id).toBe('super-wizard-tower');
@@ -180,13 +183,13 @@ describe('merge sources: required level at the unlock TH (no TH gate deadlock)',
     expect(c.filter((x) => x.item.id === 'cannon' && x.instance.level === 20)).toHaveLength(0);
   });
 
-  it('max TH: gate items ordered by unlock TH, then merges.yaml order', () => {
-    const ex = maxLab(makeExport(18, 18));
+  it('max TH: gate items ordered by unlock TH, then recipe order', () => {
+    const ex = maxLab(makeExport(MAX_TH, MAX_TH));
     setLevel(ex, 'buildings', 'ricochet-cannon', { cnt: 2 });
     setLevel(ex, 'buildings', 'multi-archer-tower', { cnt: 2 });
     setLevel(ex, 'buildings', 'super-wizard-tower', { cnt: 1 });
     // Spare maxed towers would be merged first (ready merge → Tier 0), so keep every source below its required level.
-    setLevel(ex, 'buildings', 'archer-tower', { lvl: 19 });
+    // (At TH19 every Archer Tower is merged: Multi-Archer, Multi-Gear and the TH19 Firecracker Tower take all 9.)
     setLevel(ex, 'buildings', 'wizard-tower', { lvl: 15 });
     ex.buildings.push({ data: idOf('cannon'), lvl: 19, cnt: 2 }, { data: idOf('archer-tower'), lvl: 19, cnt: 2 }, { data: idOf('wizard-tower'), lvl: 15, cnt: 2 });
     const gate = cands(parse(ex)).filter((x) => x.tier === 3);
@@ -224,51 +227,54 @@ describe('lab kind weight 0: listed, never auto-picked (SPEC §6.7)', () => {
   });
 });
 
-describe('merges missing from merges.yaml (SPEC §7)', () => {
-  const noSwt = readConfig('merges.yaml').replace(/  super-wizard-tower:[\s\S]*$/, '');
-
+describe('merges the recipes do not explain (SPEC §7)', () => {
+  // ClashKing carries every merge, so this only happens on the clash-of-clans-data backup (built-in recipes).
   it('never suggests copies of an item with countAfterMerges but no recipe; the Plan tab warns', () => {
-    const d = modifiedData(() => {}, noSwt);
+    const d = cocData(() => {}, { dropRecipes: ['super-wizard-tower'] });
     const a = parseWith(maxLab(makeExport(18, 18)), d);
     expect(candsWith(d, a).some((x) => x.kind === 'build' && x.item.id === 'wizard-tower')).toBe(false);
     const plan = buildPlan(d, a, settings(), EMPTY_META, T0);
     expect(plan.warnings.some((w) => w.includes('merges.yaml') && w.includes('Wizard Tower'))).toBe(true);
   });
 
-  it('the shipped merges.yaml gives no warning', () => {
-    const plan = buildPlan(data, parse(makeExport(18, 18)), settings(), EMPTY_META, T0);
+  it('the shipped data (ClashKing) gives no merge warning', () => {
+    const plan = buildPlan(data, parse(makeExport(MAX_TH, MAX_TH)), settings(), EMPTY_META, T0);
     expect(plan.warnings.some((w) => w.includes('merges.yaml'))).toBe(false);
   });
 });
 
 describe('supercharges', () => {
-  const xbow = idOf('x-bow');
-  const xbowSc = (c: ReturnType<typeof cands>) => c.filter((x) => x.kind === 'supercharge' && x.item.dataId === xbow);
+  // ClashKing's superchargeable buildings (the `supercharge` block): Inferno Tower is one of them.
+  const inferno = idOf('inferno-tower');
+  const infernoSc = (c: ReturnType<typeof cands>) => c.filter((x) => x.kind === 'supercharge' && x.item.dataId === inferno);
+  const infernoMax = maxLevelAt(data.byId.get('inferno-tower')!, { th: MAX_TH });
 
   it('offered when the base is at its max for the TH: temporary tier, Gold Pass applied', () => {
-    const c = cands(parse(makeExport(18, 18)), settings(), 0.2);
-    const sc = xbowSc(c);
-    expect(sc.length).toBe(entry(makeExport(18, 18), 'x-bow').cnt!);
+    const c = cands(parse(makeExport(MAX_TH, MAX_TH)), settings(), 0.2);
+    const sc = infernoSc(c);
+    expect(sc.length).toBe(entry(makeExport(MAX_TH, MAX_TH), 'inferno-tower').cnt!);
     expect(sc.every((x) => x.tier === 6 && x.timeSec === Math.round(x.rawTimeSec * 0.8))).toBe(true);
-    expect(xbowSc(cands(parse(makeExport(18, 17))))).toHaveLength(0); // base not maxed yet
+    const below = makeExport(MAX_TH, MAX_TH);
+    setLevel(below, 'buildings', 'inferno-tower', { lvl: infernoMax - 1 });
+    expect(infernoSc(cands(parse(below)))).toHaveLength(0); // base not maxed yet
   });
 
-  it('a TH19 level on the base building does not remove TH18 supercharges', () => {
-    const d19 = modifiedData((f) => {
+  it('a new TH level on the base building does not remove the supercharges for players below that TH', () => {
+    const dNext = modifiedData((f) => {
       addTownHallLevel(f);
-      addBuildingLevel(f, 'x-bow', 19);
+      addBuildingLevel(f, 'inferno-tower', MAX_TH + 1);
     });
-    expect(xbowSc(candsWith(d19, parseWith(makeExport(18, 18), d19)))).toHaveLength(entry(makeExport(18, 18), 'x-bow').cnt!);
+    expect(infernoSc(candsWith(dNext, parseWith(makeExport(MAX_TH, MAX_TH), dNext)))).toHaveLength(entry(makeExport(MAX_TH, MAX_TH), 'inferno-tower').cnt!);
   });
 
   it('reads the `supercharge` export field: next level after it, none once maxed', () => {
-    const sc = data.items.get(`${xbow}:sc`)!;
-    const one = makeExport(18, 18);
-    setLevel(one, 'buildings', 'x-bow', { supercharge: 1 });
-    expect(xbowSc(cands(parse(one))).every((x) => x.toLevel === 2)).toBe(true);
-    const max = makeExport(18, 18);
-    setLevel(max, 'buildings', 'x-bow', { supercharge: sc.levels.at(-1)!.level });
-    expect(xbowSc(cands(parse(max)))).toHaveLength(0);
+    const sc = data.items.get(`${inferno}:sc`)!;
+    const one = makeExport(MAX_TH, MAX_TH);
+    setLevel(one, 'buildings', 'inferno-tower', { supercharge: 1 });
+    expect(infernoSc(cands(parse(one))).every((x) => x.toLevel === 2)).toBe(true);
+    const max = makeExport(MAX_TH, MAX_TH);
+    setLevel(max, 'buildings', 'inferno-tower', { supercharge: sc.levels.at(-1)!.level });
+    expect(infernoSc(cands(parse(max)))).toHaveLength(0);
   });
 });
 
@@ -314,7 +320,7 @@ describe('TH weapon', () => {
 
   it('max TH: the weapon is a permanent defense (tier 5)', () => {
     const d17 = modifiedData((f) => {
-      const th = f.find((x) => x.path.startsWith('town-hall/'))!.json;
+      const th = f.buildings.find((b) => b.type === 'Town Hall')!;
       th.levels = th.levels.filter((l: { level: number }) => l.level <= 17);
     });
     expect(d17.maxTH).toBe(17);
@@ -344,7 +350,7 @@ describe('scheduler details', () => {
     const byDef = new Map<number, Item[]>();
     for (const it of data.items.values()) if (it.craftedDefenseId && it.levels.length > 2) byDef.set(it.craftedDefenseId, [...(byDef.get(it.craftedDefenseId) ?? []), it]);
     const [defId, mods] = [...byDef].find(([, m]) => m.length >= 2)!;
-    const ex = maxLab(makeExport(18, 18));
+    const ex = maxLab(makeExport(MAX_TH, MAX_TH));
     ex.buildings.push({ data: 1000097, lvl: 1, types: [{ data: defId, modules: mods.slice(0, 2).map((m) => ({ data: m.dataId, lvl: 1 })) }] });
     const a = parse(ex);
     const mine = (c: ReturnType<typeof cands>) => c.filter((x) => x.item.craftedDefenseId === defId);
@@ -405,8 +411,9 @@ describe('Gold Pass', () => {
 describe('book threshold follows the data', () => {
   it('a 9-day hero level raises the threshold to 9d; 8-day levels become eligible', () => {
     const d = modifiedData((f) => {
+      // ClashKing: row N's upgrade_time is the time of level N+1, so this makes the top level take 9 days.
       const aq = rawItem(f, 'archer-queen');
-      aq.levels[aq.levels.length - 1].upgradeTime = { days: 9 };
+      aq.levels[aq.levels.length - 2].upgrade_time = 9 * DAY;
     });
     expect(data.bookThresholdSec).toBe(8 * DAY);
     expect(d.bookThresholdSec).toBe(9 * DAY);

@@ -1,5 +1,8 @@
-import { parse as parseYaml } from 'yaml';
-import type { Category, GameData, Item, LevelInfo, MergeRecipe, Queue, Resource } from './types';
+import { COC_BACKUP_IDS, COC_BACKUP_MERGES, COC_BACKUP_SUPER_TROOPS } from './cocDataBackup.ts';
+import { parseIdOverrides, parseMergeOverrides, parseSuperTroops, type MergeOverride, type SuperTroopEntry } from './overrides.ts';
+import type { Category, GameData, Item, LevelInfo, MergeRecipe, Queue, Resource, SuperTroop } from './types.ts';
+
+export { parseIdOverrides } from './overrides.ts';
 
 /** One JSON file from clash-of-clans-data/data/home, path relative to data/home (forward slashes). */
 export interface RawFile {
@@ -29,7 +32,7 @@ export const DATA_FOLDERS = [
 const STORAGES = new Set(['gold-storage', 'elixir-storage', 'dark-elixir-storage']);
 const COLLECTORS = new Set(['gold-mine', 'elixir-collector', 'dark-elixir-drill']);
 
-/** Data resource string → Resource. An unknown string falls back to gold and is reported via `warn`. */
+/** Data resource string → Resource (both sources spell them the same way). An unknown string falls back to gold and is reported via `warn`. */
 export function mapResource(r: string | undefined, warn?: (msg: string) => void): Resource {
   switch (r) {
     case 'Gold':
@@ -85,17 +88,76 @@ function sortLevels(levels: LevelInfo[]): LevelInfo[] {
   return levels.sort((a, b) => a.level - b.level);
 }
 
-export interface MergesConfig {
-  merges: Record<string, { dataId: number; sources: { id: string; qty: number }[] }>;
+/**
+ * Merge recipes → MergeRecipe (SPEC §7). Unlock TH = the merged defense's first TH with a count (or its level-1
+ * TH). Required source level = the recipe's exact level when it has one (ClashKing `merge_requirement`, or
+ * `level` in config/merges.yaml), otherwise the source's max level at the unlock TH, so levels a later TH adds
+ * to a source never raise the bar for an older merge.
+ */
+export function buildMergeRecipes(byId: Map<string, Item>, recipes: Record<string, MergeOverride>, origin: string): MergeRecipe[] {
+  const merges: MergeRecipe[] = [];
+  for (const [id, r] of Object.entries(recipes)) {
+    const merged = byId.get(id);
+    if (!merged) throw new Error(`${origin}: merged defense "${id}" not found in game data`);
+    if (r.dataId && r.dataId !== merged.dataId) throw new Error(`${origin}: dataId mismatch for ${id} (${r.dataId} vs data ${merged.dataId})`);
+    const sources = r.sources.map((s) => {
+      const src = byId.get(s.id);
+      if (!src) throw new Error(`${origin}: source "${s.id}" not found in game data`);
+      return { id: s.id, dataId: src.dataId, qty: s.qty };
+    });
+    const counts = merged.countPerTH ?? {};
+    const firstTH = Object.keys(counts)
+      .map(Number)
+      .filter((th) => counts[th] > 0)
+      .sort((a, b) => a - b)[0];
+    const unlockTH = firstTH ?? merged.levels[0]?.thRequired ?? 99;
+    const requiredSourceLevel: Record<string, number> = {};
+    for (const s of r.sources) {
+      const src = byId.get(s.id)!;
+      requiredSourceLevel[s.id] = s.level ?? (maxLevelAt(src, { th: unlockTH }) || src.levels[src.levels.length - 1].level);
+    }
+    merges.push({ id, dataId: merged.dataId, sources, unlockTH, requiredSourceLevel });
+  }
+  return merges;
 }
 
-/** config/id-overrides.yaml: dataIds the game data is missing. Returns data file id → dataId. */
-export function parseIdOverrides(yamlText: string | undefined): Map<string, number> {
-  const out = new Map<string, number>();
-  const cfg = (yamlText ? parseYaml(yamlText) : undefined) as { ids?: Record<string, unknown> } | undefined;
-  for (const [k, v] of Object.entries(cfg?.ids ?? {})) {
-    const dataId = Number(k);
-    if (Number.isInteger(dataId) && typeof v === 'string' && v) out.set(v, dataId);
+/** Super troop table → GameData.superTroops (entries whose base troop isn't in the data are dropped). */
+export function resolveSuperTroops(byId: Map<string, Item>, table: Record<number, SuperTroopEntry & { housingSpace?: number }>): Record<number, SuperTroop> {
+  const out: Record<number, SuperTroop> = {};
+  for (const [k, s] of Object.entries(table)) {
+    const base = byId.get(s.base);
+    if (!base || base.category !== 'troop') continue;
+    const housingSpace = s.housingSpace ?? base.superHousingSpace;
+    out[Number(k)] = { name: s.name, base: s.base, baseDataId: base.dataId, ...(housingSpace ? { housingSpace } : {}) };
+  }
+  return out;
+}
+
+/** TH weapons from clash-of-clans-data's town-hall.json (ClashKing has no weapon levels; SPEC §3.1). */
+export function cocTownHallWeapons(th: any, warn?: (msg: string) => void): Item[] {
+  const out: Item[] = [];
+  for (const l of th?.levels ?? []) {
+    const w = l.weapon;
+    if (!w || !Array.isArray(w.levels) || !w.levels.length) continue;
+    out.push({
+      key: `${th.dataId}:w${l.level}`,
+      dataId: th.dataId,
+      id: `${th.id}-weapon-${l.level}`,
+      name: `${w.name ?? 'TH weapon'} (TH${l.level})`,
+      category: 'thWeapon',
+      queue: 'builder',
+      weaponForTH: l.level,
+      images: [...imageCandidates(w), ...imageCandidates(l)],
+      levels: sortLevels(
+        w.levels.map((wl: any) => ({
+          level: wl.level,
+          cost: wl.buildCost ?? 0,
+          resource: mapResource(wl.buildCostResource, warn),
+          timeSec: toSeconds(wl.buildTime),
+          thRequired: l.level,
+        })),
+      ),
+    });
   }
   return out;
 }
@@ -117,10 +179,22 @@ export function imageCandidates(j: any): string[] {
   return out;
 }
 
-export function normalize(files: RawFile[], mergesYaml: string, version: string, idOverridesYaml?: string): GameData {
-  const mergesCfg = (parseYaml(mergesYaml) ?? { merges: {} }) as MergesConfig;
-  const idOverrides = parseIdOverrides(idOverridesYaml);
-  const mergedIds = new Set(Object.keys(mergesCfg.merges ?? {}));
+/**
+ * clash-of-clans-data → Item model. Since the switch to ClashKing (SPEC §3.1) this is the BACKUP path only.
+ * Merge recipes, super troops and missing dataIds come from cocDataBackup.ts; an entry in the optional
+ * config files (merges.yaml, super-troops.yaml, id-overrides.yaml) wins.
+ */
+export function normalize(
+  files: RawFile[],
+  mergesYaml: string | undefined,
+  version: string,
+  idOverridesYaml?: string,
+  superTroopsYaml?: string,
+  builtInMerges: Record<string, MergeOverride> = COC_BACKUP_MERGES,
+): GameData {
+  const recipes: Record<string, MergeOverride> = { ...builtInMerges, ...parseMergeOverrides(mergesYaml) };
+  const idOverrides = new Map([...COC_BACKUP_IDS, ...parseIdOverrides(idOverridesYaml)]);
+  const mergedIds = new Set(Object.keys(recipes));
 
   const items = new Map<string, Item>();
   const byDataId = new Map<number, Item>();
@@ -143,11 +217,11 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string,
     const [folder, ...rest] = f.path.split('/');
     let j = f.json;
     if (!j || typeof j !== 'object') continue;
-    // config/id-overrides.yaml fills in a dataId the data is missing (e.g. the Alchemist helper).
+    // A dataId override (built-in backup table or config/id-overrides.yaml) wins over the data.
     const override = idOverrides.get(j.id);
-    if (override !== undefined) {
-      if (typeof j.dataId !== 'number') j = { ...j, dataId: override };
-      else if (j.dataId !== override) warn(`config/id-overrides.yaml maps ${override} to "${j.id}", but the data now says ${j.dataId}; using the data.`);
+    if (override !== undefined && j.dataId !== override) {
+      if (typeof j.dataId === 'number') warn(`config/id-overrides.yaml maps ${override} to "${j.id}"; the data says ${j.dataId}. Using the override.`);
+      j = { ...j, dataId: override };
     }
     const images = imageCandidates(j);
     const sub = rest.length > 1 ? rest[0] : undefined; // e.g. other/helpers/x.json
@@ -158,34 +232,8 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string,
         thRequired: l.level - 1,
       }));
       add({ key: String(j.dataId), dataId: j.dataId, id: j.id, name: j.name, category: 'townHall', queue: 'builder', levels: sortLevels(levels), images });
-      for (const l of j.levels ?? []) {
-        maxTH = Math.max(maxTH, l.level);
-        const w = l.weapon;
-        if (w && Array.isArray(w.levels) && w.levels.length) {
-          add(
-            {
-              key: `${j.dataId}:w${l.level}`,
-              dataId: j.dataId,
-              id: `${j.id}-weapon-${l.level}`,
-              name: `${w.name ?? 'TH weapon'} (TH${l.level})`,
-              category: 'thWeapon',
-              queue: 'builder',
-              weaponForTH: l.level,
-              images: [...imageCandidates(w), ...imageCandidates(l)],
-              levels: sortLevels(
-                w.levels.map((wl: any) => ({
-                  level: wl.level,
-                  cost: wl.buildCost ?? 0,
-                  resource: mapResource(wl.buildCostResource, warn),
-                  timeSec: toSeconds(wl.buildTime),
-                  thRequired: l.level,
-                })),
-              ),
-            },
-            false,
-          );
-        }
-      }
+      for (const l of j.levels ?? []) maxTH = Math.max(maxTH, l.level);
+      for (const w of cocTownHallWeapons(j, warn)) add(w, false);
       continue;
     }
 
@@ -359,33 +407,22 @@ export function normalize(files: RawFile[], mergesYaml: string, version: string,
     for (const l of it.levels) bookThresholdSec = Math.max(bookThresholdSec, l.timeSec);
   }
 
-  const merges: MergeRecipe[] = [];
-  for (const [id, r] of Object.entries(mergesCfg.merges ?? {})) {
-    const merged = byId.get(id);
-    if (!merged) throw new Error(`merges.yaml: merged defense "${id}" not found in game data`);
-    if (r.dataId && r.dataId !== merged.dataId) throw new Error(`merges.yaml: dataId mismatch for ${id} (${r.dataId} vs data ${merged.dataId})`);
-    const sources = r.sources.map((s) => {
-      const src = byId.get(s.id);
-      if (!src) throw new Error(`merges.yaml: source "${s.id}" not found in game data`);
-      return { id: s.id, dataId: src.dataId, qty: s.qty };
-    });
-    const counts = merged.countPerTH ?? {};
-    const firstTH = Object.keys(counts)
-      .map(Number)
-      .filter((th) => counts[th] > 0)
-      .sort((a, b) => a - b)[0];
-    const unlockTH = firstTH ?? merged.levels[0]?.thRequired ?? 99;
-    // Required source level = the source's max level at the merge's unlock TH (SPEC §7). Levels that a
-    // later TH adds to Cannon / Archer Tower / Wizard Tower never raise the bar for an older merge.
-    const requiredSourceLevel: Record<string, number> = {};
-    for (const s of sources) {
-      const src = byId.get(s.id)!;
-      requiredSourceLevel[s.id] = maxLevelAt(src, { th: unlockTH }) || src.levels[src.levels.length - 1].level;
-    }
-    merges.push({ id, dataId: merged.dataId, sources, unlockTH, requiredSourceLevel });
-  }
+  const merges = buildMergeRecipes(byId, recipes, 'merges');
+  const superTroops = resolveSuperTroops(byId, { ...COC_BACKUP_SUPER_TROOPS, ...parseSuperTroops(superTroopsYaml) });
 
-  return { version, items, byDataId, byId, maxTH, bookThresholdSec, merges, heroHallCaps, warnings: [...warningSet] };
+  return {
+    version,
+    source: 'clash-of-clans-data',
+    items,
+    byDataId,
+    byId,
+    maxTH,
+    bookThresholdSec,
+    merges,
+    superTroops,
+    heroHallCaps,
+    warnings: [...warningSet],
+  };
 }
 
 /** Max level of an item reachable at the given TH (and Hero Hall/lab/etc. via `req`). 0 if none. */

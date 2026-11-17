@@ -5,7 +5,7 @@ import { buildPlan } from '../src/engine/plan';
 import { builderCandidates, detectMode, OFFENSE_ORDER, type EngineState } from '../src/engine/tiers';
 import { EMPTY_META } from '../src/meta/meta';
 import type { AccountState } from '../src/state/parseExport';
-import { data, makeExport, maxLab, parse, setLevel, settings, T0 } from './helpers';
+import { cocData, data, makeExport, MAX_TH, maxLab, parse, setLevel, settings, T0 } from './helpers';
 
 function stateOf(a: AccountState): EngineState {
   const busy = new Set<string>();
@@ -17,9 +17,9 @@ const heroLevel = (id: string, hh: number) => heroCapAt(data.byId.get(id)!, hh);
 
 describe('mode detection', () => {
   it('rush below max TH, max-TH at max TH (max TH comes from data)', () => {
-    expect(data.maxTH).toBe(18);
-    expect(detectMode(17, data)).toBe('rush');
-    expect(detectMode(18, data)).toBe('maxTH');
+    expect(data.maxTH).toBe(19); // ClashKing v0.1.20: TH19 (16 Nov 2026)
+    expect(detectMode(18, data)).toBe('rush');
+    expect(detectMode(19, data)).toBe('maxTH');
   });
 });
 
@@ -103,9 +103,13 @@ describe('hero book threshold', () => {
 
   it('hero caps come from per-level heroHallLevelRequired, not the stale Hero Hall table', () => {
     expect(heroCapAt(aq, 12)).toBe(110);
-    expect(data.heroHallCaps[12]['archer-queen']).toBe(105);
+    expect(heroCapAt(aq, 13)).toBe(115); // Hero Hall 13 (ClashKing v0.1.20)
     expect(heroStatus(aq, 107, 12, threshold).kind).not.toBe('cappedByHeroHall');
-    expect(checkHeroCaps(data).some((i) => i.message.includes('Archer Queen'))).toBe(true);
+    // ClashKing has no Hero Hall cap table; the stale one is clash-of-clans-data's (backup), still checked there.
+    expect(data.heroHallCaps).toEqual({});
+    const coc = cocData();
+    expect(coc.heroHallCaps[12]['archer-queen']).toBe(105);
+    expect(checkHeroCaps(coc).some((i) => i.message.includes('Archer Queen'))).toBe(true);
   });
 
   it('a hero capped by Hero Hall is skipped and the next hero in order is used', () => {
@@ -148,16 +152,16 @@ describe('tier order', () => {
   });
 
   it('max-TH mode: offense → heroes → TH gate → resources → defenses → temporary', () => {
-    const ex = makeExport(18, 17);
+    const ex = makeExport(MAX_TH, MAX_TH - 1);
     const hh = ex.buildings.find((b) => b.data === 1000071)!.lvl;
     setLevel(ex, 'heroes', 'barbarian-king', { lvl: Math.min(50, heroLevel('barbarian-king', hh) - 1) }); // below the 8d book levels
     const c = cands(parse(ex));
     expect(c.some((x) => x.item.id === 'town-hall')).toBe(false);
     const tierOf = (id: string) => c.find((x) => x.item.id === id)!.tier;
     expect(tierOf('laboratory')).toBe(0); // Laboratory upgrade is Tier 0 in both modes
-    expect(tierOf('army-camp')).toBe(1);
+    expect(tierOf('clan-castle')).toBe(1); // offense with a TH19 level
     expect(tierOf('barbarian-king')).toBe(2);
-    expect(tierOf('super-wizard-tower')).toBe(5); // merged-defense upgrade past L1 → permanent defense
+    expect(tierOf('multi-archer-tower')).toBe(5); // merged-defense upgrade past L1 → permanent defense
     expect(tierOf('ricochet-cannon')).toBe(5);
     expect(tierOf('gold-storage')).toBe(4);
     expect(tierOf('x-bow')).toBe(5);
@@ -178,7 +182,7 @@ describe('tier order', () => {
 
 describe('LPT ordering (tiers 5–6)', () => {
   it('orders longest time first, cheaper first on ties', () => {
-    const c = cands(parse(makeExport(18, 16)));
+    const c = cands(parse(makeExport(MAX_TH, MAX_TH - 1))); // TH18 levels: tier 6 has the supercharges of buildings maxed at TH18
     for (const tier of [5, 6]) {
       const t = c.filter((x) => x.tier === tier);
       expect(t.length).toBeGreaterThan(3);
@@ -190,7 +194,7 @@ describe('LPT ordering (tiers 5–6)', () => {
   });
 
   it('free builders take the longest permanent-defense upgrades first', () => {
-    const ex = makeExport(18, 18); // everything maxed …
+    const ex = makeExport(MAX_TH, MAX_TH); // everything maxed …
     setLevel(ex, 'buildings', 'x-bow', { lvl: 12 }); // … except 4 X-Bows,
     setLevel(ex, 'buildings', 'inferno-tower', { lvl: 11 }); // 3 Infernos,
     setLevel(ex, 'buildings', 'air-sweeper', { lvl: 5 }); // 2 Air Sweepers
@@ -270,7 +274,7 @@ describe('merges', () => {
   });
 
   it('max TH: an unmerged older merge is a TH gate item (tier 3), above resources and defenses', () => {
-    const ex = makeExport(18, 18);
+    const ex = makeExport(MAX_TH, MAX_TH);
     // Ricochet Cannon is a TH16 merge. One is missing; its two Cannons are still below 21.
     setLevel(ex, 'buildings', 'ricochet-cannon', { cnt: 2 });
     ex.buildings.push({ data: dataIdOf('cannon'), lvl: 19, cnt: 2 });
@@ -283,7 +287,7 @@ describe('merges', () => {
     expect(c.filter((x) => x.tier === 4 || x.tier === 5).every((x) => x.item.id !== 'cannon')).toBe(true);
 
     // Once the Cannons are maxed, the merge itself jumps to Tier 0.
-    const ex2 = makeExport(18, 18);
+    const ex2 = makeExport(MAX_TH, MAX_TH);
     setLevel(ex2, 'buildings', 'ricochet-cannon', { cnt: 2 });
     ex2.buildings.push({ data: dataIdOf('cannon'), lvl: 21, cnt: 2 });
     const c2 = cands(parse(ex2));

@@ -1,5 +1,6 @@
 import './style.css';
 import { loadGameDataBrowser } from './data/loadBrowser';
+import { dataSourceLabel } from './data/source';
 import type { GameData } from './data/types';
 import { fmtClock } from './engine/format';
 import type { DataChangesFile } from './data/snapshot';
@@ -304,13 +305,13 @@ function renderFooter(): void {
     meta.generatedAt && meta.attacks > 0
       ? `Legend I meta: ${esc(new Date(meta.generatedAt).toLocaleString())} · ${meta.attacks.toLocaleString()} attacks, ${meta.players.toLocaleString()} players`
       : 'Legend I meta: none yet';
-  $('#footer').innerHTML = `Game data: clash-of-clans-data v${esc(data.version)}${dataChanges?.version === data.version && dataChanges.date ? ` (synced ${esc(dataChanges.date)})` : ''} · max TH ${data.maxTH} · ${metaText}<br>
+  $('#footer').innerHTML = `Game data: ${esc(dataSourceLabel(data))}${dataChanges?.version === data.version && dataChanges.date ? ` (synced ${esc(dataChanges.date)})` : ''} · max TH ${data.maxTH} · ${metaText}<br>
     Update with <code>npm run sync</code> (game data) and <code>npm run meta</code> (Legend I meta).`;
 }
 
 async function init(): Promise<void> {
   try {
-    data = loadGameDataBrowser();
+    data = await loadGameDataBrowser();
   } catch (e) {
     document.querySelector('main')!.innerHTML = `<div class="card warn">Failed to load game data: ${esc((e as Error).message)}</div>`;
     return;

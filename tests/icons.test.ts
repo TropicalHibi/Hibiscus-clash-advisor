@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { cacheName, ensureIcons, ICON_PX, sharpResize } from '../scripts/lib/itemImageCache';
 import { pickItemImages } from '../src/data/itemImages';
 import { PKG_DIR } from '../src/data/loadNode';
-import { data } from './helpers';
+import { cocData, data } from './helpers';
 
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'coc-icons-'));
 
@@ -67,7 +67,7 @@ describe('icon cache', () => {
     expect(out.length).toBeLessThan(20_000);
   });
 
-  it('with no size cap, every item in the data has an image to bundle', () => {
+  it('with no size cap, every item clash-of-clans-data also has gets an image (ClashKing-only items: name only)', () => {
     const r = pickItemImages(data.items.values(), (p) => {
       try {
         return fs.statSync(path.join(PKG_DIR, p)).size;
@@ -76,6 +76,9 @@ describe('icon cache', () => {
       }
     });
     expect(r.skipped).toEqual([]);
-    expect(r.byKey.size).toBe(data.items.size);
+    const coc = cocData();
+    const shared = [...data.items.values()].filter((i) => coc.items.has(i.key));
+    expect(shared.length).toBeGreaterThan(180);
+    expect(shared.filter((i) => !r.byKey.has(i.key)).map((i) => i.name)).toEqual([]);
   });
 });

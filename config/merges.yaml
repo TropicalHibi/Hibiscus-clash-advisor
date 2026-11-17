@@ -1,28 +1,12 @@
-# Merge recipes for the CoC Upgrade Planner.
-# Keys are clash-of-clans-data item ids (file names under data/home/defenses).
-# Unlock TH, counts per TH, and required source levels are derived from the
-# data package — only the recipe (which sources combine) lives here.
-# Recipes were derived from availablePerTownHall counts vs countAfterMerges
-# (data package v0.19.1, Nov 2026). The sync validation re-checks them.
-
-merges:
-  ricochet-cannon:
-    dataId: 1000085
-    sources:
-      - { id: cannon, qty: 2 }
-
-  multi-archer-tower:
-    dataId: 1000084
-    sources:
-      - { id: archer-tower, qty: 2 }
-
-  multi-gear-tower:
-    dataId: 1000079
-    sources:
-      - { id: cannon, qty: 1 }
-      - { id: archer-tower, qty: 1 }
-
-  super-wizard-tower:
-    dataId: 1000102
-    sources:
-      - { id: wizard-tower, qty: 2 }
+# Optional merge-recipe overrides (SPEC §7, §12). Normally EMPTY: ClashKing's data carries every merge
+# (level-1 `merge_requirement` of the merged defense, with the exact source levels).
+# An entry here wins over the data, e.g. if ClashKing ships a new merged defense with a wrong or missing
+# requirement. Keys are item ids (slug of the name, e.g. "super-wizard-tower"); `level` is optional
+# (default: the source's max level at the merge's unlock TH).
+#
+# merges:
+#   super-wizard-tower:
+#     dataId: 1000102
+#     sources:
+#       - { id: wizard-tower, qty: 2, level: 17 }
+merges: {}

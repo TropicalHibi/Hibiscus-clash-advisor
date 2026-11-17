@@ -12,8 +12,9 @@ import { battleToRow, fetchPlayerAttacks, gatherPlayers, isLegendAttack } from '
 import { data, makeExport, parse, settings, T0 } from './helpers';
 
 const fixture = (name: string) => JSON.parse(fs.readFileSync(new URL(`./fixtures/api/${name}`, import.meta.url), 'utf8'));
-const superTroops = parseSuperTroops(readConfig('super-troops.yaml'));
-const catalog = buildCatalog(data, superTroops);
+// Super troops come from ClashKing's data (super_troop); config/super-troops.yaml ships empty and adds nothing.
+const superTroops = { ...data.superTroops, ...parseSuperTroops(readConfig('super-troops.yaml')) };
+const catalog = buildCatalog(data, parseSuperTroops(readConfig('super-troops.yaml')));
 const nameOf = (id: number) => catalog.get(id)?.name;
 const LINK = 'https://link.clashofclans.com/en?action=CopyArmy&army=';
 
@@ -118,7 +119,7 @@ describe('armyShareCode on real battle logs', () => {
   });
 
   it('every ID in the real codes resolves against the game data (+ super troop config)', () => {
-    const KNOWN_UNKNOWN = new Set([4_000_197]); // event troop, not in clash-of-clans-data (see DECISIONS.md)
+    const KNOWN_UNKNOWN = new Set<number>(); // 4000197 (Wall Breaker Squad) was unknown in clash-of-clans-data; ClashKing has it
     const unknown = new Set<number>();
     for (const b of legend) for (const u of attackUsage(parseArmyCode(b.armyShareCode!), catalog).unknown) if (!KNOWN_UNKNOWN.has(u.id)) unknown.add(u.id);
     expect([...unknown]).toEqual([]);
@@ -361,8 +362,11 @@ describe('army-share score', () => {
   const short = (fileId: string) => data.byId.get(fileId)!.dataId % 1_000_000;
 
   it('every troop, spell and siege in the game data has a housing space, and so does every mapped super troop', () => {
+    // ClashKing gives no housing_space for two of the new squads (TH19 update); they rank by usage (SPEC §8.3).
+    const NO_HOUSING_IN_DATA = ['Baby Dragon Squad', 'P.E.K.K.A Titan Squad'];
     const missing = [...data.items.values()].filter((i) => ['troop', 'spell', 'siege'].includes(i.category) && !i.housingSpace).map((i) => i.name);
-    expect(missing).toEqual([]);
+    expect(missing.filter((n) => !NO_HOUSING_IN_DATA.includes(n))).toEqual([]);
+    expect(Object.keys(superTroops)).toHaveLength(17);
     const supers = [...catalog.values()].filter((u) => u.kind === 'superTroop');
     expect(supers.length).toBe(Object.keys(superTroops).length);
     expect(supers.filter((u) => !u.housing).map((u) => u.name)).toEqual([]);

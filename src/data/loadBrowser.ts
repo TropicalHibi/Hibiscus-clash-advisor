@@ -1,22 +1,36 @@
-// Browser-side loader. Vite bundles only the folders we need from the data package.
-import { normalize, type RawFile } from './normalize';
+// Browser-side loader. Bundles the pinned ClashKing copy (data/clashking/) and clash-of-clans-data's
+// town-hall.json (TH weapons). The full clash-of-clans-data set is a separate chunk, fetched only when the
+// ClashKing copy is missing or can't be loaded (backup, with a visible warning).
+import { assertClashKingShape, normalizeClashKing } from './clashking';
+import { cocTownHallWeapons } from './normalize';
+import { parseOverrides } from './overrides';
+import { backupWarning, type ClashKingPin } from './source';
 import type { GameData } from './types';
 import mergesYaml from '../../config/merges.yaml?raw';
+import superTroopsYaml from '../../config/super-troops.yaml?raw';
 import idOverridesYaml from '../../config/id-overrides.yaml?raw';
 
-const modules = import.meta.glob('/node_modules/clash-of-clans-data/data/home/{town-hall,defenses,army-buildings,resource-buildings,traps,walls,heroes,troops,spells,siege-machines,pets,hero-equipment,crafted-defenses,guardians,other}/**/*.json', {
-  eager: true,
-  import: 'default',
-});
+// Globs, so a missing file is an empty result (→ backup) rather than a build error.
+const ckFiles = import.meta.glob('/data/clashking/{static_data,pin}.json', { eager: true, import: 'default' }) as Record<string, unknown>;
+const thFiles = import.meta.glob('/node_modules/clash-of-clans-data/data/home/town-hall/town-hall.json', { eager: true, import: 'default' }) as Record<string, unknown>;
 
-const pkgVersion = Object.values(
-  import.meta.glob('/node_modules/clash-of-clans-data/package.json', { eager: true, import: 'version' }),
-)[0] as string | undefined;
+const texts = { merges: mergesYaml, superTroops: superTroopsYaml, ids: idOverridesYaml };
 
-export function loadGameDataBrowser(): GameData {
-  const files: RawFile[] = Object.entries(modules).map(([p, json]) => ({
-    path: p.replace(/^.*\/data\/home\//, ''),
-    json,
-  }));
-  return normalize(files, mergesYaml, pkgVersion ?? 'unknown', idOverridesYaml);
+export async function loadGameDataBrowser(): Promise<GameData> {
+  const raw = ckFiles['/data/clashking/static_data.json'];
+  const pin = ckFiles['/data/clashking/pin.json'] as ClashKingPin | undefined;
+  let reason = 'data/clashking/static_data.json is missing';
+  if (raw && pin) {
+    try {
+      assertClashKingShape(raw);
+      const th = Object.values(thFiles)[0];
+      return normalizeClashKing(raw, { version: pin.version, overrides: parseOverrides(texts), weapons: th ? cocTownHallWeapons(th) : [] });
+    } catch (e) {
+      reason = `the pinned ClashKing data can't be loaded (${(e as Error).message})`;
+    }
+  }
+  const { loadCocDataBrowser } = await import('./cocBackupBrowser');
+  const coc = loadCocDataBrowser(texts);
+  coc.warnings.unshift(backupWarning(reason));
+  return coc;
 }

@@ -69,11 +69,12 @@ describe('scheduler', () => {
     expect(xbM.end).toBe(xbN.end);
   });
 
-  it('rush mode: the first free builder takes the Laboratory (Tier 0), the next one the Town Hall', () => {
+  it('rush mode: free builders take the Laboratory, then new buildings (Tier 0), then the Town Hall', () => {
     const plan = buildPlan(data, fixture(), settings(), EMPTY_META, T0);
     expect(plan.mode).toBe('rush');
     const builders = plan.startNow.filter((e) => e.slotId.startsWith('B')).map((e) => e.itemName);
-    expect(builders.slice(0, 2)).toEqual(['Laboratory', 'Town Hall']);
+    // The fixture predates the TH19 update: its new Squad Barracks (TH8+) is a Tier 0 build ahead of the TH.
+    expect(builders.slice(0, 3)).toEqual(['Laboratory', 'Squad Barracks', 'Town Hall']);
   });
 
   it('merge builds consume sources and create the merged defense in the simulation', () => {
@@ -145,7 +146,8 @@ describe('wall dump', () => {
     expect(w.fromLevel).toBe(17);
     expect(w.toLevel).toBe(18);
     expect(w.countAtLevel).toBe(148);
-    expect(w.text).toBe('Overflow → walls: Lv 17→18 costs 7M gold or elixir each; 148 walls at Lv 17.');
+    // Wall 18: 6M since the TH19 update (clash-of-clans-data 0.19.1 still said 7M).
+    expect(w.text).toBe('Overflow → walls: Lv 17→18 costs 6M gold or elixir each; 148 walls at Lv 17.');
   });
 
   it('is null when every wall is maxed for the TH', () => {

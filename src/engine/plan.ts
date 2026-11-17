@@ -1,5 +1,6 @@
 // Orchestrates parse → simulate → forecast into one Plan used by the UI and the CLI.
 import type { GameData, Resource } from '../data/types';
+import { dataSourceLabel } from '../data/source';
 import { checkMergeConsumption } from '../data/validate';
 import { levelsOf } from '../state/levels';
 import type { MetaFile } from '../meta/meta';
@@ -138,7 +139,7 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
     simulateHelpers: settings.simulateHelpers,
     helperLine: helperLine(account, sim, nowSec, settings.simulateHelpers),
     bookThresholdSec: data.bookThresholdSec,
-    dataVersion: data.version,
+    dataVersion: dataSourceLabel(data),
     exportTimestamp: account.exportTimestamp,
     sim,
     startNow: sim.timeline.filter((e) => !e.inProgress && e.start === 0),

@@ -1,0 +1,8118 @@
+{
+  "version": "clashking-v0.1.20",
+  "previousVersion": "0.19.1",
+  "date": "2026-11-17",
+  "changes": [
+    {
+      "kind": "requirement",
+      "key": "12000005",
+      "item": "Air Bomb",
+      "level": 1,
+      "text": "Air Bomb 1: TH requirement 5 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "12000005",
+      "item": "Air Bomb",
+      "level": 12,
+      "text": "Air Bomb 12: 9.5M gold → 6.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000005",
+      "item": "Air Bomb",
+      "level": 12,
+      "text": "Air Bomb 12: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "12000005",
+      "item": "Air Bomb",
+      "level": 13,
+      "text": "Air Bomb 13: 15M gold → 9M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000005",
+      "item": "Air Bomb",
+      "level": 13,
+      "text": "Air Bomb 13: 9d → 5d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "12000005",
+      "item": "Air Bomb",
+      "level": 14,
+      "text": "NEW: Air Bomb 14 (17.5M gold, 8d 12h)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000009",
+      "item": "Air Bombs",
+      "text": "REMOVED ITEM: Air Bombs"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000009:m102000029",
+      "item": "Air Bombs Attack Cooldown",
+      "text": "REMOVED ITEM: Air Bombs Attack Cooldown"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000009:m102000028",
+      "item": "Air Bombs Damage",
+      "text": "REMOVED ITEM: Air Bombs Damage"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000009:m102000027",
+      "item": "Air Bombs Hitpoints",
+      "text": "REMOVED ITEM: Air Bombs Hitpoints"
+    },
+    {
+      "kind": "cost",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 10,
+      "text": "Air Defense 10: 5M gold → 3.8M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 10,
+      "text": "Air Defense 10: 4d → 3d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 11,
+      "text": "Air Defense 11: 5.6M gold → 4M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 11,
+      "text": "Air Defense 11: 4d 12h → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 12,
+      "text": "Air Defense 12: 6.5M gold → 5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 12,
+      "text": "Air Defense 12: 5d → 4d"
+    },
+    {
+      "kind": "time",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 13,
+      "text": "Air Defense 13: 6d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 14,
+      "text": "Air Defense 14: 9M gold → 8.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 14,
+      "text": "Air Defense 14: 6d 12h → 5d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 15,
+      "text": "Air Defense 15: 15M gold → 13.5M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 16,
+      "text": "Air Defense 16: 26M gold → 18.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 16,
+      "text": "Air Defense 16: 13d 6h → 10d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000012",
+      "item": "Air Defense",
+      "level": 17,
+      "text": "NEW: Air Defense 17 (28.5M gold, 14d)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "1000012:sc",
+      "item": "Air Defense Supercharge",
+      "text": "REMOVED ITEM: Air Defense Supercharge"
+    },
+    {
+      "kind": "renamed",
+      "key": "93000002",
+      "item": "Alchemist",
+      "text": "RENAMED: Prospector → Alchemist"
+    },
+    {
+      "kind": "time",
+      "key": "73000011",
+      "item": "Angry Jelly",
+      "level": 7,
+      "text": "Angry Jelly 7: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "73000011",
+      "item": "Angry Jelly",
+      "level": 8,
+      "text": "Angry Jelly 8: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "73000011",
+      "item": "Angry Jelly",
+      "level": 9,
+      "text": "Angry Jelly 9: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000011",
+      "item": "Angry Jelly",
+      "level": 10,
+      "text": "Angry Jelly 10: 8d → 7d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "73000011",
+      "item": "Angry Jelly",
+      "level": 11,
+      "text": "NEW: Angry Jelly 11 (260K DE, 7d 12h)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "73000011",
+      "item": "Angry Jelly",
+      "level": 12,
+      "text": "NEW: Angry Jelly 12 (290K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "73000011",
+      "item": "Angry Jelly",
+      "level": 13,
+      "text": "NEW: Angry Jelly 13 (320K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "73000011",
+      "item": "Angry Jelly",
+      "level": 14,
+      "text": "NEW: Angry Jelly 14 (350K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "73000011",
+      "item": "Angry Jelly",
+      "level": 15,
+      "text": "NEW: Angry Jelly 15 (380K DE, 8d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000123",
+      "item": "Angry Spell",
+      "level": 1,
+      "text": "Angry Spell 1: TH requirement 15 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000123",
+      "item": "Angry Spell",
+      "level": 1,
+      "text": "Angry Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "time",
+      "key": "26000123",
+      "item": "Angry Spell",
+      "level": 2,
+      "text": "Angry Spell 2: 9d 8h → 9d"
+    },
+    {
+      "kind": "cost",
+      "key": "26000123",
+      "item": "Angry Spell",
+      "level": 4,
+      "text": "Angry Spell 4: 400K DE → 350K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000123",
+      "item": "Angry Spell",
+      "level": 4,
+      "text": "Angry Spell 4: 15d → 13d"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000097",
+      "item": "Apprentice Warden",
+      "level": 1,
+      "text": "Apprentice Warden 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000097",
+      "item": "Apprentice Warden",
+      "level": 2,
+      "text": "Apprentice Warden 2: 90K DE → 75K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000097",
+      "item": "Apprentice Warden",
+      "level": 2,
+      "text": "Apprentice Warden 2: 6d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000097",
+      "item": "Apprentice Warden",
+      "level": 3,
+      "text": "Apprentice Warden 3: 135K DE → 125K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000097",
+      "item": "Apprentice Warden",
+      "level": 3,
+      "text": "Apprentice Warden 3: 7d 12h → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000097",
+      "item": "Apprentice Warden",
+      "level": 4,
+      "text": "Apprentice Warden 4: 160K DE → 150K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000097",
+      "item": "Apprentice Warden",
+      "level": 4,
+      "text": "Apprentice Warden 4: 8d → 7d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 1,
+      "text": "Archer 1: TH requirement 1 → 2"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 1,
+      "text": "Archer 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 10,
+      "text": "Archer 10: 4.5M elixir → 3.8M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 10,
+      "text": "Archer 10: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 11,
+      "text": "Archer 11: 6.5M elixir → 5.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 11,
+      "text": "Archer 11: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 12,
+      "text": "Archer 12: 9M elixir → 8M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 12,
+      "text": "Archer 12: 4d 12h → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 13,
+      "text": "Archer 13: 14M elixir → 11M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 13,
+      "text": "Archer 13: 9d → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 14,
+      "text": "Archer 14: 25M elixir → 19M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 14,
+      "text": "Archer 14: 13d 12h → 9d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000001",
+      "item": "Archer",
+      "level": 15,
+      "text": "NEW: Archer 15 (31M elixir, 14d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000002",
+      "item": "Archer Puppet",
+      "level": 1,
+      "text": "Archer Puppet 1: Blacksmith requirement 0 → 1"
+    },
+    {
+      "kind": "time",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 96,
+      "text": "Archer Queen 96: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 97,
+      "text": "Archer Queen 97: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 98,
+      "text": "Archer Queen 98: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 99,
+      "text": "Archer Queen 99: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 100,
+      "text": "Archer Queen 100: 8d → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 105,
+      "text": "Archer Queen 105: 450K DE → 440K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 106,
+      "text": "Archer Queen 106: 460K DE → 445K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 107,
+      "text": "Archer Queen 107: 470K DE → 450K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 108,
+      "text": "Archer Queen 108: 475K DE → 455K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 109,
+      "text": "Archer Queen 109: 485K DE → 460K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 110,
+      "text": "Archer Queen 110: 490K DE → 465K DE"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 111,
+      "text": "NEW: Archer Queen 111 (500K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 112,
+      "text": "NEW: Archer Queen 112 (505K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 113,
+      "text": "NEW: Archer Queen 113 (510K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 114,
+      "text": "NEW: Archer Queen 114 (515K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000001",
+      "item": "Archer Queen",
+      "level": 115,
+      "text": "NEW: Archer Queen 115 (520K DE, 8d)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000000",
+      "item": "Army Camp",
+      "level": 11,
+      "text": "Army Camp 11: 7.5M elixir → 7M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000000",
+      "item": "Army Camp",
+      "level": 11,
+      "text": "Army Camp 11: 5d → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000000",
+      "item": "Army Camp",
+      "level": 12,
+      "text": "Army Camp 12: 10M elixir → 8.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000000",
+      "item": "Army Camp",
+      "level": 12,
+      "text": "Army Camp 12: 6d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000000",
+      "item": "Army Camp",
+      "level": 13,
+      "text": "Army Camp 13: 17M elixir → 14.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000000",
+      "item": "Army Camp",
+      "level": 13,
+      "text": "Army Camp 13: 7d 12h → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000000",
+      "item": "Army Camp",
+      "level": 14,
+      "text": "Army Camp 14: 26M elixir → 24M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000000",
+      "item": "Army Camp",
+      "level": 14,
+      "text": "Army Camp 14: 15d → 13d"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000120",
+      "item": "Azure Dragon",
+      "text": "NEW ITEM: Azure Dragon (levels 1–13)"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "1000064",
+      "item": "B.O.B's Hut",
+      "level": 1,
+      "text": "REMOVED: B.O.B's Hut 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000023",
+      "item": "Baby Dragon",
+      "level": 1,
+      "text": "Baby Dragon 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000023",
+      "item": "Baby Dragon",
+      "level": 7,
+      "text": "Baby Dragon 7: 6.2M elixir → 5.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000023",
+      "item": "Baby Dragon",
+      "level": 7,
+      "text": "Baby Dragon 7: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000023",
+      "item": "Baby Dragon",
+      "level": 8,
+      "text": "Baby Dragon 8: 9.5M elixir → 8.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000023",
+      "item": "Baby Dragon",
+      "level": 8,
+      "text": "Baby Dragon 8: 6d → 5d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000023",
+      "item": "Baby Dragon",
+      "level": 11,
+      "text": "Baby Dragon 11: 16.5M elixir → 15M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000023",
+      "item": "Baby Dragon",
+      "level": 11,
+      "text": "Baby Dragon 11: 10d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000023",
+      "item": "Baby Dragon",
+      "level": 12,
+      "text": "Baby Dragon 12: 29M elixir → 21M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000023",
+      "item": "Baby Dragon",
+      "level": 12,
+      "text": "Baby Dragon 12: 15d 6h → 11d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000023",
+      "item": "Baby Dragon",
+      "level": 13,
+      "text": "NEW: Baby Dragon 13 (29M elixir, 12d 12h)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000206",
+      "item": "Baby Dragon Squad",
+      "text": "NEW ITEM: Baby Dragon Squad (levels 1–3)"
+    },
+    {
+      "kind": "newItem",
+      "key": "26000073",
+      "item": "Bag of Frostmites",
+      "text": "NEW ITEM: Bag of Frostmites (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000005",
+      "item": "Balloon",
+      "level": 1,
+      "text": "Balloon 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000005",
+      "item": "Balloon",
+      "level": 9,
+      "text": "Balloon 9: 7M elixir → 6M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000005",
+      "item": "Balloon",
+      "level": 9,
+      "text": "Balloon 9: 4d 12h → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000005",
+      "item": "Balloon",
+      "level": 11,
+      "text": "Balloon 11: 14M elixir → 13M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000005",
+      "item": "Balloon",
+      "level": 11,
+      "text": "Balloon 11: 8d 12h → 8d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000005",
+      "item": "Balloon",
+      "level": 12,
+      "text": "Balloon 12: 17.5M elixir → 15.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000005",
+      "item": "Balloon",
+      "level": 12,
+      "text": "Balloon 12: 11d → 10d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000005",
+      "item": "Balloon",
+      "level": 13,
+      "text": "Balloon 13: 28M elixir → 22.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000005",
+      "item": "Balloon",
+      "level": 13,
+      "text": "Balloon 13: 14d 18h → 11d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000005",
+      "item": "Balloon",
+      "level": 14,
+      "text": "NEW: Balloon 14 (28M elixir, 12d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000199",
+      "item": "Balloon Squad",
+      "text": "NEW ITEM: Balloon Squad (levels 1–3)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000000",
+      "item": "Barbarian",
+      "level": 1,
+      "text": "Barbarian 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "time",
+      "key": "4000000",
+      "item": "Barbarian",
+      "level": 2,
+      "text": "Barbarian 2: 30m → 0s"
+    },
+    {
+      "kind": "cost",
+      "key": "4000000",
+      "item": "Barbarian",
+      "level": 11,
+      "text": "Barbarian 11: 6M elixir → 5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000000",
+      "item": "Barbarian",
+      "level": 11,
+      "text": "Barbarian 11: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000000",
+      "item": "Barbarian",
+      "level": 12,
+      "text": "Barbarian 12: 8M elixir → 6M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000000",
+      "item": "Barbarian",
+      "level": 12,
+      "text": "Barbarian 12: 4d → 3d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000000",
+      "item": "Barbarian",
+      "level": 13,
+      "text": "Barbarian 13: 24M elixir → 18M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000000",
+      "item": "Barbarian",
+      "level": 13,
+      "text": "Barbarian 13: 12d 12h → 9d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000000",
+      "item": "Barbarian",
+      "level": 14,
+      "text": "NEW: Barbarian 14 (30M elixir, 13d 12h)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000121",
+      "item": "Barbarian Kicker",
+      "text": "NEW ITEM: Barbarian Kicker (levels 1–13)"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 83,
+      "text": "Barbarian King 83: 195K DE → 190K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 84,
+      "text": "Barbarian King 84: 205K DE → 195K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 85,
+      "text": "Barbarian King 85: 215K DE → 200K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 86,
+      "text": "Barbarian King 86: 220K DE → 215K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 87,
+      "text": "Barbarian King 87: 230K DE → 225K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 88,
+      "text": "Barbarian King 88: 240K DE → 235K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 89,
+      "text": "Barbarian King 89: 250K DE → 245K DE"
+    },
+    {
+      "kind": "time",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 96,
+      "text": "Barbarian King 96: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 97,
+      "text": "Barbarian King 97: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 98,
+      "text": "Barbarian King 98: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 99,
+      "text": "Barbarian King 99: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 100,
+      "text": "Barbarian King 100: 8d → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 105,
+      "text": "Barbarian King 105: 450K DE → 440K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 106,
+      "text": "Barbarian King 106: 460K DE → 445K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 107,
+      "text": "Barbarian King 107: 470K DE → 450K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 108,
+      "text": "Barbarian King 108: 475K DE → 455K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 109,
+      "text": "Barbarian King 109: 485K DE → 460K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 110,
+      "text": "Barbarian King 110: 490K DE → 465K DE"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 111,
+      "text": "NEW: Barbarian King 111 (500K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 112,
+      "text": "NEW: Barbarian King 112 (505K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 113,
+      "text": "NEW: Barbarian King 113 (510K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 114,
+      "text": "NEW: Barbarian King 114 (515K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000000",
+      "item": "Barbarian King",
+      "level": 115,
+      "text": "NEW: Barbarian King 115 (520K DE, 8d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000000",
+      "item": "Barbarian Puppet",
+      "level": 1,
+      "text": "Barbarian Puppet 1: Blacksmith requirement 0 → 1"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000195",
+      "item": "Barch Squad",
+      "text": "NEW ITEM: Barch Squad (levels 1–3)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000101",
+      "item": "Barcher",
+      "text": "NEW ITEM: Barcher (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "1000006",
+      "item": "Barracks",
+      "level": 2,
+      "text": "Barracks 2: TH requirement 1 → 2"
+    },
+    {
+      "kind": "requirement",
+      "key": "1000006",
+      "item": "Barracks",
+      "level": 3,
+      "text": "Barracks 3: TH requirement 1 → 2"
+    },
+    {
+      "kind": "cost",
+      "key": "1000006",
+      "item": "Barracks",
+      "level": 13,
+      "text": "Barracks 13: 6M elixir → 5.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "1000006",
+      "item": "Barracks",
+      "level": 19,
+      "text": "Barracks 19: 26M elixir → 18M elixir"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000028",
+      "item": "Bat Spell",
+      "level": 1,
+      "text": "Bat Spell 1: TH requirement 10 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000028",
+      "item": "Bat Spell",
+      "level": 1,
+      "text": "Bat Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "26000028",
+      "item": "Bat Spell",
+      "level": 7,
+      "text": "Bat Spell 7: 220K DE → 190K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000028",
+      "item": "Bat Spell",
+      "level": 7,
+      "text": "Bat Spell 7: 8d 12h → 7d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000028",
+      "item": "Bat Spell",
+      "level": 8,
+      "text": "Bat Spell 8: 300K DE → 245K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000028",
+      "item": "Bat Spell",
+      "level": 8,
+      "text": "Bat Spell 8: 13d → 9d 6h"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000028",
+      "item": "Bat Spell",
+      "level": 8,
+      "text": "Bat Spell 8: TH requirement 17 → 18"
+    },
+    {
+      "kind": "newLevel",
+      "key": "26000028",
+      "item": "Bat Spell",
+      "level": 9,
+      "text": "NEW: Bat Spell 9 (415K DE, 13d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000052",
+      "item": "Battle Blimp",
+      "level": 1,
+      "text": "Battle Blimp 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000052",
+      "item": "Battle Blimp",
+      "level": 6,
+      "text": "Battle Blimp 6: 26M elixir → 18.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000052",
+      "item": "Battle Blimp",
+      "level": 6,
+      "text": "Battle Blimp 6: 13d 12h → 10d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000092",
+      "item": "Battle Drill",
+      "level": 1,
+      "text": "Battle Drill 1: TH requirement 16 → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000092",
+      "item": "Battle Drill",
+      "level": 1,
+      "text": "Battle Drill 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000092",
+      "item": "Battle Drill",
+      "level": 2,
+      "text": "Battle Drill 2: TH requirement 16 → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000092",
+      "item": "Battle Drill",
+      "level": 3,
+      "text": "Battle Drill 3: TH requirement 16 → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000092",
+      "item": "Battle Drill",
+      "level": 4,
+      "text": "Battle Drill 4: TH requirement 16 → 15"
+    },
+    {
+      "kind": "cost",
+      "key": "4000092",
+      "item": "Battle Drill",
+      "level": 6,
+      "text": "Battle Drill 6: 28M elixir → 24.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000092",
+      "item": "Battle Drill",
+      "level": 6,
+      "text": "Battle Drill 6: 15d 12h → 13d"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000045",
+      "item": "Battle Ram",
+      "text": "NEW ITEM: Battle Ram (levels 1–13)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000070",
+      "item": "Blacksmith",
+      "level": 10,
+      "text": "Blacksmith 10: 18M elixir → 17M elixir"
+    },
+    {
+      "kind": "requirement",
+      "key": "12000000",
+      "item": "Bomb",
+      "level": 1,
+      "text": "Bomb 1: TH requirement 3 → 1"
+    },
+    {
+      "kind": "time",
+      "key": "12000000",
+      "item": "Bomb",
+      "level": 4,
+      "text": "Bomb 4: 40m → 30m"
+    },
+    {
+      "kind": "cost",
+      "key": "12000000",
+      "item": "Bomb",
+      "level": 13,
+      "text": "Bomb 13: 8.5M gold → 6.5M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "12000000",
+      "item": "Bomb",
+      "level": 14,
+      "text": "Bomb 14: 14M gold → 9M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000000",
+      "item": "Bomb",
+      "level": 14,
+      "text": "Bomb 14: 8d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 7,
+      "text": "Bomb Tower 7: 4M gold → 3.3M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 7,
+      "text": "Bomb Tower 7: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 8,
+      "text": "Bomb Tower 8: 5M gold → 3.6M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 8,
+      "text": "Bomb Tower 8: 3d 12h → 2d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 9,
+      "text": "Bomb Tower 9: 6M gold → 5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 9,
+      "text": "Bomb Tower 9: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 10,
+      "text": "Bomb Tower 10: 7M gold → 5.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 10,
+      "text": "Bomb Tower 10: 4d 12h → 3d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 11,
+      "text": "Bomb Tower 11: 8.5M gold → 7M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 11,
+      "text": "Bomb Tower 11: 5d → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 12,
+      "text": "Bomb Tower 12: 14.5M gold → 13.5M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 13,
+      "text": "Bomb Tower 13: 25M gold → 16.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000032",
+      "item": "Bomb Tower",
+      "level": 13,
+      "text": "Bomb Tower 13: 13d → 9d"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000022",
+      "item": "Bowler",
+      "level": 1,
+      "text": "Bowler 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000022",
+      "item": "Bowler",
+      "level": 5,
+      "text": "Bowler 5: 85K DE → 75K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000022",
+      "item": "Bowler",
+      "level": 5,
+      "text": "Bowler 5: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000022",
+      "item": "Bowler",
+      "level": 6,
+      "text": "Bowler 6: 110K DE → 100K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000022",
+      "item": "Bowler",
+      "level": 6,
+      "text": "Bowler 6: 6d → 5d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000022",
+      "item": "Bowler",
+      "level": 9,
+      "text": "Bowler 9: 260K DE → 205K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000022",
+      "item": "Bowler",
+      "level": 9,
+      "text": "Bowler 9: 10d → 8d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000022",
+      "item": "Bowler",
+      "level": 10,
+      "text": "Bowler 10: 360K DE → 245K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000022",
+      "item": "Bowler",
+      "level": 10,
+      "text": "Bowler 10: 15d → 9d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000022",
+      "item": "Bowler",
+      "level": 11,
+      "text": "NEW: Bowler 11 (385K DE, 11d 12h)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000125",
+      "item": "Broom Witch",
+      "text": "NEW ITEM: Broom Witch (levels 1–13)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 3,
+      "text": "Builder's Hut 3: 4M gold → 3.4M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 3,
+      "text": "Builder's Hut 3: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 4,
+      "text": "Builder's Hut 4: 6M gold → 5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 4,
+      "text": "Builder's Hut 4: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 5,
+      "text": "Builder's Hut 5: 7M gold → 5.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 5,
+      "text": "Builder's Hut 5: 5d → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 6,
+      "text": "Builder's Hut 6: 8M gold → 7M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 6,
+      "text": "Builder's Hut 6: 5d 12h → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 7,
+      "text": "Builder's Hut 7: 15.5M gold → 13.5M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 8,
+      "text": "Builder's Hut 8: 24M gold → 20M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 8,
+      "text": "Builder's Hut 8: 13d → 11d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000015",
+      "item": "Builder's Hut",
+      "level": 9,
+      "text": "NEW: Builder's Hut 9 (26M gold, 14d)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "1000015:sc",
+      "item": "Builder's Hut Supercharge",
+      "text": "REMOVED ITEM: Builder's Hut Supercharge"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000118",
+      "item": "C.O.O.K.I.E",
+      "text": "NEW ITEM: C.O.O.K.I.E (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000040",
+      "item": "Cake-A-Pult Damage",
+      "level": 1,
+      "text": "Cake-A-Pult Damage 1: TH requirement none → 11"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000040",
+      "item": "Cake-A-Pult Damage",
+      "level": 2,
+      "text": "Cake-A-Pult Damage 2: TH requirement none → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000040",
+      "item": "Cake-A-Pult Damage",
+      "level": 3,
+      "text": "Cake-A-Pult Damage 3: TH requirement none → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000040",
+      "item": "Cake-A-Pult Damage",
+      "level": 4,
+      "text": "Cake-A-Pult Damage 4: TH requirement none → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000040",
+      "item": "Cake-A-Pult Damage",
+      "level": 5,
+      "text": "Cake-A-Pult Damage 5: TH requirement none → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000040",
+      "item": "Cake-A-Pult Damage",
+      "level": 6,
+      "text": "Cake-A-Pult Damage 6: TH requirement none → 16"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000040",
+      "item": "Cake-A-Pult Damage",
+      "level": 7,
+      "text": "Cake-A-Pult Damage 7: TH requirement none → 17"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000040",
+      "item": "Cake-A-Pult Damage",
+      "level": 8,
+      "text": "Cake-A-Pult Damage 8: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000040",
+      "item": "Cake-A-Pult Damage",
+      "level": 9,
+      "text": "Cake-A-Pult Damage 9: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000040",
+      "item": "Cake-A-Pult Damage",
+      "level": 10,
+      "text": "Cake-A-Pult Damage 10: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000039",
+      "item": "Cake-A-Pult Hitpoints",
+      "level": 1,
+      "text": "Cake-A-Pult Hitpoints 1: TH requirement none → 11"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000039",
+      "item": "Cake-A-Pult Hitpoints",
+      "level": 2,
+      "text": "Cake-A-Pult Hitpoints 2: TH requirement none → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000039",
+      "item": "Cake-A-Pult Hitpoints",
+      "level": 3,
+      "text": "Cake-A-Pult Hitpoints 3: TH requirement none → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000039",
+      "item": "Cake-A-Pult Hitpoints",
+      "level": 4,
+      "text": "Cake-A-Pult Hitpoints 4: TH requirement none → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000039",
+      "item": "Cake-A-Pult Hitpoints",
+      "level": 5,
+      "text": "Cake-A-Pult Hitpoints 5: TH requirement none → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000039",
+      "item": "Cake-A-Pult Hitpoints",
+      "level": 6,
+      "text": "Cake-A-Pult Hitpoints 6: TH requirement none → 16"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000039",
+      "item": "Cake-A-Pult Hitpoints",
+      "level": 7,
+      "text": "Cake-A-Pult Hitpoints 7: TH requirement none → 17"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000039",
+      "item": "Cake-A-Pult Hitpoints",
+      "level": 8,
+      "text": "Cake-A-Pult Hitpoints 8: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000039",
+      "item": "Cake-A-Pult Hitpoints",
+      "level": 9,
+      "text": "Cake-A-Pult Hitpoints 9: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000039",
+      "item": "Cake-A-Pult Hitpoints",
+      "level": 10,
+      "text": "Cake-A-Pult Hitpoints 10: TH requirement none → 18"
+    },
+    {
+      "kind": "renamed",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "text": "RENAMED: Cake-A-Pult Explosion Damage → Cake-A-Pult Splash Damage"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "level": 1,
+      "text": "Cake-A-Pult Splash Damage 1: TH requirement none → 11"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "level": 2,
+      "text": "Cake-A-Pult Splash Damage 2: TH requirement none → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "level": 3,
+      "text": "Cake-A-Pult Splash Damage 3: TH requirement none → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "level": 4,
+      "text": "Cake-A-Pult Splash Damage 4: TH requirement none → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "level": 5,
+      "text": "Cake-A-Pult Splash Damage 5: TH requirement none → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "level": 6,
+      "text": "Cake-A-Pult Splash Damage 6: TH requirement none → 16"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "level": 7,
+      "text": "Cake-A-Pult Splash Damage 7: TH requirement none → 17"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "level": 8,
+      "text": "Cake-A-Pult Splash Damage 8: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "level": 9,
+      "text": "Cake-A-Pult Splash Damage 9: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000013:m102000041",
+      "item": "Cake-A-Pult Splash Damage",
+      "level": 10,
+      "text": "Cake-A-Pult Splash Damage 10: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "1000008",
+      "item": "Cannon",
+      "level": 2,
+      "text": "Cannon 2: TH requirement 1 → 2"
+    },
+    {
+      "kind": "cost",
+      "key": "1000014",
+      "item": "Clan Castle",
+      "level": 13,
+      "text": "Clan Castle 13: 19M elixir → 17.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "1000014",
+      "item": "Clan Castle",
+      "level": 14,
+      "text": "Clan Castle 14: 28M elixir → 25.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000014",
+      "item": "Clan Castle",
+      "level": 14,
+      "text": "Clan Castle 14: 14d → 13d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000014",
+      "item": "Clan Castle",
+      "level": 15,
+      "text": "NEW: Clan Castle 15 (31.5M elixir, 16d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000016",
+      "item": "Clone Spell",
+      "level": 1,
+      "text": "Clone Spell 1: TH requirement 9 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000016",
+      "item": "Clone Spell",
+      "level": 1,
+      "text": "Clone Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "26000016",
+      "item": "Clone Spell",
+      "level": 7,
+      "text": "Clone Spell 7: 8M elixir → 7M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000016",
+      "item": "Clone Spell",
+      "level": 7,
+      "text": "Clone Spell 7: 5d → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000016",
+      "item": "Clone Spell",
+      "level": 9,
+      "text": "Clone Spell 9: 26M elixir → 21M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000016",
+      "item": "Clone Spell",
+      "level": 9,
+      "text": "Clone Spell 9: 13d 12h → 11d 6h"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "1000097",
+      "item": "Crafting Station",
+      "level": 1,
+      "text": "REMOVED: Crafting Station 1"
+    },
+    {
+      "kind": "cost",
+      "key": "1000026",
+      "item": "Dark Barracks",
+      "level": 8,
+      "text": "Dark Barracks 8: 7M elixir → 6M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "1000026",
+      "item": "Dark Barracks",
+      "level": 12,
+      "text": "Dark Barracks 12: 20M elixir → 14M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "1000026",
+      "item": "Dark Barracks",
+      "level": 13,
+      "text": "Dark Barracks 13: 23M elixir → 15.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "1000023",
+      "item": "Dark Elixir Drill",
+      "level": 9,
+      "text": "Dark Elixir Drill 9: 3.7M elixir → 3M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000023",
+      "item": "Dark Elixir Drill",
+      "level": 9,
+      "text": "Dark Elixir Drill 9: 2d 12h → 2d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000023",
+      "item": "Dark Elixir Drill",
+      "level": 10,
+      "text": "Dark Elixir Drill 10: 5.3M elixir → 4.4M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000023",
+      "item": "Dark Elixir Drill",
+      "level": 10,
+      "text": "Dark Elixir Drill 10: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000023",
+      "item": "Dark Elixir Drill",
+      "level": 11,
+      "text": "Dark Elixir Drill 11: 12M elixir → 8M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000023",
+      "item": "Dark Elixir Drill",
+      "level": 11,
+      "text": "Dark Elixir Drill 11: 6d → 5d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000023",
+      "item": "Dark Elixir Drill",
+      "level": 12,
+      "text": "NEW: Dark Elixir Drill 12 (12.5M elixir, 6d 12h)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "1000023:sc",
+      "item": "Dark Elixir Drill Supercharge",
+      "text": "REMOVED ITEM: Dark Elixir Drill Supercharge"
+    },
+    {
+      "kind": "cost",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 7,
+      "text": "Dark Elixir Storage 7: 3.8M elixir → 3.2M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 7,
+      "text": "Dark Elixir Storage 7: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 8,
+      "text": "Dark Elixir Storage 8: 5.4M elixir → 3.8M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 8,
+      "text": "Dark Elixir Storage 8: 3d 12h → 2d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 9,
+      "text": "Dark Elixir Storage 9: 6.6M elixir → 4.8M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 9,
+      "text": "Dark Elixir Storage 9: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 10,
+      "text": "Dark Elixir Storage 10: 8M elixir → 6M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 10,
+      "text": "Dark Elixir Storage 10: 4d 12h → 3d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 11,
+      "text": "Dark Elixir Storage 11: 10M elixir → 8M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 11,
+      "text": "Dark Elixir Storage 11: 5d → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 12,
+      "text": "Dark Elixir Storage 12: 16M elixir → 15M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 13,
+      "text": "Dark Elixir Storage 13: 25M elixir → 20M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 13,
+      "text": "Dark Elixir Storage 13: 13d → 10d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000024",
+      "item": "Dark Elixir Storage",
+      "level": 14,
+      "text": "NEW: Dark Elixir Storage 14 (24M elixir, 13d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000136",
+      "item": "Debt Collector",
+      "text": "NEW ITEM: Debt Collector (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000008",
+      "item": "Dragon",
+      "level": 1,
+      "text": "Dragon 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000008",
+      "item": "Dragon",
+      "level": 11,
+      "text": "Dragon 11: 14M elixir → 13.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000008",
+      "item": "Dragon",
+      "level": 11,
+      "text": "Dragon 11: 8d 12h → 8d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000008",
+      "item": "Dragon",
+      "level": 12,
+      "text": "Dragon 12: 18.5M elixir → 15.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000008",
+      "item": "Dragon",
+      "level": 12,
+      "text": "Dragon 12: 10d → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000008",
+      "item": "Dragon",
+      "level": 13,
+      "text": "Dragon 13: 28.5M elixir → 21M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000008",
+      "item": "Dragon",
+      "level": 13,
+      "text": "Dragon 13: 15d → 11d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000008",
+      "item": "Dragon",
+      "level": 14,
+      "text": "NEW: Dragon 14 (28.5M elixir, 12d 12h)"
+    },
+    {
+      "kind": "time",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 18,
+      "text": "Dragon Duke 18: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 19,
+      "text": "Dragon Duke 19: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 20,
+      "text": "Dragon Duke 20: 8d → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 22,
+      "text": "Dragon Duke 22: 420K DE → 415K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 23,
+      "text": "Dragon Duke 23: 440K DE → 430K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 24,
+      "text": "Dragon Duke 24: 460K DE → 445K DE"
+    },
+    {
+      "kind": "cost",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 25,
+      "text": "Dragon Duke 25: 480K DE → 460K DE"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 26,
+      "text": "NEW: Dragon Duke 26 (500K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 27,
+      "text": "NEW: Dragon Duke 27 (505K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 28,
+      "text": "NEW: Dragon Duke 28 (510K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 29,
+      "text": "NEW: Dragon Duke 29 (515K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000007",
+      "item": "Dragon Duke",
+      "level": 30,
+      "text": "NEW: Dragon Duke 30 (520K DE, 8d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 1,
+      "text": "Dragon Rider 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 2,
+      "text": "Dragon Rider 2: 7.5M elixir → 7M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 2,
+      "text": "Dragon Rider 2: 6d → 5d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 3,
+      "text": "Dragon Rider 3: 12M elixir → 11M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 3,
+      "text": "Dragon Rider 3: 8d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 4,
+      "text": "Dragon Rider 4: 14.5M elixir → 13.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 4,
+      "text": "Dragon Rider 4: 9d → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 5,
+      "text": "Dragon Rider 5: 19M elixir → 17.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 5,
+      "text": "Dragon Rider 5: 10d 6h → 9d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 6,
+      "text": "Dragon Rider 6: 29.5M elixir → 21M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 6,
+      "text": "Dragon Rider 6: 15d 12h → 11d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000065",
+      "item": "Dragon Rider",
+      "level": 7,
+      "text": "NEW: Dragon Rider 7 (28.5M elixir, 12d 12h)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000205",
+      "item": "Dragons Squad",
+      "text": "NEW ITEM: Dragons Squad (levels 1–3)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 1,
+      "text": "Druid 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 2,
+      "text": "Druid 2: 125K DE → 110K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 2,
+      "text": "Druid 2: 8d → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 3,
+      "text": "Druid 3: 175K DE → 130K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 3,
+      "text": "Druid 3: 9d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 4,
+      "text": "Druid 4: 188K DE → 150K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 4,
+      "text": "Druid 4: 11d → 8d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 5,
+      "text": "Druid 5: 300K DE → 215K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 5,
+      "text": "Druid 5: 12d → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 6,
+      "text": "Druid 6: 380K DE → 340K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 6,
+      "text": "Druid 6: 15d 12h → 12d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000123",
+      "item": "Druid",
+      "level": 7,
+      "text": "NEW: Druid 7 (415K DE, 13d)"
+    },
+    {
+      "kind": "time",
+      "key": "1000031",
+      "item": "Eagle Artillery",
+      "level": 3,
+      "text": "Eagle Artillery 3: 7d → 6d"
+    },
+    {
+      "kind": "time",
+      "key": "1000031",
+      "item": "Eagle Artillery",
+      "level": 4,
+      "text": "Eagle Artillery 4: 7d 12h → 6d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "1000031",
+      "item": "Eagle Artillery",
+      "level": 5,
+      "text": "Eagle Artillery 5: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "1000031",
+      "item": "Eagle Artillery",
+      "level": 6,
+      "text": "Eagle Artillery 6: 9d → 8d"
+    },
+    {
+      "kind": "time",
+      "key": "1000031",
+      "item": "Eagle Artillery",
+      "level": 7,
+      "text": "Eagle Artillery 7: 9d 12h → 9d"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000010",
+      "item": "Earthquake Spell",
+      "level": 1,
+      "text": "Earthquake Spell 1: TH requirement 8 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000010",
+      "item": "Earthquake Spell",
+      "level": 1,
+      "text": "Earthquake Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "26000010",
+      "item": "Earthquake Spell",
+      "level": 6,
+      "text": "Earthquake Spell 6: 120K DE → 110K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000010",
+      "item": "Earthquake Spell",
+      "level": 6,
+      "text": "Earthquake Spell 6: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "26000010",
+      "item": "Earthquake Spell",
+      "level": 7,
+      "text": "Earthquake Spell 7: 9d → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000010",
+      "item": "Earthquake Spell",
+      "level": 8,
+      "text": "Earthquake Spell 8: 330K DE → 305K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000010",
+      "item": "Earthquake Spell",
+      "level": 8,
+      "text": "Earthquake Spell 8: 13d 12h → 12d"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000010",
+      "item": "Earthquake Spell",
+      "level": 8,
+      "text": "Earthquake Spell 8: TH requirement 17 → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 1,
+      "text": "Electro Dragon 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 5,
+      "text": "Electro Dragon 5: 11M elixir → 10.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 5,
+      "text": "Electro Dragon 5: 8d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 6,
+      "text": "Electro Dragon 6: 14M elixir → 13M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 6,
+      "text": "Electro Dragon 6: 8d 12h → 8d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 7,
+      "text": "Electro Dragon 7: 16M elixir → 15M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 7,
+      "text": "Electro Dragon 7: 9d → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 8,
+      "text": "Electro Dragon 8: 20M elixir → 18M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 8,
+      "text": "Electro Dragon 8: 10d → 9d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 9,
+      "text": "Electro Dragon 9: 30M elixir → 22.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 9,
+      "text": "Electro Dragon 9: 16d → 12d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000059",
+      "item": "Electro Dragon",
+      "level": 10,
+      "text": "NEW: Electro Dragon 10 (29.5M elixir, 13d)"
+    },
+    {
+      "kind": "renamed",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "text": "RENAMED: Monolith Arrow → Electro Fangs"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 1,
+      "text": "Electro Fangs 1: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 2,
+      "text": "Electro Fangs 2: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 3,
+      "text": "Electro Fangs 3: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 4,
+      "text": "Electro Fangs 4: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 5,
+      "text": "Electro Fangs 5: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 6,
+      "text": "Electro Fangs 6: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 7,
+      "text": "Electro Fangs 7: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 8,
+      "text": "Electro Fangs 8: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "cost",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 9,
+      "text": "Electro Fangs 9: 1.8K shiny, 200 glowy, 10 starry → 1.8K shiny, 200 glowy"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 9,
+      "text": "Electro Fangs 9: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 10,
+      "text": "Electro Fangs 10: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 11,
+      "text": "Electro Fangs 11: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "cost",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 12,
+      "text": "Electro Fangs 12: 2.1K shiny, 400 glowy, 20 starry → 2.1K shiny, 400 glowy"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 12,
+      "text": "Electro Fangs 12: Blacksmith requirement 1 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 13,
+      "text": "Electro Fangs 13: Blacksmith requirement 3 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 14,
+      "text": "Electro Fangs 14: Blacksmith requirement 3 → 10"
+    },
+    {
+      "kind": "cost",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 15,
+      "text": "Electro Fangs 15: 2.4K shiny, 600 glowy, 30 starry → 2.4K shiny, 600 glowy"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 15,
+      "text": "Electro Fangs 15: Blacksmith requirement 3 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 16,
+      "text": "Electro Fangs 16: Blacksmith requirement 5 → 10"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 17,
+      "text": "Electro Fangs 17: Blacksmith requirement 5 → 10"
+    },
+    {
+      "kind": "cost",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 18,
+      "text": "Electro Fangs 18: 2.7K shiny, 600 glowy, 50 starry → 2.7K shiny, 600 glowy"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 18,
+      "text": "Electro Fangs 18: Blacksmith requirement 5 → 10"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 19,
+      "text": "REMOVED: Electro Fangs 19"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 20,
+      "text": "REMOVED: Electro Fangs 20"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 21,
+      "text": "REMOVED: Electro Fangs 21"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 22,
+      "text": "REMOVED: Electro Fangs 22"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 23,
+      "text": "REMOVED: Electro Fangs 23"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 24,
+      "text": "REMOVED: Electro Fangs 24"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 25,
+      "text": "REMOVED: Electro Fangs 25"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 26,
+      "text": "REMOVED: Electro Fangs 26"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "90000059",
+      "item": "Electro Fangs",
+      "level": 27,
+      "text": "REMOVED: Electro Fangs 27"
+    },
+    {
+      "kind": "time",
+      "key": "73000002",
+      "item": "Electro Owl",
+      "level": 12,
+      "text": "Electro Owl 12: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000002",
+      "item": "Electro Owl",
+      "level": 13,
+      "text": "Electro Owl 13: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000002",
+      "item": "Electro Owl",
+      "level": 14,
+      "text": "Electro Owl 14: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000002",
+      "item": "Electro Owl",
+      "level": 15,
+      "text": "Electro Owl 15: 8d → 7d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000095",
+      "item": "Electro Titan",
+      "level": 1,
+      "text": "Electro Titan 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000095",
+      "item": "Electro Titan",
+      "level": 2,
+      "text": "Electro Titan 2: 14M elixir → 11.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000095",
+      "item": "Electro Titan",
+      "level": 2,
+      "text": "Electro Titan 2: 8d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000095",
+      "item": "Electro Titan",
+      "level": 3,
+      "text": "Electro Titan 3: 16M elixir → 13.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000095",
+      "item": "Electro Titan",
+      "level": 3,
+      "text": "Electro Titan 3: 9d → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000095",
+      "item": "Electro Titan",
+      "level": 4,
+      "text": "Electro Titan 4: 18.5M elixir → 15.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000095",
+      "item": "Electro Titan",
+      "level": 4,
+      "text": "Electro Titan 4: 11d → 9d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000095",
+      "item": "Electro Titan",
+      "level": 5,
+      "text": "Electro Titan 5: 30M elixir → 18M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000095",
+      "item": "Electro Titan",
+      "level": 5,
+      "text": "Electro Titan 5: 16d → 11d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000095",
+      "item": "Electro Titan",
+      "level": 6,
+      "text": "NEW: Electro Titan 6 (28M elixir, 12d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000185",
+      "item": "Elephant Rider",
+      "text": "NEW ITEM: Elephant Rider (levels 1–18)"
+    },
+    {
+      "kind": "requirement",
+      "key": "1000002",
+      "item": "Elixir Collector",
+      "level": 2,
+      "text": "Elixir Collector 2: TH requirement 1 → 2"
+    },
+    {
+      "kind": "cost",
+      "key": "1000002",
+      "item": "Elixir Collector",
+      "level": 17,
+      "text": "Elixir Collector 17: 8M gold → 4.2M gold"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000002",
+      "item": "Elixir Collector",
+      "level": 18,
+      "text": "NEW: Elixir Collector 18 (8.5M gold, 3d)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "1000002:sc",
+      "item": "Elixir Collector Supercharge",
+      "text": "REMOVED ITEM: Elixir Collector Supercharge"
+    },
+    {
+      "kind": "cost",
+      "key": "1000003",
+      "item": "Elixir Storage",
+      "level": 18,
+      "text": "Elixir Storage 18: 10M gold → 8.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000003",
+      "item": "Elixir Storage",
+      "level": 18,
+      "text": "Elixir Storage 18: 5d → 4d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000003",
+      "item": "Elixir Storage",
+      "level": 19,
+      "text": "Elixir Storage 19: 18M gold → 12.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000003",
+      "item": "Elixir Storage",
+      "level": 19,
+      "text": "Elixir Storage 19: 12d 12h → 7d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000003",
+      "item": "Elixir Storage",
+      "level": 20,
+      "text": "NEW: Elixir Storage 20 (18M gold, 11d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000004",
+      "item": "Eternal Tome",
+      "level": 1,
+      "text": "Eternal Tome 1: Blacksmith requirement 0 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000052",
+      "item": "Fire Heart",
+      "level": 1,
+      "text": "Fire Heart 1: Blacksmith requirement 0 → 1"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000119",
+      "item": "Firecracker",
+      "text": "NEW ITEM: Firecracker (levels 1–13)"
+    },
+    {
+      "kind": "newItem",
+      "key": "1000108",
+      "item": "Firecracker Tower",
+      "text": "NEW ITEM: Firecracker Tower (levels 1–2)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000089",
+      "item": "Firespitter",
+      "level": 1,
+      "text": "Firespitter 1: 17M gold → 15.5M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000089",
+      "item": "Firespitter",
+      "level": 2,
+      "text": "Firespitter 2: 18M gold → 17M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000089",
+      "item": "Firespitter",
+      "level": 3,
+      "text": "Firespitter 3: 29M gold → 22.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000089",
+      "item": "Firespitter",
+      "level": 3,
+      "text": "Firespitter 3: 15d → 11d"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000057",
+      "item": "Flame Blower",
+      "level": 1,
+      "text": "Flame Blower 1: Blacksmith requirement 0 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000091",
+      "item": "Flame Flinger",
+      "level": 1,
+      "text": "Flame Flinger 1: TH requirement 15 → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000091",
+      "item": "Flame Flinger",
+      "level": 1,
+      "text": "Flame Flinger 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000091",
+      "item": "Flame Flinger",
+      "level": 2,
+      "text": "Flame Flinger 2: TH requirement 15 → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000091",
+      "item": "Flame Flinger",
+      "level": 3,
+      "text": "Flame Flinger 3: TH requirement 15 → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000091",
+      "item": "Flame Flinger",
+      "level": 4,
+      "text": "Flame Flinger 4: TH requirement 15 → 14"
+    },
+    {
+      "kind": "cost",
+      "key": "4000091",
+      "item": "Flame Flinger",
+      "level": 5,
+      "text": "Flame Flinger 5: 18M elixir → 14.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000091",
+      "item": "Flame Flinger",
+      "level": 5,
+      "text": "Flame Flinger 5: 12d → 8d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000091",
+      "item": "Flame Flinger",
+      "level": 6,
+      "text": "NEW: Flame Flinger 6 (31M elixir, 15d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000005",
+      "item": "Freeze Spell",
+      "level": 1,
+      "text": "Freeze Spell 1: TH requirement 8 → 9"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000005",
+      "item": "Freeze Spell",
+      "level": 1,
+      "text": "Freeze Spell 1: Lab requirement 0 → 7"
+    },
+    {
+      "kind": "cost",
+      "key": "26000005",
+      "item": "Freeze Spell",
+      "level": 8,
+      "text": "Freeze Spell 8: 28M elixir → 21.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000005",
+      "item": "Freeze Spell",
+      "level": 8,
+      "text": "Freeze Spell 8: 15d 12h → 11d 18h"
+    },
+    {
+      "kind": "time",
+      "key": "73000009",
+      "item": "Frosty",
+      "level": 12,
+      "text": "Frosty 12: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000009",
+      "item": "Frosty",
+      "level": 13,
+      "text": "Frosty 13: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000009",
+      "item": "Frosty",
+      "level": 14,
+      "text": "Frosty 14: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000009",
+      "item": "Frosty",
+      "level": 15,
+      "text": "Frosty 15: 8d → 7d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000150",
+      "item": "Furnace",
+      "level": 1,
+      "text": "Furnace 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000150",
+      "item": "Furnace",
+      "level": 2,
+      "text": "Furnace 2: 200K DE → 175K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000150",
+      "item": "Furnace",
+      "level": 2,
+      "text": "Furnace 2: 9d → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000150",
+      "item": "Furnace",
+      "level": 3,
+      "text": "Furnace 3: 260K DE → 200K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000150",
+      "item": "Furnace",
+      "level": 3,
+      "text": "Furnace 3: 11d → 9d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000150",
+      "item": "Furnace",
+      "level": 4,
+      "text": "Furnace 4: 320K DE → 265K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000150",
+      "item": "Furnace",
+      "level": 4,
+      "text": "Furnace 4: 15d → 11d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 1,
+      "text": "Giant 1: TH requirement 1 → 2"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 1,
+      "text": "Giant 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 10,
+      "text": "Giant 10: 5M elixir → 4.6M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 10,
+      "text": "Giant 10: 3d → 2d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 11,
+      "text": "Giant 11: 7.5M elixir → 6.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 11,
+      "text": "Giant 11: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 12,
+      "text": "Giant 12: 10M elixir → 8M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 12,
+      "text": "Giant 12: 5d → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 13,
+      "text": "Giant 13: 15M elixir → 10.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 13,
+      "text": "Giant 13: 9d 12h → 6d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 14,
+      "text": "Giant 14: 25M elixir → 20M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 14,
+      "text": "Giant 14: 13d 12h → 8d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000003",
+      "item": "Giant",
+      "level": 15,
+      "text": "NEW: Giant 15 (29.5M elixir, 13d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "12000002",
+      "item": "Giant Bomb",
+      "level": 1,
+      "text": "Giant Bomb 1: TH requirement 6 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "12000002",
+      "item": "Giant Bomb",
+      "level": 11,
+      "text": "Giant Bomb 11: 10M gold → 7M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000002",
+      "item": "Giant Bomb",
+      "level": 11,
+      "text": "Giant Bomb 11: 4d → 3d"
+    },
+    {
+      "kind": "cost",
+      "key": "12000002",
+      "item": "Giant Bomb",
+      "level": 12,
+      "text": "Giant Bomb 12: 17M gold → 9M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000002",
+      "item": "Giant Bomb",
+      "level": 12,
+      "text": "Giant Bomb 12: 10d 12h → 5d"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000156",
+      "item": "Giant Giant",
+      "text": "NEW ITEM: Giant Giant (levels 1–16)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000050",
+      "item": "Giant Skeleton",
+      "text": "NEW ITEM: Giant Skeleton (levels 1–13)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000122",
+      "item": "Giant Thrower",
+      "text": "NEW ITEM: Giant Thrower (levels 1–13)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000196",
+      "item": "Giant Wizard Squad",
+      "text": "NEW ITEM: Giant Wizard Squad (levels 1–3)"
+    },
+    {
+      "kind": "cost",
+      "key": "12000020",
+      "item": "Giga Bomb",
+      "level": 4,
+      "text": "Giga Bomb 4: 20M gold → 14M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000020",
+      "item": "Giga Bomb",
+      "level": 4,
+      "text": "Giga Bomb 4: 13d → 7d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000002",
+      "item": "Goblin",
+      "level": 1,
+      "text": "Goblin 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000002",
+      "item": "Goblin",
+      "level": 8,
+      "text": "Goblin 8: 3.7M elixir → 3.3M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000002",
+      "item": "Goblin",
+      "level": 8,
+      "text": "Goblin 8: 2d 6h → 2d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000002",
+      "item": "Goblin",
+      "level": 9,
+      "text": "Goblin 9: 8M elixir → 5.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000002",
+      "item": "Goblin",
+      "level": 9,
+      "text": "Goblin 9: 5d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000002",
+      "item": "Goblin",
+      "level": 10,
+      "text": "Goblin 10: 26M elixir → 15M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000002",
+      "item": "Goblin",
+      "level": 10,
+      "text": "Goblin 10: 14d → 8d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000002",
+      "item": "Goblin",
+      "level": 11,
+      "text": "NEW: Goblin 11 (22M elixir, 10d 12h)"
+    },
+    {
+      "kind": "requirement",
+      "key": "1000004",
+      "item": "Gold Mine",
+      "level": 2,
+      "text": "Gold Mine 2: TH requirement 1 → 2"
+    },
+    {
+      "kind": "cost",
+      "key": "1000004",
+      "item": "Gold Mine",
+      "level": 17,
+      "text": "Gold Mine 17: 8M elixir → 4.2M elixir"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000004",
+      "item": "Gold Mine",
+      "level": 18,
+      "text": "NEW: Gold Mine 18 (8.5M elixir, 3d)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "1000004:sc",
+      "item": "Gold Mine Supercharge",
+      "text": "REMOVED ITEM: Gold Mine Supercharge"
+    },
+    {
+      "kind": "cost",
+      "key": "1000005",
+      "item": "Gold Storage",
+      "level": 18,
+      "text": "Gold Storage 18: 10M elixir → 8.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000005",
+      "item": "Gold Storage",
+      "level": 18,
+      "text": "Gold Storage 18: 5d → 4d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000005",
+      "item": "Gold Storage",
+      "level": 19,
+      "text": "Gold Storage 19: 18M elixir → 12.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000005",
+      "item": "Gold Storage",
+      "level": 19,
+      "text": "Gold Storage 19: 12d 12h → 7d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000005",
+      "item": "Gold Storage",
+      "level": 20,
+      "text": "NEW: Gold Storage 20 (18M elixir, 11d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 1,
+      "text": "Golem 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 11,
+      "text": "Golem 11: 105K DE → 95K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 11,
+      "text": "Golem 11: 5d → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 12,
+      "text": "Golem 12: 123K DE → 110K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 12,
+      "text": "Golem 12: 5d 12h → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 13,
+      "text": "Golem 13: 175K DE → 135K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 13,
+      "text": "Golem 13: 6d → 5d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 14,
+      "text": "Golem 14: 230K DE → 160K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 14,
+      "text": "Golem 14: 10d → 6d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 15,
+      "text": "Golem 15: 350K DE → 295K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 15,
+      "text": "Golem 15: 14d 12h → 10d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000013",
+      "item": "Golem",
+      "level": 16,
+      "text": "NEW: Golem 16 (455K DE, 14d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000200",
+      "item": "Golem Witch Squad",
+      "text": "NEW ITEM: Golem Witch Squad (levels 1–3)"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 1,
+      "text": "Grand Warden 1: 1M elixir → 0 elixir"
+    },
+    {
+      "kind": "time",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 70,
+      "text": "Grand Warden 70: 7d 12h → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 71,
+      "text": "Grand Warden 71: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 72,
+      "text": "Grand Warden 72: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 73,
+      "text": "Grand Warden 73: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 74,
+      "text": "Grand Warden 74: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 75,
+      "text": "Grand Warden 75: 8d → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 76,
+      "text": "Grand Warden 76: 23.5M elixir → 23M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 77,
+      "text": "Grand Warden 77: 24.5M elixir → 23.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 78,
+      "text": "Grand Warden 78: 25.5M elixir → 24M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 79,
+      "text": "Grand Warden 79: 26.5M elixir → 24.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 80,
+      "text": "Grand Warden 80: 27.5M elixir → 25.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 81,
+      "text": "Grand Warden 81: 28.5M elixir → 26.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 82,
+      "text": "Grand Warden 82: 29M elixir → 27.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 83,
+      "text": "Grand Warden 83: 29.5M elixir → 28.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 84,
+      "text": "Grand Warden 84: 30M elixir → 29M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 85,
+      "text": "Grand Warden 85: 30.5M elixir → 29.5M elixir"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 86,
+      "text": "NEW: Grand Warden 86 (31M elixir, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 87,
+      "text": "NEW: Grand Warden 87 (31.3M elixir, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 88,
+      "text": "NEW: Grand Warden 88 (31.5M elixir, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 89,
+      "text": "NEW: Grand Warden 89 (31.8M elixir, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000002",
+      "item": "Grand Warden",
+      "level": 90,
+      "text": "NEW: Grand Warden 90 (32M elixir, 8d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "1000105",
+      "item": "Guardian Shrine",
+      "text": "NEW ITEM: Guardian Shrine"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000011",
+      "item": "Haste Spell",
+      "level": 1,
+      "text": "Haste Spell 1: TH requirement 9 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000011",
+      "item": "Haste Spell",
+      "level": 1,
+      "text": "Haste Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "26000011",
+      "item": "Haste Spell",
+      "level": 6,
+      "text": "Haste Spell 6: 200K DE → 165K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000011",
+      "item": "Haste Spell",
+      "level": 6,
+      "text": "Haste Spell 6: 9d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000011",
+      "item": "Haste Spell",
+      "level": 7,
+      "text": "Haste Spell 7: 320K DE → 255K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000011",
+      "item": "Haste Spell",
+      "level": 7,
+      "text": "Haste Spell 7: 12d 12h → 9d 6h"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000011",
+      "item": "Haste Spell",
+      "level": 7,
+      "text": "Haste Spell 7: TH requirement 17 → 18"
+    },
+    {
+      "kind": "newLevel",
+      "key": "26000011",
+      "item": "Haste Spell",
+      "level": 8,
+      "text": "NEW: Haste Spell 8 (415K DE, 13d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000082",
+      "item": "Headhunter",
+      "level": 1,
+      "text": "Headhunter 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000082",
+      "item": "Headhunter",
+      "level": 2,
+      "text": "Headhunter 2: 57.5K DE → 45K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000082",
+      "item": "Headhunter",
+      "level": 2,
+      "text": "Headhunter 2: 5d → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000082",
+      "item": "Headhunter",
+      "level": 4,
+      "text": "Headhunter 4: 370K DE → 275K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000082",
+      "item": "Headhunter",
+      "level": 4,
+      "text": "Headhunter 4: 15d 12h → 10d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000082",
+      "item": "Headhunter",
+      "level": 5,
+      "text": "NEW: Headhunter 5 (425K DE, 12d 12h)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000007",
+      "item": "Healer",
+      "level": 1,
+      "text": "Healer 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000007",
+      "item": "Healer",
+      "level": 6,
+      "text": "Healer 6: 6M elixir → 5.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000007",
+      "item": "Healer",
+      "level": 6,
+      "text": "Healer 6: 4d 12h → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000007",
+      "item": "Healer",
+      "level": 10,
+      "text": "Healer 10: 17M elixir → 15M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000007",
+      "item": "Healer",
+      "level": 10,
+      "text": "Healer 10: 11d → 9d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000007",
+      "item": "Healer",
+      "level": 11,
+      "text": "Healer 11: 28.5M elixir → 20M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000007",
+      "item": "Healer",
+      "level": 11,
+      "text": "Healer 11: 15d → 11d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000007",
+      "item": "Healer",
+      "level": 12,
+      "text": "NEW: Healer 12 (29.5M elixir, 13d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000203",
+      "item": "Healer Squad",
+      "text": "NEW ITEM: Healer Squad (levels 1–3)"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 1,
+      "text": "Healing Spell 1: TH requirement 6 → 4"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 1,
+      "text": "Healing Spell 1: Lab requirement 0 → 2"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 2,
+      "text": "Healing Spell 2: TH requirement 6 → 4"
+    },
+    {
+      "kind": "cost",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 9,
+      "text": "Healing Spell 9: 11M elixir → 10.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 9,
+      "text": "Healing Spell 9: 6d 12h → 5d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 11,
+      "text": "Healing Spell 11: 19M elixir → 16M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 11,
+      "text": "Healing Spell 11: 10d 12h → 8d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 12,
+      "text": "Healing Spell 12: 29M elixir → 19.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 12,
+      "text": "Healing Spell 12: 15d → 10d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 12,
+      "text": "Healing Spell 12: TH requirement 17 → 18"
+    },
+    {
+      "kind": "newLevel",
+      "key": "26000001",
+      "item": "Healing Spell",
+      "level": 13,
+      "text": "NEW: Healing Spell 13 (29.5M elixir, 14d 12h)"
+    },
+    {
+      "kind": "removedLevel",
+      "key": "1000093",
+      "item": "Helper Hut",
+      "level": 1,
+      "text": "REMOVED: Helper Hut 1"
+    },
+    {
+      "kind": "cost",
+      "key": "1000071",
+      "item": "Hero Hall",
+      "level": 1,
+      "text": "Hero Hall 1: 800K elixir → 30K elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000071",
+      "item": "Hero Hall",
+      "level": 1,
+      "text": "Hero Hall 1: 1d → 1h"
+    },
+    {
+      "kind": "requirement",
+      "key": "1000071",
+      "item": "Hero Hall",
+      "level": 1,
+      "text": "Hero Hall 1: TH requirement 7 → 4"
+    },
+    {
+      "kind": "cost",
+      "key": "1000071",
+      "item": "Hero Hall",
+      "level": 11,
+      "text": "Hero Hall 11: 17M elixir → 15.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "1000071",
+      "item": "Hero Hall",
+      "level": 12,
+      "text": "Hero Hall 12: 26M elixir → 23.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000071",
+      "item": "Hero Hall",
+      "level": 12,
+      "text": "Hero Hall 12: 13d 12h → 12d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000071",
+      "item": "Hero Hall",
+      "level": 13,
+      "text": "NEW: Hero Hall 13 (30.5M elixir, 15d 12h)"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000037",
+      "item": "Hero Hunter Damage",
+      "level": 1,
+      "text": "Hero Hunter Damage 1: TH requirement none → 11"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000037",
+      "item": "Hero Hunter Damage",
+      "level": 2,
+      "text": "Hero Hunter Damage 2: TH requirement none → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000037",
+      "item": "Hero Hunter Damage",
+      "level": 3,
+      "text": "Hero Hunter Damage 3: TH requirement none → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000037",
+      "item": "Hero Hunter Damage",
+      "level": 4,
+      "text": "Hero Hunter Damage 4: TH requirement none → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000037",
+      "item": "Hero Hunter Damage",
+      "level": 5,
+      "text": "Hero Hunter Damage 5: TH requirement none → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000037",
+      "item": "Hero Hunter Damage",
+      "level": 6,
+      "text": "Hero Hunter Damage 6: TH requirement none → 16"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000037",
+      "item": "Hero Hunter Damage",
+      "level": 7,
+      "text": "Hero Hunter Damage 7: TH requirement none → 17"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000037",
+      "item": "Hero Hunter Damage",
+      "level": 8,
+      "text": "Hero Hunter Damage 8: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000037",
+      "item": "Hero Hunter Damage",
+      "level": 9,
+      "text": "Hero Hunter Damage 9: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000037",
+      "item": "Hero Hunter Damage",
+      "level": 10,
+      "text": "Hero Hunter Damage 10: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000036",
+      "item": "Hero Hunter Hitpoints",
+      "level": 1,
+      "text": "Hero Hunter Hitpoints 1: TH requirement none → 11"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000036",
+      "item": "Hero Hunter Hitpoints",
+      "level": 2,
+      "text": "Hero Hunter Hitpoints 2: TH requirement none → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000036",
+      "item": "Hero Hunter Hitpoints",
+      "level": 3,
+      "text": "Hero Hunter Hitpoints 3: TH requirement none → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000036",
+      "item": "Hero Hunter Hitpoints",
+      "level": 4,
+      "text": "Hero Hunter Hitpoints 4: TH requirement none → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000036",
+      "item": "Hero Hunter Hitpoints",
+      "level": 5,
+      "text": "Hero Hunter Hitpoints 5: TH requirement none → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000036",
+      "item": "Hero Hunter Hitpoints",
+      "level": 6,
+      "text": "Hero Hunter Hitpoints 6: TH requirement none → 16"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000036",
+      "item": "Hero Hunter Hitpoints",
+      "level": 7,
+      "text": "Hero Hunter Hitpoints 7: TH requirement none → 17"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000036",
+      "item": "Hero Hunter Hitpoints",
+      "level": 8,
+      "text": "Hero Hunter Hitpoints 8: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000036",
+      "item": "Hero Hunter Hitpoints",
+      "level": 9,
+      "text": "Hero Hunter Hitpoints 9: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000036",
+      "item": "Hero Hunter Hitpoints",
+      "level": 10,
+      "text": "Hero Hunter Hitpoints 10: TH requirement none → 18"
+    },
+    {
+      "kind": "renamed",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "text": "RENAMED: Hero Hunter Poison Level → Hero Hunter Poison Effect"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "level": 1,
+      "text": "Hero Hunter Poison Effect 1: TH requirement none → 11"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "level": 2,
+      "text": "Hero Hunter Poison Effect 2: TH requirement none → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "level": 3,
+      "text": "Hero Hunter Poison Effect 3: TH requirement none → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "level": 4,
+      "text": "Hero Hunter Poison Effect 4: TH requirement none → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "level": 5,
+      "text": "Hero Hunter Poison Effect 5: TH requirement none → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "level": 6,
+      "text": "Hero Hunter Poison Effect 6: TH requirement none → 16"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "level": 7,
+      "text": "Hero Hunter Poison Effect 7: TH requirement none → 17"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "level": 8,
+      "text": "Hero Hunter Poison Effect 8: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "level": 9,
+      "text": "Hero Hunter Poison Effect 9: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000012:m102000038",
+      "item": "Hero Hunter Poison Effect",
+      "level": 10,
+      "text": "Hero Hunter Poison Effect 10: TH requirement none → 18"
+    },
+    {
+      "kind": "newItem",
+      "key": "26000153",
+      "item": "Heroic Spell",
+      "text": "NEW ITEM: Heroic Spell (levels 1–4)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 10,
+      "text": "Hidden Tesla 10: 3M gold → 2.5M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 11,
+      "text": "Hidden Tesla 11: 3.1M gold → 2.8M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 11,
+      "text": "Hidden Tesla 11: 2d 12h → 2d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 12,
+      "text": "Hidden Tesla 12: 3.7M gold → 3M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 12,
+      "text": "Hidden Tesla 12: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 13,
+      "text": "Hidden Tesla 13: 5.1M gold → 4.4M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 13,
+      "text": "Hidden Tesla 13: 3d 12h → 3d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 15,
+      "text": "Hidden Tesla 15: 8.2M gold → 7M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 15,
+      "text": "Hidden Tesla 15: 5d → 4d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 16,
+      "text": "Hidden Tesla 16: 15M gold → 13.5M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 17,
+      "text": "Hidden Tesla 17: 25M gold → 16.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 17,
+      "text": "Hidden Tesla 17: 13d → 9d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000019",
+      "item": "Hidden Tesla",
+      "level": 18,
+      "text": "NEW: Hidden Tesla 18 (27.5M gold, 14d)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "1000019:sc",
+      "item": "Hidden Tesla Supercharge",
+      "text": "REMOVED ITEM: Hidden Tesla Supercharge"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 1,
+      "text": "Hog Rider 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 11,
+      "text": "Hog Rider 11: 108K DE → 95K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 11,
+      "text": "Hog Rider 11: 5d → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 12,
+      "text": "Hog Rider 12: 125K DE → 115K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 12,
+      "text": "Hog Rider 12: 5d 12h → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 13,
+      "text": "Hog Rider 13: 175K DE → 135K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 13,
+      "text": "Hog Rider 13: 6d 12h → 5d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 14,
+      "text": "Hog Rider 14: 240K DE → 155K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 14,
+      "text": "Hog Rider 14: 10d → 6d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 15,
+      "text": "Hog Rider 15: 340K DE → 285K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 15,
+      "text": "Hog Rider 15: 14d 12h → 10d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000011",
+      "item": "Hog Rider",
+      "level": 16,
+      "text": "NEW: Hog Rider 16 (440K DE, 13d 12h)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000201",
+      "item": "Hog Rider Squad",
+      "text": "NEW ITEM: Hog Rider Squad (levels 1–3)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000103",
+      "item": "Hog Wizard",
+      "text": "NEW ITEM: Hog Wizard (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000034",
+      "item": "Hot Candle Damage",
+      "level": 1,
+      "text": "Hot Candle Damage 1: TH requirement none → 11"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000034",
+      "item": "Hot Candle Damage",
+      "level": 2,
+      "text": "Hot Candle Damage 2: TH requirement none → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000034",
+      "item": "Hot Candle Damage",
+      "level": 3,
+      "text": "Hot Candle Damage 3: TH requirement none → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000034",
+      "item": "Hot Candle Damage",
+      "level": 4,
+      "text": "Hot Candle Damage 4: TH requirement none → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000034",
+      "item": "Hot Candle Damage",
+      "level": 5,
+      "text": "Hot Candle Damage 5: TH requirement none → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000034",
+      "item": "Hot Candle Damage",
+      "level": 6,
+      "text": "Hot Candle Damage 6: TH requirement none → 16"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000034",
+      "item": "Hot Candle Damage",
+      "level": 7,
+      "text": "Hot Candle Damage 7: TH requirement none → 17"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000034",
+      "item": "Hot Candle Damage",
+      "level": 8,
+      "text": "Hot Candle Damage 8: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000034",
+      "item": "Hot Candle Damage",
+      "level": 9,
+      "text": "Hot Candle Damage 9: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000034",
+      "item": "Hot Candle Damage",
+      "level": 10,
+      "text": "Hot Candle Damage 10: TH requirement none → 18"
+    },
+    {
+      "kind": "renamed",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "text": "RENAMED: Hot Candle Seconds Active → Hot Candle Duration"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "level": 1,
+      "text": "Hot Candle Duration 1: TH requirement none → 11"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "level": 2,
+      "text": "Hot Candle Duration 2: TH requirement none → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "level": 3,
+      "text": "Hot Candle Duration 3: TH requirement none → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "level": 4,
+      "text": "Hot Candle Duration 4: TH requirement none → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "level": 5,
+      "text": "Hot Candle Duration 5: TH requirement none → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "level": 6,
+      "text": "Hot Candle Duration 6: TH requirement none → 16"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "level": 7,
+      "text": "Hot Candle Duration 7: TH requirement none → 17"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "level": 8,
+      "text": "Hot Candle Duration 8: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "level": 9,
+      "text": "Hot Candle Duration 9: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000035",
+      "item": "Hot Candle Duration",
+      "level": 10,
+      "text": "Hot Candle Duration 10: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000033",
+      "item": "Hot Candle Hitpoints",
+      "level": 1,
+      "text": "Hot Candle Hitpoints 1: TH requirement none → 11"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000033",
+      "item": "Hot Candle Hitpoints",
+      "level": 2,
+      "text": "Hot Candle Hitpoints 2: TH requirement none → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000033",
+      "item": "Hot Candle Hitpoints",
+      "level": 3,
+      "text": "Hot Candle Hitpoints 3: TH requirement none → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000033",
+      "item": "Hot Candle Hitpoints",
+      "level": 4,
+      "text": "Hot Candle Hitpoints 4: TH requirement none → 14"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000033",
+      "item": "Hot Candle Hitpoints",
+      "level": 5,
+      "text": "Hot Candle Hitpoints 5: TH requirement none → 15"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000033",
+      "item": "Hot Candle Hitpoints",
+      "level": 6,
+      "text": "Hot Candle Hitpoints 6: TH requirement none → 16"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000033",
+      "item": "Hot Candle Hitpoints",
+      "level": 7,
+      "text": "Hot Candle Hitpoints 7: TH requirement none → 17"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000033",
+      "item": "Hot Candle Hitpoints",
+      "level": 8,
+      "text": "Hot Candle Hitpoints 8: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000033",
+      "item": "Hot Candle Hitpoints",
+      "level": 9,
+      "text": "Hot Candle Hitpoints 9: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "103000011:m102000033",
+      "item": "Hot Candle Hitpoints",
+      "level": 10,
+      "text": "Hot Candle Hitpoints 10: TH requirement none → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 1,
+      "text": "Ice Block Spell 1: TH requirement 12 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 1,
+      "text": "Ice Block Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 2,
+      "text": "Ice Block Spell 2: 140K DE → 120K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 2,
+      "text": "Ice Block Spell 2: 10d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 3,
+      "text": "Ice Block Spell 3: 11d → 9d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 4,
+      "text": "Ice Block Spell 4: 280K DE → 230K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 4,
+      "text": "Ice Block Spell 4: 12d → 10d"
+    },
+    {
+      "kind": "cost",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 5,
+      "text": "Ice Block Spell 5: 320K DE → 250K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 5,
+      "text": "Ice Block Spell 5: 14d → 10d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 6,
+      "text": "Ice Block Spell 6: 380K DE → 290K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000109",
+      "item": "Ice Block Spell",
+      "level": 6,
+      "text": "Ice Block Spell 6: 16d → 11d"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 1,
+      "text": "Ice Golem 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "time",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 4,
+      "text": "Ice Golem 4: 3d 6h → 3d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 5,
+      "text": "Ice Golem 5: 62.5K DE → 55K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 5,
+      "text": "Ice Golem 5: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 6,
+      "text": "Ice Golem 6: 110K DE → 100K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 6,
+      "text": "Ice Golem 6: 6d 12h → 6d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 7,
+      "text": "Ice Golem 7: 140K DE → 130K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 7,
+      "text": "Ice Golem 7: 7d 12h → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 8,
+      "text": "Ice Golem 8: 180K DE → 170K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 8,
+      "text": "Ice Golem 8: 8d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 9,
+      "text": "Ice Golem 9: 280K DE → 225K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000058",
+      "item": "Ice Golem",
+      "level": 9,
+      "text": "Ice Golem 9: 10d 14h → 8d 12h"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000130",
+      "item": "Ice Minion",
+      "text": "NEW ITEM: Ice Minion (levels 1–13)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000030",
+      "item": "Ice Wizard",
+      "text": "NEW ITEM: Ice Wizard (levels 1–13)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 5,
+      "text": "Inferno Tower 5: 4.2M gold → 4M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 6,
+      "text": "Inferno Tower 6: 6M gold → 4.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 6,
+      "text": "Inferno Tower 6: 4d → 3d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 7,
+      "text": "Inferno Tower 7: 8M gold → 5.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 7,
+      "text": "Inferno Tower 7: 5d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 8,
+      "text": "Inferno Tower 8: 9.5M gold → 8M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 8,
+      "text": "Inferno Tower 8: 6d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 9,
+      "text": "Inferno Tower 9: 10M gold → 8.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 9,
+      "text": "Inferno Tower 9: 6d 12h → 5d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 11,
+      "text": "Inferno Tower 11: 16M gold → 13.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 11,
+      "text": "Inferno Tower 11: 8d → 7d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 12,
+      "text": "Inferno Tower 12: 26.5M gold → 20M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000027",
+      "item": "Inferno Tower",
+      "level": 12,
+      "text": "Inferno Tower 12: 13d 12h → 10d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000035",
+      "item": "Invisibility Spell",
+      "level": 1,
+      "text": "Invisibility Spell 1: TH requirement 10 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000035",
+      "item": "Invisibility Spell",
+      "level": 1,
+      "text": "Invisibility Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000003",
+      "item": "Invisibility Vial",
+      "level": 1,
+      "text": "Invisibility Vial 1: Blacksmith requirement 0 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000003",
+      "item": "Jump Spell",
+      "level": 1,
+      "text": "Jump Spell 1: TH requirement 8 → 6"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000003",
+      "item": "Jump Spell",
+      "level": 1,
+      "text": "Jump Spell 1: Lab requirement 0 → 4"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000003",
+      "item": "Jump Spell",
+      "level": 2,
+      "text": "Jump Spell 2: TH requirement 8 → 7"
+    },
+    {
+      "kind": "cost",
+      "key": "26000003",
+      "item": "Jump Spell",
+      "level": 5,
+      "text": "Jump Spell 5: 8M elixir → 7.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000003",
+      "item": "Jump Spell",
+      "level": 5,
+      "text": "Jump Spell 5: 5d → 4d 12h"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000157",
+      "item": "K.A.N.E",
+      "text": "NEW ITEM: K.A.N.E (levels 1–16)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000007",
+      "item": "Laboratory",
+      "level": 15,
+      "text": "Laboratory 15: 18M elixir → 17M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "1000007",
+      "item": "Laboratory",
+      "level": 16,
+      "text": "Laboratory 16: 27M elixir → 25M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000007",
+      "item": "Laboratory",
+      "level": 16,
+      "text": "Laboratory 16: 16d → 13d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000007",
+      "item": "Laboratory",
+      "level": 17,
+      "text": "NEW: Laboratory 17 (30.5M elixir, 15d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000017",
+      "item": "Lava Hound",
+      "level": 1,
+      "text": "Lava Hound 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000017",
+      "item": "Lava Hound",
+      "level": 5,
+      "text": "Lava Hound 5: 60K DE → 50K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000017",
+      "item": "Lava Hound",
+      "level": 5,
+      "text": "Lava Hound 5: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000017",
+      "item": "Lava Hound",
+      "level": 7,
+      "text": "Lava Hound 7: 200K DE → 190K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000017",
+      "item": "Lava Hound",
+      "level": 7,
+      "text": "Lava Hound 7: 8d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000017",
+      "item": "Lava Hound",
+      "level": 8,
+      "text": "Lava Hound 8: 345K DE → 285K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000017",
+      "item": "Lava Hound",
+      "level": 8,
+      "text": "Lava Hound 8: 15d 6h → 10d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000017",
+      "item": "Lava Hound",
+      "level": 9,
+      "text": "NEW: Lava Hound 9 (375K DE, 11d)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000010",
+      "item": "Lava Launcher",
+      "text": "REMOVED ITEM: Lava Launcher"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000010:m102000031",
+      "item": "Lava Launcher Damage",
+      "text": "REMOVED ITEM: Lava Launcher Damage"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000010:m102000030",
+      "item": "Lava Launcher Hitpoints",
+      "text": "REMOVED ITEM: Lava Launcher Hitpoints"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000010:m102000032",
+      "item": "Lava Launcher Range",
+      "text": "REMOVED ITEM: Lava Launcher Range"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000104",
+      "item": "Lavaloon",
+      "text": "NEW ITEM: Lavaloon (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000005",
+      "item": "Life Gem",
+      "level": 1,
+      "text": "Life Gem 1: Blacksmith requirement 0 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 1,
+      "text": "Lightning Spell 1: TH requirement 5 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 1,
+      "text": "Lightning Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 2,
+      "text": "Lightning Spell 2: TH requirement 5 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 3,
+      "text": "Lightning Spell 3: TH requirement 5 → 4"
+    },
+    {
+      "kind": "cost",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 10,
+      "text": "Lightning Spell 10: 10M elixir → 9M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 10,
+      "text": "Lightning Spell 10: 6d → 5d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 12,
+      "text": "Lightning Spell 12: 18.5M elixir → 17M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 12,
+      "text": "Lightning Spell 12: 10d → 9d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 13,
+      "text": "Lightning Spell 13: 27M elixir → 20M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 13,
+      "text": "Lightning Spell 13: 14d → 11d"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 13,
+      "text": "Lightning Spell 13: TH requirement 17 → 18"
+    },
+    {
+      "kind": "newLevel",
+      "key": "26000000",
+      "item": "Lightning Spell",
+      "level": 14,
+      "text": "NEW: Lightning Spell 14 (31M elixir, 15d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000087",
+      "item": "Log Launcher",
+      "level": 1,
+      "text": "Log Launcher 1: TH requirement 14 → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000087",
+      "item": "Log Launcher",
+      "level": 1,
+      "text": "Log Launcher 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000087",
+      "item": "Log Launcher",
+      "level": 2,
+      "text": "Log Launcher 2: TH requirement 14 → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000087",
+      "item": "Log Launcher",
+      "level": 3,
+      "text": "Log Launcher 3: TH requirement 14 → 13"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000087",
+      "item": "Log Launcher",
+      "level": 4,
+      "text": "Log Launcher 4: TH requirement 14 → 13"
+    },
+    {
+      "kind": "cost",
+      "key": "4000087",
+      "item": "Log Launcher",
+      "level": 5,
+      "text": "Log Launcher 5: 18M elixir → 14.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000087",
+      "item": "Log Launcher",
+      "level": 5,
+      "text": "Log Launcher 5: 12d → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000087",
+      "item": "Log Launcher",
+      "level": 6,
+      "text": "Log Launcher 6: 27M elixir → 21.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000087",
+      "item": "Log Launcher",
+      "level": 6,
+      "text": "Log Launcher 6: 15d → 12d"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000067",
+      "item": "M.E.C.H.A",
+      "text": "NEW ITEM: M.E.C.H.A (levels 1–13)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000167",
+      "item": "Meteor Golem",
+      "text": "NEW ITEM: Meteor Golem (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000177",
+      "item": "Meteor Golem",
+      "level": 1,
+      "text": "Meteor Golem 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000177",
+      "item": "Meteor Golem",
+      "level": 2,
+      "text": "Meteor Golem 2: 28M elixir → 20M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000177",
+      "item": "Meteor Golem",
+      "level": 2,
+      "text": "Meteor Golem 2: 14d → 10d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000177",
+      "item": "Meteor Golem",
+      "level": 3,
+      "text": "Meteor Golem 3: 30M elixir → 22M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000177",
+      "item": "Meteor Golem",
+      "level": 3,
+      "text": "Meteor Golem 3: 16d → 11d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000177",
+      "item": "Meteor Golem",
+      "level": 4,
+      "text": "NEW: Meteor Golem 4 (28M elixir, 12d 12h)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 1,
+      "text": "Miner 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 7,
+      "text": "Miner 7: 6M elixir → 5.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 7,
+      "text": "Miner 7: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 8,
+      "text": "Miner 8: 8.6M elixir → 7M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 8,
+      "text": "Miner 8: 6d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 9,
+      "text": "Miner 9: 10.5M elixir → 9M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 9,
+      "text": "Miner 9: 6d 12h → 5d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 10,
+      "text": "Miner 10: 12.5M elixir → 10.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 10,
+      "text": "Miner 10: 7d → 6d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 11,
+      "text": "Miner 11: 16.5M elixir → 12M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 11,
+      "text": "Miner 11: 9d 12h → 6d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 12,
+      "text": "Miner 12: 28M elixir → 19M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 12,
+      "text": "Miner 12: 14d 12h → 8d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000024",
+      "item": "Miner",
+      "level": 13,
+      "text": "NEW: Miner 13 (28M elixir, 11d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000202",
+      "item": "Miner Squad",
+      "text": "NEW ITEM: Miner Squad (levels 1–3)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 1,
+      "text": "Minion 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 9,
+      "text": "Minion 9: 75K DE → 60K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 9,
+      "text": "Minion 9: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 10,
+      "text": "Minion 10: 100K DE → 80K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 10,
+      "text": "Minion 10: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 11,
+      "text": "Minion 11: 115K DE → 100K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 11,
+      "text": "Minion 11: 4d 12h → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 12,
+      "text": "Minion 12: 160K DE → 120K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 12,
+      "text": "Minion 12: 5d → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 13,
+      "text": "Minion 13: 220K DE → 150K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 13,
+      "text": "Minion 13: 9d → 6d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 14,
+      "text": "Minion 14: 335K DE → 280K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 14,
+      "text": "Minion 14: 14d → 8d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000010",
+      "item": "Minion",
+      "level": 15,
+      "text": "NEW: Minion 15 (430K DE, 12d 12h)"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 76,
+      "text": "Minion Prince 76: 7d 12h → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 77,
+      "text": "Minion Prince 77: 7d 12h → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 78,
+      "text": "Minion Prince 78: 7d 12h → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 79,
+      "text": "Minion Prince 79: 7d 12h → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 80,
+      "text": "Minion Prince 80: 7d 12h → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 81,
+      "text": "Minion Prince 81: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 82,
+      "text": "Minion Prince 82: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 83,
+      "text": "Minion Prince 83: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 84,
+      "text": "Minion Prince 84: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 85,
+      "text": "Minion Prince 85: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 86,
+      "text": "Minion Prince 86: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 87,
+      "text": "Minion Prince 87: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 88,
+      "text": "Minion Prince 88: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 89,
+      "text": "Minion Prince 89: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 90,
+      "text": "Minion Prince 90: 8d → 7d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 96,
+      "text": "NEW: Minion Prince 96 (500K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 97,
+      "text": "NEW: Minion Prince 97 (505K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 98,
+      "text": "NEW: Minion Prince 98 (510K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 99,
+      "text": "NEW: Minion Prince 99 (515K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000006",
+      "item": "Minion Prince",
+      "level": 100,
+      "text": "NEW: Minion Prince 100 (520K DE, 8d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000198",
+      "item": "Minion Squad",
+      "text": "NEW ITEM: Minion Squad (levels 1–3)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000077",
+      "item": "Monolith",
+      "level": 5,
+      "text": "Monolith 5: 470K DE → 405K DE"
+    },
+    {
+      "kind": "time",
+      "key": "1000077",
+      "item": "Monolith",
+      "level": 5,
+      "text": "Monolith 5: 15d → 12d"
+    },
+    {
+      "kind": "renamed",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "text": "RENAMED: Electro Fangs → Monolith Arrow"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 1,
+      "text": "Monolith Arrow 1: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 2,
+      "text": "Monolith Arrow 2: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 3,
+      "text": "Monolith Arrow 3: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 4,
+      "text": "Monolith Arrow 4: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 5,
+      "text": "Monolith Arrow 5: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 6,
+      "text": "Monolith Arrow 6: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 7,
+      "text": "Monolith Arrow 7: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 8,
+      "text": "Monolith Arrow 8: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 9,
+      "text": "Monolith Arrow 9: 1.8K shiny, 200 glowy → 1.8K shiny, 200 glowy, 10 starry"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 9,
+      "text": "Monolith Arrow 9: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 10,
+      "text": "Monolith Arrow 10: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 11,
+      "text": "Monolith Arrow 11: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 12,
+      "text": "Monolith Arrow 12: 2.1K shiny, 400 glowy → 2.1K shiny, 400 glowy, 20 starry"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 12,
+      "text": "Monolith Arrow 12: Blacksmith requirement 10 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 13,
+      "text": "Monolith Arrow 13: Blacksmith requirement 10 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 14,
+      "text": "Monolith Arrow 14: Blacksmith requirement 10 → 3"
+    },
+    {
+      "kind": "cost",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 15,
+      "text": "Monolith Arrow 15: 2.4K shiny, 600 glowy → 2.4K shiny, 600 glowy, 30 starry"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 15,
+      "text": "Monolith Arrow 15: Blacksmith requirement 10 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 16,
+      "text": "Monolith Arrow 16: Blacksmith requirement 10 → 5"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 17,
+      "text": "Monolith Arrow 17: Blacksmith requirement 10 → 5"
+    },
+    {
+      "kind": "cost",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 18,
+      "text": "Monolith Arrow 18: 2.7K shiny, 600 glowy → 2.7K shiny, 600 glowy, 50 starry"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 18,
+      "text": "Monolith Arrow 18: Blacksmith requirement 10 → 5"
+    },
+    {
+      "kind": "newLevel",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 19,
+      "text": "NEW: Monolith Arrow 19 (2.8K shiny ore, 0s)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 20,
+      "text": "NEW: Monolith Arrow 20 (2.9K shiny ore, 0s)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 21,
+      "text": "NEW: Monolith Arrow 21 (3K shiny ore, 0s)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 22,
+      "text": "NEW: Monolith Arrow 22 (3.1K shiny ore, 0s)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 23,
+      "text": "NEW: Monolith Arrow 23 (3.2K shiny ore, 0s)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 24,
+      "text": "NEW: Monolith Arrow 24 (3.3K shiny ore, 0s)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 25,
+      "text": "NEW: Monolith Arrow 25 (3.4K shiny ore, 0s)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 26,
+      "text": "NEW: Monolith Arrow 26 (3.5K shiny ore, 0s)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "90000016",
+      "item": "Monolith Arrow",
+      "level": 27,
+      "text": "NEW: Monolith Arrow 27 (3.6K shiny ore, 0s)"
+    },
+    {
+      "kind": "requirement",
+      "key": "1000077:sc",
+      "item": "Monolith Supercharge",
+      "level": 1,
+      "text": "Monolith Supercharge 1: TH requirement 18 → 17"
+    },
+    {
+      "kind": "requirement",
+      "key": "1000077:sc",
+      "item": "Monolith Supercharge",
+      "level": 2,
+      "text": "Monolith Supercharge 2: TH requirement 18 → 17"
+    },
+    {
+      "kind": "cost",
+      "key": "1000013",
+      "item": "Mortar",
+      "level": 11,
+      "text": "Mortar 11: 2.3M gold → 2M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000013",
+      "item": "Mortar",
+      "level": 12,
+      "text": "Mortar 12: 2.4M gold → 2.2M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000013",
+      "item": "Mortar",
+      "level": 14,
+      "text": "Mortar 14: 4.3M gold → 3.4M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000013",
+      "item": "Mortar",
+      "level": 14,
+      "text": "Mortar 14: 2d 12h → 2d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000013",
+      "item": "Mortar",
+      "level": 17,
+      "text": "Mortar 17: 13M gold → 8.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000013",
+      "item": "Mortar",
+      "level": 17,
+      "text": "Mortar 17: 5d → 4d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000013",
+      "item": "Mortar",
+      "level": 18,
+      "text": "Mortar 18: 21M gold → 15.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000013",
+      "item": "Mortar",
+      "level": 18,
+      "text": "Mortar 18: 12d 12h → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000084",
+      "item": "Multi-Archer Tower",
+      "level": 4,
+      "text": "Multi-Archer Tower 4: 27M gold → 23M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000084",
+      "item": "Multi-Archer Tower",
+      "level": 4,
+      "text": "Multi-Archer Tower 4: 14d → 11d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000084",
+      "item": "Multi-Archer Tower",
+      "level": 5,
+      "text": "NEW: Multi-Archer Tower 5 (29M gold, 14d 12h)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "1000084:sc",
+      "item": "Multi-Archer Tower Supercharge",
+      "text": "REMOVED ITEM: Multi-Archer Tower Supercharge"
+    },
+    {
+      "kind": "cost",
+      "key": "1000079",
+      "item": "Multi-Gear Tower",
+      "level": 3,
+      "text": "Multi-Gear Tower 3: 28M gold → 23.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000079",
+      "item": "Multi-Gear Tower",
+      "level": 3,
+      "text": "Multi-Gear Tower 3: 14d → 11d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000079",
+      "item": "Multi-Gear Tower",
+      "level": 4,
+      "text": "NEW: Multi-Gear Tower 4 (30M gold, 14d 12h)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "1000079:sc",
+      "item": "Multi-Gear Tower Supercharge",
+      "text": "REMOVED ITEM: Multi-Gear Tower Supercharge"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000070",
+      "item": "Overgrowth Spell",
+      "level": 1,
+      "text": "Overgrowth Spell 1: TH requirement 11 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000070",
+      "item": "Overgrowth Spell",
+      "level": 1,
+      "text": "Overgrowth Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "26000070",
+      "item": "Overgrowth Spell",
+      "level": 3,
+      "text": "Overgrowth Spell 3: 125K DE → 110K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000070",
+      "item": "Overgrowth Spell",
+      "level": 3,
+      "text": "Overgrowth Spell 3: 8d 12h → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "26000070",
+      "item": "Overgrowth Spell",
+      "level": 4,
+      "text": "Overgrowth Spell 4: 10d → 9d"
+    },
+    {
+      "kind": "cost",
+      "key": "26000070",
+      "item": "Overgrowth Spell",
+      "level": 5,
+      "text": "Overgrowth Spell 5: 360K DE → 295K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000070",
+      "item": "Overgrowth Spell",
+      "level": 5,
+      "text": "Overgrowth Spell 5: 16d → 11d 6h"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000009",
+      "item": "P.E.K.K.A",
+      "level": 1,
+      "text": "P.E.K.K.A 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000009",
+      "item": "P.E.K.K.A",
+      "level": 10,
+      "text": "P.E.K.K.A 10: 10.5M elixir → 7.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000009",
+      "item": "P.E.K.K.A",
+      "level": 10,
+      "text": "P.E.K.K.A 10: 5d 12h → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000009",
+      "item": "P.E.K.K.A",
+      "level": 11,
+      "text": "P.E.K.K.A 11: 12M elixir → 9.5M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "4000009",
+      "item": "P.E.K.K.A",
+      "level": 12,
+      "text": "P.E.K.K.A 12: 16M elixir → 12M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000009",
+      "item": "P.E.K.K.A",
+      "level": 12,
+      "text": "P.E.K.K.A 12: 10d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000009",
+      "item": "P.E.K.K.A",
+      "level": 13,
+      "text": "P.E.K.K.A 13: 28M elixir → 21M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000009",
+      "item": "P.E.K.K.A",
+      "level": 13,
+      "text": "P.E.K.K.A 13: 14d 12h → 10d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000009",
+      "item": "P.E.K.K.A",
+      "level": 14,
+      "text": "NEW: P.E.K.K.A 14 (28M elixir, 11d 12h)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000204",
+      "item": "P.E.K.K.A Titan Squad",
+      "text": "NEW ITEM: P.E.K.K.A Titan Squad (levels 1–3)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000072",
+      "item": "Party Wizard",
+      "text": "NEW ITEM: Party Wizard (levels 1–13)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000068",
+      "item": "Pet House",
+      "level": 11,
+      "text": "Pet House 11: 16.5M elixir → 15M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "1000068",
+      "item": "Pet House",
+      "level": 12,
+      "text": "Pet House 12: 25.5M elixir → 23M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000068",
+      "item": "Pet House",
+      "level": 12,
+      "text": "Pet House 12: 13d 12h → 12d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000007",
+      "item": "Poison Lizard",
+      "level": 13,
+      "text": "Poison Lizard 13: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000007",
+      "item": "Poison Lizard",
+      "level": 14,
+      "text": "Poison Lizard 14: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000007",
+      "item": "Poison Lizard",
+      "level": 15,
+      "text": "Poison Lizard 15: 8d → 7d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000009",
+      "item": "Poison Spell",
+      "level": 1,
+      "text": "Poison Spell 1: TH requirement 8 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000009",
+      "item": "Poison Spell",
+      "level": 1,
+      "text": "Poison Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "time",
+      "key": "26000009",
+      "item": "Poison Spell",
+      "level": 8,
+      "text": "Poison Spell 8: 6d 12h → 5d 18h"
+    },
+    {
+      "kind": "time",
+      "key": "26000009",
+      "item": "Poison Spell",
+      "level": 10,
+      "text": "Poison Spell 10: 8d → 7d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000009",
+      "item": "Poison Spell",
+      "level": 11,
+      "text": "Poison Spell 11: 230K DE → 200K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000009",
+      "item": "Poison Spell",
+      "level": 11,
+      "text": "Poison Spell 11: 9d 16h → 8d"
+    },
+    {
+      "kind": "cost",
+      "key": "26000009",
+      "item": "Poison Spell",
+      "level": 12,
+      "text": "Poison Spell 12: 350K DE → 280K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000009",
+      "item": "Poison Spell",
+      "level": 12,
+      "text": "Poison Spell 12: 14d 12h → 10d"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000009",
+      "item": "Poison Spell",
+      "level": 12,
+      "text": "Poison Spell 12: TH requirement 17 → 18"
+    },
+    {
+      "kind": "newLevel",
+      "key": "26000009",
+      "item": "Poison Spell",
+      "level": 13,
+      "text": "NEW: Poison Spell 13 (425K DE, 13d 12h)"
+    },
+    {
+      "kind": "renamed",
+      "key": "93000003",
+      "item": "Prospector",
+      "text": "RENAMED: Alchemist → Prospector"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000048",
+      "item": "Pumpkin Barbarian",
+      "text": "NEW ITEM: Pumpkin Barbarian (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000002",
+      "item": "Rage Spell",
+      "level": 1,
+      "text": "Rage Spell 1: TH requirement 7 → 5"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000002",
+      "item": "Rage Spell",
+      "level": 1,
+      "text": "Rage Spell 1: Lab requirement 0 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000002",
+      "item": "Rage Spell",
+      "level": 2,
+      "text": "Rage Spell 2: TH requirement 7 → 5"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000002",
+      "item": "Rage Spell",
+      "level": 3,
+      "text": "Rage Spell 3: TH requirement 7 → 6"
+    },
+    {
+      "kind": "cost",
+      "key": "26000002",
+      "item": "Rage Spell",
+      "level": 7,
+      "text": "Rage Spell 7: 26M elixir → 24M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000002",
+      "item": "Rage Spell",
+      "level": 7,
+      "text": "Rage Spell 7: 14d → 12d 18h"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000001",
+      "item": "Rage Vial",
+      "level": 1,
+      "text": "Rage Vial 1: Blacksmith requirement 0 → 1"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000094",
+      "item": "Ram Rider",
+      "text": "NEW ITEM: Ram Rider (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000053",
+      "item": "Recall Spell",
+      "level": 1,
+      "text": "Recall Spell 1: TH requirement 11 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000053",
+      "item": "Recall Spell",
+      "level": 1,
+      "text": "Recall Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "time",
+      "key": "26000053",
+      "item": "Recall Spell",
+      "level": 3,
+      "text": "Recall Spell 3: 7d 12h → 7d 6h"
+    },
+    {
+      "kind": "time",
+      "key": "26000053",
+      "item": "Recall Spell",
+      "level": 4,
+      "text": "Recall Spell 4: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "26000053",
+      "item": "Recall Spell",
+      "level": 5,
+      "text": "Recall Spell 5: 9d → 8d"
+    },
+    {
+      "kind": "cost",
+      "key": "26000053",
+      "item": "Recall Spell",
+      "level": 6,
+      "text": "Recall Spell 6: 19M elixir → 17M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000053",
+      "item": "Recall Spell",
+      "level": 6,
+      "text": "Recall Spell 6: 11d → 9d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000053",
+      "item": "Recall Spell",
+      "level": 7,
+      "text": "Recall Spell 7: 29M elixir → 19.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000053",
+      "item": "Recall Spell",
+      "level": 7,
+      "text": "Recall Spell 7: 16d → 11d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000086",
+      "item": "Revenge Tower",
+      "level": 1,
+      "text": "Revenge Tower 1: 430K DE → 335K DE"
+    },
+    {
+      "kind": "time",
+      "key": "1000086",
+      "item": "Revenge Tower",
+      "level": 1,
+      "text": "Revenge Tower 1: 13d → 10d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000086",
+      "item": "Revenge Tower",
+      "level": 2,
+      "text": "Revenge Tower 2: 460K DE → 365K DE"
+    },
+    {
+      "kind": "time",
+      "key": "1000086",
+      "item": "Revenge Tower",
+      "level": 2,
+      "text": "Revenge Tower 2: 14d → 11d"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000098",
+      "item": "Revive Spell",
+      "level": 1,
+      "text": "Revive Spell 1: TH requirement 12 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000098",
+      "item": "Revive Spell",
+      "level": 1,
+      "text": "Revive Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "26000098",
+      "item": "Revive Spell",
+      "level": 3,
+      "text": "Revive Spell 3: 19M elixir → 18.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000098",
+      "item": "Revive Spell",
+      "level": 3,
+      "text": "Revive Spell 3: 8d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000098",
+      "item": "Revive Spell",
+      "level": 4,
+      "text": "Revive Spell 4: 20M elixir → 19M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000098",
+      "item": "Revive Spell",
+      "level": 4,
+      "text": "Revive Spell 4: 11d 12h → 10d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000098",
+      "item": "Revive Spell",
+      "level": 5,
+      "text": "Revive Spell 5: 29.5M elixir → 24M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000098",
+      "item": "Revive Spell",
+      "level": 5,
+      "text": "Revive Spell 5: 16d → 12d 18h"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000098",
+      "item": "Revive Spell",
+      "level": 5,
+      "text": "Revive Spell 5: TH requirement 17 → 18"
+    },
+    {
+      "kind": "cost",
+      "key": "1000085",
+      "item": "Ricochet Cannon",
+      "level": 4,
+      "text": "Ricochet Cannon 4: 26.5M gold → 22M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000085",
+      "item": "Ricochet Cannon",
+      "level": 4,
+      "text": "Ricochet Cannon 4: 13d 12h → 10d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000085",
+      "item": "Ricochet Cannon",
+      "level": 5,
+      "text": "NEW: Ricochet Cannon 5 (28M gold, 14d)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "1000085:sc",
+      "item": "Ricochet Cannon Supercharge",
+      "text": "REMOVED ITEM: Ricochet Cannon Supercharge"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000008",
+      "item": "Roaster",
+      "text": "REMOVED ITEM: Roaster"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000008:m102000026",
+      "item": "Roaster Burst Fire",
+      "text": "REMOVED ITEM: Roaster Burst Fire"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000008:m102000025",
+      "item": "Roaster Damage",
+      "text": "REMOVED ITEM: Roaster Damage"
+    },
+    {
+      "kind": "removedItem",
+      "key": "103000008:m102000024",
+      "item": "Roaster Hitpoints",
+      "text": "REMOVED ITEM: Roaster Hitpoints"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000110",
+      "item": "Root Rider",
+      "level": 1,
+      "text": "Root Rider 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000110",
+      "item": "Root Rider",
+      "level": 2,
+      "text": "Root Rider 2: 15M elixir → 14M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000110",
+      "item": "Root Rider",
+      "level": 2,
+      "text": "Root Rider 2: 8d → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000110",
+      "item": "Root Rider",
+      "level": 3,
+      "text": "Root Rider 3: 17.6M elixir → 16M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000110",
+      "item": "Root Rider",
+      "level": 3,
+      "text": "Root Rider 3: 10d → 9d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000110",
+      "item": "Root Rider",
+      "level": 4,
+      "text": "Root Rider 4: 30M elixir → 23M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000110",
+      "item": "Root Rider",
+      "level": 4,
+      "text": "Root Rider 4: 16d → 12d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000110",
+      "item": "Root Rider",
+      "level": 5,
+      "text": "NEW: Root Rider 5 (29M elixir, 13d)"
+    },
+    {
+      "kind": "time",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 45,
+      "text": "Royal Champion 45: 7d 12h → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 46,
+      "text": "Royal Champion 46: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 47,
+      "text": "Royal Champion 47: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 48,
+      "text": "Royal Champion 48: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 49,
+      "text": "Royal Champion 49: 8d → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 50,
+      "text": "Royal Champion 50: 8d → 7d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 56,
+      "text": "NEW: Royal Champion 56 (500K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 57,
+      "text": "NEW: Royal Champion 57 (505K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 58,
+      "text": "NEW: Royal Champion 58 (510K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 59,
+      "text": "NEW: Royal Champion 59 (515K DE, 8d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "28000004",
+      "item": "Royal Champion",
+      "level": 60,
+      "text": "NEW: Royal Champion 60 (520K DE, 8d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000007",
+      "item": "Royal Gem",
+      "level": 1,
+      "text": "Royal Gem 1: Blacksmith requirement 0 → 1"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000047",
+      "item": "Royal Ghost",
+      "text": "NEW ITEM: Royal Ghost (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000109",
+      "item": "Ruin Witch",
+      "level": 1,
+      "text": "Ruin Witch 1: Lab requirement 14 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000109",
+      "item": "Ruin Witch",
+      "level": 4,
+      "text": "Ruin Witch 4: 380K DE → 355K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000109",
+      "item": "Ruin Witch",
+      "level": 4,
+      "text": "Ruin Witch 4: 15d 12h → 13d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000109",
+      "item": "Ruin Witch",
+      "level": 5,
+      "text": "NEW: Ruin Witch 5 (435K DE, 13d 12h)"
+    },
+    {
+      "kind": "newItem",
+      "key": "26000006",
+      "item": "Santa's Surprise",
+      "text": "NEW ITEM: Santa's Surprise (levels 1–13)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000067",
+      "item": "Scattershot",
+      "level": 6,
+      "text": "Scattershot 6: 16.5M gold → 15.5M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000067",
+      "item": "Scattershot",
+      "level": 7,
+      "text": "Scattershot 7: 26.5M gold → 19.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000067",
+      "item": "Scattershot",
+      "level": 7,
+      "text": "Scattershot 7: 15d → 10d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "12000006",
+      "item": "Seeking Air Mine",
+      "level": 1,
+      "text": "Seeking Air Mine 1: TH requirement 7 → 1"
+    },
+    {
+      "kind": "time",
+      "key": "12000006",
+      "item": "Seeking Air Mine",
+      "level": 3,
+      "text": "Seeking Air Mine 3: 1d → 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "12000006",
+      "item": "Seeking Air Mine",
+      "level": 7,
+      "text": "Seeking Air Mine 7: 12M gold → 7.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000006",
+      "item": "Seeking Air Mine",
+      "level": 7,
+      "text": "Seeking Air Mine 7: 5d → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "12000006",
+      "item": "Seeking Air Mine",
+      "level": 8,
+      "text": "Seeking Air Mine 8: 19M gold → 11.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000006",
+      "item": "Seeking Air Mine",
+      "level": 8,
+      "text": "Seeking Air Mine 8: 11d 12h → 7d"
+    },
+    {
+      "kind": "requirement",
+      "key": "90000006",
+      "item": "Seeking Shield",
+      "level": 1,
+      "text": "Seeking Shield 1: Blacksmith requirement 0 → 1"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000075",
+      "item": "Siege Barracks",
+      "level": 1,
+      "text": "Siege Barracks 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000075",
+      "item": "Siege Barracks",
+      "level": 5,
+      "text": "Siege Barracks 5: 18M elixir → 14.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000075",
+      "item": "Siege Barracks",
+      "level": 5,
+      "text": "Siege Barracks 5: 12d → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000075",
+      "item": "Siege Barracks",
+      "level": 6,
+      "text": "Siege Barracks 6: 27M elixir → 20.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000075",
+      "item": "Siege Barracks",
+      "level": 6,
+      "text": "Siege Barracks 6: 15d → 11d 12h"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000061",
+      "item": "Skeleton Barrel",
+      "text": "NEW ITEM: Skeleton Barrel (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000017",
+      "item": "Skeleton Spell",
+      "level": 1,
+      "text": "Skeleton Spell 1: TH requirement 9 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000017",
+      "item": "Skeleton Spell",
+      "level": 1,
+      "text": "Skeleton Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "26000017",
+      "item": "Skeleton Spell",
+      "level": 8,
+      "text": "Skeleton Spell 8: 135K DE → 120K DE"
+    },
+    {
+      "kind": "time",
+      "key": "26000017",
+      "item": "Skeleton Spell",
+      "level": 8,
+      "text": "Skeleton Spell 8: 6d → 5d 6h"
+    },
+    {
+      "kind": "requirement",
+      "key": "12000008",
+      "item": "Skeleton Trap",
+      "level": 1,
+      "text": "Skeleton Trap 1: TH requirement 8 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "12000008",
+      "item": "Skeleton Trap",
+      "level": 5,
+      "text": "Skeleton Trap 5: 18M gold → 10.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000008",
+      "item": "Skeleton Trap",
+      "level": 5,
+      "text": "Skeleton Trap 5: 7d → 5d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "12000008",
+      "item": "Skeleton Trap",
+      "level": 6,
+      "text": "NEW: Skeleton Trap 6 (18M gold, 9d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000188",
+      "item": "Sky Wagon",
+      "level": 1,
+      "text": "Sky Wagon 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000188",
+      "item": "Sky Wagon",
+      "level": 3,
+      "text": "Sky Wagon 3: 26M elixir → 25M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000188",
+      "item": "Sky Wagon",
+      "level": 3,
+      "text": "Sky Wagon 3: 13d 12h → 13d"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000188",
+      "item": "Sky Wagon",
+      "level": 3,
+      "text": "Sky Wagon 3: TH requirement 17 → 18"
+    },
+    {
+      "kind": "cost",
+      "key": "4000188",
+      "item": "Sky Wagon",
+      "level": 4,
+      "text": "Sky Wagon 4: 29M elixir → 28M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000188",
+      "item": "Sky Wagon",
+      "level": 4,
+      "text": "Sky Wagon 4: 16d → 13d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 2,
+      "text": "Smasher 2: 18M elixir → 13M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 2,
+      "text": "Smasher 2: 7d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 3,
+      "text": "Smasher 3: 22M elixir → 16M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 3,
+      "text": "Smasher 3: 9d → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 4,
+      "text": "Smasher 4: 26M elixir → 19M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 4,
+      "text": "Smasher 4: 11d → 9d"
+    },
+    {
+      "kind": "cost",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 5,
+      "text": "Smasher 5: 28M elixir → 21.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 5,
+      "text": "Smasher 5: 13d → 11d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 6,
+      "text": "NEW: Smasher 6 (24M elixir, 12d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 7,
+      "text": "NEW: Smasher 7 (25M elixir, 12d 12h)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 8,
+      "text": "NEW: Smasher 8 (26M elixir, 13d)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 9,
+      "text": "NEW: Smasher 9 (27M elixir, 13d 12h)"
+    },
+    {
+      "kind": "newLevel",
+      "key": "107000001",
+      "item": "Smasher",
+      "level": 10,
+      "text": "NEW: Smasher 10 (28M elixir, 14d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000142",
+      "item": "Snake Barrel",
+      "text": "NEW ITEM: Snake Barrel (levels 1–13)"
+    },
+    {
+      "kind": "time",
+      "key": "73000016",
+      "item": "Sneezy",
+      "level": 2,
+      "text": "Sneezy 2: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000016",
+      "item": "Sneezy",
+      "level": 3,
+      "text": "Sneezy 3: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000016",
+      "item": "Sneezy",
+      "level": 4,
+      "text": "Sneezy 4: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000016",
+      "item": "Sneezy",
+      "level": 5,
+      "text": "Sneezy 5: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000016",
+      "item": "Sneezy",
+      "level": 6,
+      "text": "Sneezy 6: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000016",
+      "item": "Sneezy",
+      "level": 7,
+      "text": "Sneezy 7: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000016",
+      "item": "Sneezy",
+      "level": 8,
+      "text": "Sneezy 8: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000016",
+      "item": "Sneezy",
+      "level": 9,
+      "text": "Sneezy 9: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000016",
+      "item": "Sneezy",
+      "level": 10,
+      "text": "Sneezy 10: 8d → 7d 12h"
+    },
+    {
+      "kind": "newItem",
+      "key": "1000083",
+      "item": "Sour Elixir Cauldron",
+      "text": "NEW ITEM: Sour Elixir Cauldron"
+    },
+    {
+      "kind": "cost",
+      "key": "1000020",
+      "item": "Spell Factory",
+      "level": 9,
+      "text": "Spell Factory 9: 24M elixir → 16M elixir"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000020",
+      "item": "Spell Factory",
+      "level": 10,
+      "text": "NEW: Spell Factory 10 (18.5M elixir, 10d 12h)"
+    },
+    {
+      "kind": "time",
+      "key": "1000072",
+      "item": "Spell Tower",
+      "level": 2,
+      "text": "Spell Tower 2: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "1000072",
+      "item": "Spell Tower",
+      "level": 3,
+      "text": "Spell Tower 3: 8d 12h → 8d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000072",
+      "item": "Spell Tower",
+      "level": 4,
+      "text": "Spell Tower 4: 27M gold → 17M gold"
+    },
+    {
+      "kind": "newItem",
+      "key": "1000107",
+      "item": "Spiky Tower",
+      "text": "NEW ITEM: Spiky Tower (levels 1–2)"
+    },
+    {
+      "kind": "time",
+      "key": "73000010",
+      "item": "Spirit Fox",
+      "level": 10,
+      "text": "Spirit Fox 10: 8d → 7d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "12000001",
+      "item": "Spring Trap",
+      "level": 1,
+      "text": "Spring Trap 1: TH requirement 4 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "12000001",
+      "item": "Spring Trap",
+      "level": 12,
+      "text": "Spring Trap 12: 13M gold → 7M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000001",
+      "item": "Spring Trap",
+      "level": 12,
+      "text": "Spring Trap 12: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "12000001",
+      "item": "Spring Trap",
+      "level": 13,
+      "text": "Spring Trap 13: 16M gold → 9.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "12000001",
+      "item": "Spring Trap",
+      "level": 13,
+      "text": "Spring Trap 13: 11d → 5d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "12000001",
+      "item": "Spring Trap",
+      "level": 14,
+      "text": "NEW: Spring Trap 14 (17M gold, 8d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "1000106",
+      "item": "Squad Barracks",
+      "text": "NEW ITEM: Squad Barracks (levels 1–12)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000062",
+      "item": "Stone Slammer",
+      "level": 1,
+      "text": "Stone Slammer 1: TH requirement 13 → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000062",
+      "item": "Stone Slammer",
+      "level": 1,
+      "text": "Stone Slammer 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000062",
+      "item": "Stone Slammer",
+      "level": 2,
+      "text": "Stone Slammer 2: TH requirement 13 → 12"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000062",
+      "item": "Stone Slammer",
+      "level": 3,
+      "text": "Stone Slammer 3: TH requirement 13 → 12"
+    },
+    {
+      "kind": "cost",
+      "key": "4000062",
+      "item": "Stone Slammer",
+      "level": 6,
+      "text": "Stone Slammer 6: 26M elixir → 19.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000062",
+      "item": "Stone Slammer",
+      "level": 6,
+      "text": "Stone Slammer 6: 13d 12h → 11d"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000062",
+      "item": "Stone Slammer",
+      "level": 6,
+      "text": "Stone Slammer 6: TH requirement 17 → 18"
+    },
+    {
+      "kind": "cost",
+      "key": "90000056",
+      "item": "Stun Blaster",
+      "level": 6,
+      "text": "Stun Blaster 6: 940 shiny, 100 glowy → 840 shiny, 100 glowy"
+    },
+    {
+      "kind": "cost",
+      "key": "1000102",
+      "item": "Super Wizard Tower",
+      "level": 1,
+      "text": "Super Wizard Tower 1: 29M gold → 24M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000102",
+      "item": "Super Wizard Tower",
+      "level": 1,
+      "text": "Super Wizard Tower 1: 13d → 10d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000102",
+      "item": "Super Wizard Tower",
+      "level": 2,
+      "text": "Super Wizard Tower 2: 30M gold → 25.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000102",
+      "item": "Super Wizard Tower",
+      "level": 2,
+      "text": "Super Wizard Tower 2: 14d → 11d"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000158",
+      "item": "The Disarmer",
+      "text": "NEW ITEM: The Disarmer (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000132",
+      "item": "Thrower",
+      "level": 1,
+      "text": "Thrower 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000132",
+      "item": "Thrower",
+      "level": 2,
+      "text": "Thrower 2: 16M elixir → 15.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000132",
+      "item": "Thrower",
+      "level": 2,
+      "text": "Thrower 2: 9d 12h → 9d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000132",
+      "item": "Thrower",
+      "level": 3,
+      "text": "Thrower 3: 18M elixir → 16M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000132",
+      "item": "Thrower",
+      "level": 3,
+      "text": "Thrower 3: 10d 12h → 9d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000132",
+      "item": "Thrower",
+      "level": 4,
+      "text": "Thrower 4: 27M elixir → 20.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000132",
+      "item": "Thrower",
+      "level": 4,
+      "text": "Thrower 4: 15d → 11d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000132",
+      "item": "Thrower",
+      "level": 5,
+      "text": "NEW: Thrower 5 (29.5M elixir, 13d)"
+    },
+    {
+      "kind": "cost",
+      "key": "12000016",
+      "item": "Tornado Trap",
+      "level": 1,
+      "text": "Tornado Trap 1: 1.8M gold → 1M gold"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000120",
+      "item": "Totem Spell",
+      "level": 1,
+      "text": "Totem Spell 1: TH requirement 13 → 3"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000120",
+      "item": "Totem Spell",
+      "level": 1,
+      "text": "Totem Spell 1: Lab requirement 0 → 1"
+    },
+    {
+      "kind": "cost",
+      "key": "26000120",
+      "item": "Totem Spell",
+      "level": 2,
+      "text": "Totem Spell 2: 21M elixir → 18.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000120",
+      "item": "Totem Spell",
+      "level": 2,
+      "text": "Totem Spell 2: 12d → 9d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "26000120",
+      "item": "Totem Spell",
+      "level": 3,
+      "text": "Totem Spell 3: 22M elixir → 19M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000120",
+      "item": "Totem Spell",
+      "level": 3,
+      "text": "Totem Spell 3: 14d → 12d"
+    },
+    {
+      "kind": "cost",
+      "key": "26000120",
+      "item": "Totem Spell",
+      "level": 4,
+      "text": "Totem Spell 4: 23M elixir → 22M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "26000120",
+      "item": "Totem Spell",
+      "level": 4,
+      "text": "Totem Spell 4: 16d → 12d 6h"
+    },
+    {
+      "kind": "requirement",
+      "key": "26000120",
+      "item": "Totem Spell",
+      "level": 4,
+      "text": "Totem Spell 4: TH requirement 17 → 18"
+    },
+    {
+      "kind": "newLevel",
+      "key": "26000120",
+      "item": "Totem Spell",
+      "level": 5,
+      "text": "NEW: Totem Spell 5 (31M elixir, 15d)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000194",
+      "item": "Totem Thrower",
+      "text": "NEW ITEM: Totem Thrower (levels 1–18)"
+    },
+    {
+      "kind": "time",
+      "key": "1000001",
+      "item": "Town Hall",
+      "level": 13,
+      "text": "Town Hall 13: 7d → 6d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000001",
+      "item": "Town Hall",
+      "level": 14,
+      "text": "Town Hall 14: 12M gold → 11.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000001",
+      "item": "Town Hall",
+      "level": 14,
+      "text": "Town Hall 14: 7d 12h → 7d"
+    },
+    {
+      "kind": "time",
+      "key": "1000001",
+      "item": "Town Hall",
+      "level": 15,
+      "text": "Town Hall 15: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "1000001",
+      "item": "Town Hall",
+      "level": 16,
+      "text": "Town Hall 16: 9d → 8d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "1000001",
+      "item": "Town Hall",
+      "level": 17,
+      "text": "Town Hall 17: 10d → 9d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000001",
+      "item": "Town Hall",
+      "level": 18,
+      "text": "Town Hall 18: 25M gold → 20M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000001",
+      "item": "Town Hall",
+      "level": 18,
+      "text": "Town Hall 18: 12d → 10d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000001",
+      "item": "Town Hall",
+      "level": 19,
+      "text": "NEW: Town Hall 19 (27M gold, 13d)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000135",
+      "item": "Troop Launcher",
+      "level": 1,
+      "text": "Troop Launcher 1: TH requirement 17 → 16"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000135",
+      "item": "Troop Launcher",
+      "level": 1,
+      "text": "Troop Launcher 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000135",
+      "item": "Troop Launcher",
+      "level": 2,
+      "text": "Troop Launcher 2: TH requirement 17 → 16"
+    },
+    {
+      "kind": "time",
+      "key": "4000135",
+      "item": "Troop Launcher",
+      "level": 3,
+      "text": "Troop Launcher 3: 9d → 8d"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000135",
+      "item": "Troop Launcher",
+      "level": 3,
+      "text": "Troop Launcher 3: TH requirement 17 → 16"
+    },
+    {
+      "kind": "time",
+      "key": "73000003",
+      "item": "Unicorn",
+      "level": 12,
+      "text": "Unicorn 12: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000003",
+      "item": "Unicorn",
+      "level": 13,
+      "text": "Unicorn 13: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000003",
+      "item": "Unicorn",
+      "level": 14,
+      "text": "Unicorn 14: 8d → 7d 12h"
+    },
+    {
+      "kind": "time",
+      "key": "73000003",
+      "item": "Unicorn",
+      "level": 15,
+      "text": "Unicorn 15: 8d → 7d 12h"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 1,
+      "text": "Valkyrie 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 8,
+      "text": "Valkyrie 8: 77.5K DE → 70K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 8,
+      "text": "Valkyrie 8: 3d → 2d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 9,
+      "text": "Valkyrie 9: 105K DE → 95K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 9,
+      "text": "Valkyrie 9: 4d 12h → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 10,
+      "text": "Valkyrie 10: 120K DE → 110K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 10,
+      "text": "Valkyrie 10: 5d → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 11,
+      "text": "Valkyrie 11: 170K DE → 140K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 11,
+      "text": "Valkyrie 11: 6d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 12,
+      "text": "Valkyrie 12: 340K DE → 235K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 12,
+      "text": "Valkyrie 12: 14d → 9d 12h"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000012",
+      "item": "Valkyrie",
+      "level": 13,
+      "text": "NEW: Valkyrie 13 (370K DE, 10d 12h)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000010",
+      "item": "Wall",
+      "level": 18,
+      "text": "Wall 18: 7M gold or elixir → 6M gold or elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "1000010",
+      "item": "Wall",
+      "level": 19,
+      "text": "Wall 19: 10M gold or elixir → 8M gold or elixir"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000010",
+      "item": "Wall",
+      "level": 20,
+      "text": "NEW: Wall 20 (10M gold or elixir, 0s)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 1,
+      "text": "Wall Breaker 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 8,
+      "text": "Wall Breaker 8: 3.8M elixir → 3.2M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 8,
+      "text": "Wall Breaker 8: 2d 12h → 2d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 9,
+      "text": "Wall Breaker 9: 5.2M elixir → 4.3M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 9,
+      "text": "Wall Breaker 9: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 10,
+      "text": "Wall Breaker 10: 6.5M elixir → 5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 10,
+      "text": "Wall Breaker 10: 5d → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 11,
+      "text": "Wall Breaker 11: 9.5M elixir → 8M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 11,
+      "text": "Wall Breaker 11: 5d 12h → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 12,
+      "text": "Wall Breaker 12: 11M elixir → 9M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 12,
+      "text": "Wall Breaker 12: 6d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 13,
+      "text": "Wall Breaker 13: 15.5M elixir → 10M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 13,
+      "text": "Wall Breaker 13: 10d → 6d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 14,
+      "text": "Wall Breaker 14: 26M elixir → 19M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 14,
+      "text": "Wall Breaker 14: 14d → 9d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000004",
+      "item": "Wall Breaker",
+      "level": 15,
+      "text": "NEW: Wall Breaker 15 (29M elixir, 12d 12h)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000197",
+      "item": "Wall Breaker Squad",
+      "text": "NEW ITEM: Wall Breaker Squad (levels 1–3)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000051",
+      "item": "Wall Wrecker",
+      "level": 1,
+      "text": "Wall Wrecker 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000051",
+      "item": "Wall Wrecker",
+      "level": 6,
+      "text": "Wall Wrecker 6: 26M elixir → 17.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000051",
+      "item": "Wall Wrecker",
+      "level": 6,
+      "text": "Wall Wrecker 6: 13d 12h → 10d"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000051",
+      "item": "Wall Wrecker",
+      "level": 6,
+      "text": "Wall Wrecker 6: TH requirement 17 → 18"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000015",
+      "item": "Witch",
+      "level": 1,
+      "text": "Witch 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000015",
+      "item": "Witch",
+      "level": 6,
+      "text": "Witch 6: 150K DE → 125K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000015",
+      "item": "Witch",
+      "level": 6,
+      "text": "Witch 6: 5d 12h → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000015",
+      "item": "Witch",
+      "level": 7,
+      "text": "Witch 7: 180K DE → 175K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000015",
+      "item": "Witch",
+      "level": 7,
+      "text": "Witch 7: 7d 6h → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000015",
+      "item": "Witch",
+      "level": 8,
+      "text": "Witch 8: 355K DE → 300K DE"
+    },
+    {
+      "kind": "time",
+      "key": "4000015",
+      "item": "Witch",
+      "level": 8,
+      "text": "Witch 8: 15d 12h → 10d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000015",
+      "item": "Witch",
+      "level": 9,
+      "text": "NEW: Witch 9 (460K DE, 14d 12h)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000102",
+      "item": "Witch Golem",
+      "text": "NEW ITEM: Witch Golem (levels 1–13)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 1,
+      "text": "Wizard 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 10,
+      "text": "Wizard 10: 5.5M elixir → 4.7M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 10,
+      "text": "Wizard 10: 3d 12h → 3d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 11,
+      "text": "Wizard 11: 10M elixir → 7M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 11,
+      "text": "Wizard 11: 5d 12h → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 12,
+      "text": "Wizard 12: 11.5M elixir → 9M elixir"
+    },
+    {
+      "kind": "cost",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 13,
+      "text": "Wizard 13: 16M elixir → 11.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 13,
+      "text": "Wizard 13: 10d 12h → 7d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 14,
+      "text": "Wizard 14: 27M elixir → 21M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 14,
+      "text": "Wizard 14: 14d → 9d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000006",
+      "item": "Wizard",
+      "level": 15,
+      "text": "NEW: Wizard 15 (32M elixir, 14d 12h)"
+    },
+    {
+      "kind": "cost",
+      "key": "1000011",
+      "item": "Wizard Tower",
+      "level": 11,
+      "text": "Wizard Tower 11: 2.5M gold → 2.1M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000011",
+      "item": "Wizard Tower",
+      "level": 13,
+      "text": "Wizard Tower 13: 3M gold → 2.8M gold"
+    },
+    {
+      "kind": "cost",
+      "key": "1000011",
+      "item": "Wizard Tower",
+      "level": 14,
+      "text": "Wizard Tower 14: 4.5M gold → 3.8M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000011",
+      "item": "Wizard Tower",
+      "level": 14,
+      "text": "Wizard Tower 14: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000011",
+      "item": "Wizard Tower",
+      "level": 17,
+      "text": "Wizard Tower 17: 14M gold → 12M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000011",
+      "item": "Wizard Tower",
+      "level": 17,
+      "text": "Wizard Tower 17: 5d 12h → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 2,
+      "text": "Workshop 2: 3.7M elixir → 3.1M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 2,
+      "text": "Workshop 2: 3d → 2d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 3,
+      "text": "Workshop 3: 5M elixir → 3.6M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 3,
+      "text": "Workshop 3: 3d 12h → 2d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 4,
+      "text": "Workshop 4: 8.7M elixir → 6.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 4,
+      "text": "Workshop 4: 4d → 3d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 5,
+      "text": "Workshop 5: 9M elixir → 8M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 5,
+      "text": "Workshop 5: 5d → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 6,
+      "text": "Workshop 6: 10M elixir → 8.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 6,
+      "text": "Workshop 6: 5d 12h → 4d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 7,
+      "text": "Workshop 7: 11M elixir → 9.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 7,
+      "text": "Workshop 7: 6d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 9,
+      "text": "Workshop 9: 26M elixir → 18.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "1000059",
+      "item": "Workshop",
+      "level": 9,
+      "text": "Workshop 9: 13d 12h → 10d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 6,
+      "text": "X-Bow 6: 5M gold → 4.3M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 6,
+      "text": "X-Bow 6: 3d 12h → 3d 6h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 7,
+      "text": "X-Bow 7: 6M gold → 4.6M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 7,
+      "text": "X-Bow 7: 4d → 3d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 8,
+      "text": "X-Bow 8: 7M gold → 5.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 8,
+      "text": "X-Bow 8: 4d 12h → 3d 18h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 9,
+      "text": "X-Bow 9: 9M gold → 7M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 9,
+      "text": "X-Bow 9: 5d → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 10,
+      "text": "X-Bow 10: 9.5M gold → 8M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 10,
+      "text": "X-Bow 10: 5d 12h → 4d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 11,
+      "text": "X-Bow 11: 10M gold → 8.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 11,
+      "text": "X-Bow 11: 6d → 5d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 12,
+      "text": "X-Bow 12: 16M gold → 13M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 12,
+      "text": "X-Bow 12: 8d → 7d"
+    },
+    {
+      "kind": "cost",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 13,
+      "text": "X-Bow 13: 26M gold → 18.5M gold"
+    },
+    {
+      "kind": "time",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 13,
+      "text": "X-Bow 13: 13d 12h → 10d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "1000021",
+      "item": "X-Bow",
+      "level": 14,
+      "text": "NEW: X-Bow 14 (28M gold, 14d)"
+    },
+    {
+      "kind": "removedItem",
+      "key": "1000021:sc",
+      "item": "X-Bow Supercharge",
+      "text": "REMOVED ITEM: X-Bow Supercharge"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000159",
+      "item": "YEETer",
+      "text": "NEW ITEM: YEETer (levels 1–16)"
+    },
+    {
+      "kind": "requirement",
+      "key": "4000053",
+      "item": "Yeti",
+      "level": 1,
+      "text": "Yeti 1: Lab requirement 0 → none"
+    },
+    {
+      "kind": "cost",
+      "key": "4000053",
+      "item": "Yeti",
+      "level": 3,
+      "text": "Yeti 3: 6.5M elixir → 6M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000053",
+      "item": "Yeti",
+      "level": 3,
+      "text": "Yeti 3: 4d 12h → 4d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000053",
+      "item": "Yeti",
+      "level": 6,
+      "text": "Yeti 6: 14.5M elixir → 14M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000053",
+      "item": "Yeti",
+      "level": 6,
+      "text": "Yeti 6: 8d 6h → 8d"
+    },
+    {
+      "kind": "cost",
+      "key": "4000053",
+      "item": "Yeti",
+      "level": 7,
+      "text": "Yeti 7: 17M elixir → 15.5M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000053",
+      "item": "Yeti",
+      "level": 7,
+      "text": "Yeti 7: 10d → 8d 12h"
+    },
+    {
+      "kind": "cost",
+      "key": "4000053",
+      "item": "Yeti",
+      "level": 8,
+      "text": "Yeti 8: 27.5M elixir → 19M elixir"
+    },
+    {
+      "kind": "time",
+      "key": "4000053",
+      "item": "Yeti",
+      "level": 8,
+      "text": "Yeti 8: 15d 12h → 11d"
+    },
+    {
+      "kind": "newLevel",
+      "key": "4000053",
+      "item": "Yeti",
+      "level": 9,
+      "text": "NEW: Yeti 9 (25M elixir, 11d 12h)"
+    },
+    {
+      "kind": "newItem",
+      "key": "4000190",
+      "item": "Yeti Undertaker",
+      "text": "NEW ITEM: Yeti Undertaker (levels 1–18)"
+    }
+  ]
+}

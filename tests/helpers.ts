@@ -1,6 +1,9 @@
 // Test helpers: build realistic synthetic exports straight from the game data.
-import { dataVersion, loadGameDataNode, readConfig, readIdOverrides, readRawFiles } from '../src/data/loadNode';
+import { ckSlug, type ClashKingRaw } from '../src/data/clashking';
+import { COC_BACKUP_MERGES } from '../src/data/cocDataBackup';
+import { dataVersion, loadGameDataNode, normalizeClashKingNode, readClashKing, readOverrideTexts, readRawFiles } from '../src/data/loadNode';
 import { countAt, maxLevelAt, normalize, type RawFile } from '../src/data/normalize';
+import type { OverrideTexts } from '../src/data/overrides';
 import type { GameData } from '../src/data/types';
 import { heroCapAt } from '../src/engine/book';
 import { parseExport } from '../src/state/parseExport';
@@ -99,29 +102,56 @@ export function setLevel(ex: SyntheticExport, section: keyof SyntheticExport, id
   Object.assign(e, patch);
 }
 
+/** Max TH in the data (TH19 since ClashKing v0.1.20). Tests about "max-TH mode" use this, not a number. */
+export const MAX_TH = data.maxTH;
+
+/** The pinned ClashKing raw data (a fresh deep copy each call). */
+export function ckRaw(): ClashKingRaw {
+  const ck = readClashKing();
+  if (!ck) throw new Error('data/clashking/static_data.json is missing: run npm run sync');
+  return structuredClone(ck.raw);
+}
+
 /**
- * A modified copy of the game data, for "what if the next data release…" tests. `mutate` edits the raw
- * JSON files in place; helpers below cover the common edits. The real data object is never touched.
+ * A modified copy of the game data, for "what if the next data release…" tests. `mutate` edits the ClashKing
+ * raw JSON (a copy); helpers below cover the common edits. The real data object is never touched.
+ * `overrides` replaces the config/ override files (default: the shipped ones).
  */
-export function modifiedData(mutate: (files: RawFile[]) => void, mergesYaml = readConfig('merges.yaml')): GameData {
+export function modifiedData(mutate: (raw: ClashKingRaw) => void, overrides: OverrideTexts = readOverrideTexts()): GameData {
+  const raw = ckRaw();
+  mutate(raw);
+  return normalizeClashKingNode(raw, readClashKing()!.pin.version, overrides);
+}
+/** A ClashKing raw entry by item id (slug of its name), from any section. */
+export function rawItem(raw: ClashKingRaw, id: string): any {
+  for (const list of Object.values(raw)) for (const x of list) if (x && ckSlug(x.name) === id) return x;
+  throw new Error(`${id} not in the ClashKing data`);
+}
+/** Adds a Town Hall level (copy of the current top level, no unlocks / merges). */
+export function addTownHallLevel(raw: ClashKingRaw): void {
+  const th = raw.buildings.find((b) => b.type === 'Town Hall')!;
+  const top = th.levels[th.levels.length - 1];
+  th.levels.push({ ...structuredClone(top), level: top.level + 1, required_townhall: top.level, unlocks: [], merge_requirement: undefined });
+}
+/** Appends a building level requiring `thRequired` (copy of the top level, without its supercharge block). */
+export function addBuildingLevel(raw: ClashKingRaw, id: string, thRequired: number, patch: Record<string, unknown> = {}): void {
+  const j = rawItem(raw, id);
+  const last = j.levels[j.levels.length - 1];
+  const { supercharge: _sc, ...copy } = structuredClone(last);
+  j.levels.push({ ...copy, level: last.level + 1, required_townhall: thRequired, ...patch });
+}
+
+/**
+ * clash-of-clans-data normalized (the backup source). `mutate` edits its raw files; `dropRecipes` removes
+ * built-in backup merge recipes (simulates a data release with a merge the recipes don't know yet).
+ */
+export function cocData(mutate: (files: RawFile[]) => void = () => {}, opts: { dropRecipes?: string[]; mergesYaml?: string } = {}): GameData {
   const files = readRawFiles().map((f) => ({ path: f.path, json: structuredClone(f.json) }));
   mutate(files);
-  return normalize(files, mergesYaml, dataVersion(), readIdOverrides());
+  const recipes = Object.fromEntries(Object.entries(COC_BACKUP_MERGES).filter(([id]) => !opts.dropRecipes?.includes(id)));
+  return normalize(files, opts.mergesYaml, dataVersion(), undefined, undefined, recipes);
 }
-export const rawItem = (files: RawFile[], id: string) => files.find((f) => f.json?.id === id)!.json;
-/** Adds a Town Hall level (copy of the current top level, without a weapon). */
-export function addTownHallLevel(files: RawFile[]): void {
-  const th = files.find((f) => f.path.startsWith('town-hall/'))!.json;
-  const top = th.levels[th.levels.length - 1];
-  th.levels.push({ ...structuredClone(top), level: top.level + 1, weapon: undefined });
-}
-/** Appends a normal (non-supercharge) level to a building, requiring `thRequired`. */
-export function addBuildingLevel(files: RawFile[], id: string, thRequired: number, patch: Record<string, unknown> = {}): void {
-  const j = rawItem(files, id);
-  const normal = j.levels.filter((l: any) => !l.supercharge);
-  const last = normal[normal.length - 1];
-  j.levels.push({ ...structuredClone(last), level: last.level + 1, townHallRequired: thRequired, ...patch });
-}
+export const cocRawItem = (files: RawFile[], id: string) => files.find((f) => f.json?.id === id)!.json;
 export const parseWith = (ex: SyntheticExport, d: GameData) => parseExport(JSON.parse(JSON.stringify(ex)), d);
 
 /** Laboratory at its max for the export's TH, so the Tier 0 Lab rule stays out of tests about other tiers. */
