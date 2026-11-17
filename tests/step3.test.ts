@@ -16,7 +16,7 @@ import { simulate, type SimResult, type TimelineEntry } from '../src/engine/sche
 import { builderCandidates } from '../src/engine/tiers';
 import { EMPTY_META } from '../src/meta/meta';
 import { parseBoosts, parseExport } from '../src/state/parseExport';
-import { DEFAULT_HERO_ORDER, heroOrder, moveHero } from '../src/state/settings';
+import { coerceSettings, DEFAULT_HERO_ORDER, heroOrder, LOCKED_HERO, moveHero, settingsFromYaml } from '../src/state/settings';
 import { addTownHallLevel, data, makeExport, maxLab, modifiedData, parse, rawItem, setLevel, settings, T0, type Entry, type SyntheticExport } from './helpers';
 
 const H = 3600;
@@ -381,25 +381,41 @@ describe('Everything tab engine', () => {
 describe('hero order', () => {
   it('moveHero moves one hero (drag or ↑/↓); out-of-range moves change nothing', () => {
     const o = DEFAULT_HERO_ORDER;
-    expect(moveHero(o, 0, 3)).toEqual(['grand-warden', 'dragon-duke', 'barbarian-king', 'archer-queen', 'royal-champion', 'minion-prince']);
-    expect(moveHero(o, 5, 0)[0]).toBe('minion-prince');
+    expect(moveHero(o, 1, 3)).toEqual(['archer-queen', 'dragon-duke', 'barbarian-king', 'grand-warden', 'royal-champion', 'minion-prince']);
+    expect(moveHero(o, 5, 1)).toEqual(['archer-queen', 'minion-prince', 'grand-warden', 'dragon-duke', 'barbarian-king', 'royal-champion']);
     expect(moveHero(o, 1, 9)).toEqual(o);
   });
 
+  it('the Archer Queen is locked at position 1: she never moves and nothing moves above her', () => {
+    const o = DEFAULT_HERO_ORDER;
+    expect(LOCKED_HERO).toBe('archer-queen');
+    expect(moveHero(o, 0, 3)).toEqual(o); // drag / ↓ on the Queen: unchanged
+    expect(moveHero(o, 0, 1)).toEqual(o);
+    expect(moveHero(o, 5, 0)).toEqual(moveHero(o, 5, 1)); // a drop on her slot lands just below her
+    expect(moveHero(o, 5, 0)[0]).toBe('archer-queen');
+    expect(moveHero(o, 1, 0)).toEqual(o); // ↑ on #2: no-op
+  });
+
   it('saved orders keep their order (incl. ids newer than the defaults), drop duplicates and append missing heroes', () => {
-    expect(heroOrder(['royal-champion', 'new-hero', 'royal-champion'])).toEqual(['royal-champion', 'new-hero', 'archer-queen', 'grand-warden', 'dragon-duke', 'barbarian-king', 'minion-prince']);
+    expect(heroOrder(['royal-champion', 'new-hero', 'royal-champion'])).toEqual(['archer-queen', 'royal-champion', 'new-hero', 'grand-warden', 'dragon-duke', 'barbarian-king', 'minion-prince']);
     expect(heroOrder('junk')).toEqual(DEFAULT_HERO_ORDER);
   });
 
-  it('a custom order changes hero candidate order; the Queen keeps Tier 0 even when last', () => {
+  it('a saved order with the Archer Queen elsewhere is normalized to put her first (rest unchanged)', () => {
+    const saved = ['barbarian-king', 'grand-warden', 'archer-queen', 'minion-prince', 'dragon-duke', 'royal-champion'];
+    expect(heroOrder(saved)).toEqual(['archer-queen', 'barbarian-king', 'grand-warden', 'minion-prince', 'dragon-duke', 'royal-champion']);
+    expect(coerceSettings({ heroOrder: saved }).heroOrder[0]).toBe('archer-queen');
+    expect(settingsFromYaml('heroOrder: [minion-prince, archer-queen]\n').heroOrder.slice(0, 2)).toEqual(['archer-queen', 'minion-prince']);
+  });
+
+  it('a custom order changes hero candidate order; the Queen keeps Tier 0', () => {
     const ex = maxLab(makeExport(16));
     for (const id of ['archer-queen', 'grand-warden', 'barbarian-king', 'royal-champion']) {
       const h = ex.heroes.find((x) => x.data === data.byId.get(id)!.dataId)!;
       h.lvl = Math.max(1, h.lvl - 5);
     }
-    const order = moveHero(moveHero(DEFAULT_HERO_ORDER, 0, 5), 2, 0); // barbarian-king first, archer-queen last
-    expect(order[0]).toBe('barbarian-king');
-    expect(order[5]).toBe('archer-queen');
+    const order = moveHero(DEFAULT_HERO_ORDER, 3, 1); // barbarian-king right after the locked Queen
+    expect(order.slice(0, 2)).toEqual(['archer-queen', 'barbarian-king']);
     const acc = parse(ex);
     const cands = builderCandidates(data, { instances: acc.instances, busy: new Set() }, settings({ heroOrder: order }), { builderBoost: 0 });
     const heroes = cands.filter((c) => c.item.category === 'hero');

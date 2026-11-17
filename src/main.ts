@@ -9,7 +9,7 @@ import { buildPlan } from './engine/plan';
 import { detectMode } from './engine/tiers';
 import { coerceMeta, EMPTY_META, type MetaFile } from './meta/meta';
 import { parseExport, ExportParseError, type AccountState } from './state/parseExport';
-import { DEFAULT_HERO_ORDER, moveHero, settingsFromYaml, type Settings } from './state/settings';
+import { DEFAULT_HERO_ORDER, heroOrder, LOCKED_HERO, moveHero, settingsFromYaml, type Settings } from './state/settings';
 import { renderEverything } from './ui/everythingView';
 import { renderLab, type PinList } from './ui/labView';
 import { icon } from './ui/images';
@@ -194,12 +194,14 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
     </div>
     <div class="card">
       <div><b>Hero order</b> <span class="small muted">(drag to reorder, or use ↑ / ↓)</span></div>
-      <p class="small muted">The order of the Heroes tier. The Archer Queen's Tier 0 rule (upgraded until book-ready, right after the Laboratory and new buildings) belongs to the Queen herself, wherever she sits in this list.</p>
+      <p class="small muted">The order of the Heroes tier. The Archer Queen is locked at position 1 because of her Tier 0 rule: she's upgraded until book-ready, right after the Laboratory and new buildings. The other heroes can be reordered below her.</p>
       <ol class="hero-order">
         ${settings.heroOrder
-          .map(
-            (id, i) => `<li draggable="true" data-idx="${i}"><span class="grip" aria-hidden="true">⋮⋮</span><span class="n">${i + 1}</span>${icon(data.byId.get(id)?.key ?? '', 24)}<span class="name">${esc(heroName(id))}${id === 'archer-queen' ? ' <span class="small muted">· Tier 0</span>' : ''}</span>
-          <button class="icon" data-move="${i}" data-dir="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(heroName(id))} up">↑</button>
+          .map((id, i) =>
+            id === LOCKED_HERO
+              ? `<li class="locked" data-idx="${i}" aria-disabled="true" title="Locked at position 1 (Tier 0 rule)"><span class="grip" aria-hidden="true"></span><span class="n">${i + 1}</span>${icon(data.byId.get(id)?.key ?? '', 24)}<span class="name">${esc(heroName(id))} <span class="small muted">· Tier 0 · locked</span></span></li>`
+              : `<li draggable="true" data-idx="${i}"><span class="grip" aria-hidden="true">⋮⋮</span><span class="n">${i + 1}</span>${icon(data.byId.get(id)?.key ?? '', 24)}<span class="name">${esc(heroName(id))}</span>
+          <button class="icon" data-move="${i}" data-dir="-1" ${i === 0 || settings.heroOrder[i - 1] === LOCKED_HERO ? 'disabled' : ''} aria-label="Move ${esc(heroName(id))} up">↑</button>
           <button class="icon" data-move="${i}" data-dir="1" ${i === settings.heroOrder.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(heroName(id))} down">↓</button></li>`,
           )
           .join('')}
@@ -252,7 +254,7 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
     storage.saveSettings(settings);
   });
   const setHeroOrder = (order: string[]) => {
-    settings = { ...settings, heroOrder: order };
+    settings = { ...settings, heroOrder: heroOrder(order) }; // normalized: the Archer Queen stays first
     storage.saveSettings(settings);
     renderImportTab();
   };
@@ -264,14 +266,18 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
   );
   // Drag to reorder (desktop). Touch devices use the ↑ / ↓ buttons.
   let dragFrom = -1;
-  el.querySelectorAll<HTMLLIElement>('.hero-order li').forEach((li) => {
+  // The locked Archer Queen is neither a drag source nor a drop target.
+  el.querySelectorAll<HTMLLIElement>('.hero-order li:not(.locked)').forEach((li) => {
     li.addEventListener('dragstart', (ev) => {
       dragFrom = Number(li.dataset.idx);
       li.classList.add('dragging');
       ev.dataTransfer?.setData('text/plain', String(dragFrom));
       if (ev.dataTransfer) ev.dataTransfer.effectAllowed = 'move';
     });
-    li.addEventListener('dragend', () => li.classList.remove('dragging'));
+    li.addEventListener('dragend', () => {
+      li.classList.remove('dragging');
+      dragFrom = -1; // e.g. dropped on the locked Queen or outside the list
+    });
     li.addEventListener('dragover', (ev) => {
       ev.preventDefault();
       li.classList.add('drop-target');
@@ -281,6 +287,7 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
       ev.preventDefault();
       const from = dragFrom >= 0 ? dragFrom : Number(ev.dataTransfer?.getData('text/plain'));
       dragFrom = -1;
+      if (!Number.isInteger(from)) return; // no drag source from this list
       setHeroOrder(moveHero(settings.heroOrder, from, Number(li.dataset.idx)));
     });
   });

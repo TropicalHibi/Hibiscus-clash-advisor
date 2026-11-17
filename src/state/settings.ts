@@ -35,14 +35,18 @@ export const DEFAULT_SETTINGS: Settings = {
   blacksmith: { pinned: [] },
 };
 
+/** The Archer Queen is locked at position 1 of the hero order (her Tier 0 rule, SPEC §6.2). */
+export const LOCKED_HERO = 'archer-queen';
+
 /**
  * A saved hero order: the saved order with duplicates removed (ids newer than the defaults are kept), and
- * any default hero missing from it appended in default order. Junk → the default order.
+ * any default hero missing from it appended in default order. The Archer Queen always comes first
+ * (a saved order with her elsewhere is normalized). Junk → the default order.
  */
 export function heroOrder(v: unknown): string[] {
   if (!Array.isArray(v) || !v.every((x) => typeof x === 'string')) return [...DEFAULT_HERO_ORDER];
-  const seen = new Set<string>();
-  const out: string[] = [];
+  const seen = new Set<string>([LOCKED_HERO]);
+  const out: string[] = [LOCKED_HERO];
   for (const id of v as string[]) if (!seen.has(id)) (seen.add(id), out.push(id));
   for (const id of DEFAULT_HERO_ORDER) if (!seen.has(id)) out.push(id);
   return out;
@@ -76,8 +80,14 @@ export function coerceSettings(input: unknown): Settings {
   };
 }
 
-/** Hero order after moving the hero at `from` to position `to` (drag-and-drop or ↑/↓). Out of range → unchanged. */
+/**
+ * Hero order after moving the hero at `from` to position `to` (drag-and-drop or ↑/↓). Out of range → unchanged.
+ * The locked Archer Queen never moves, and nothing moves above her (a move to her slot lands just below her).
+ */
 export function moveHero(order: string[], from: number, to: number): string[] {
+  const locked = order.indexOf(LOCKED_HERO);
+  if (from === locked) return [...order];
+  if (locked >= 0 && to <= locked && from > locked) to = locked + 1;
   if (from === to || from < 0 || to < 0 || from >= order.length || to >= order.length) return [...order];
   const next = [...order];
   const [id] = next.splice(from, 1);

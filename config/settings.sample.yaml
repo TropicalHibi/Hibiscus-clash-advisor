@@ -5,7 +5,7 @@
 goldPass: none            # none | max
 simulateHelpers: true     # apply Builder's Apprentice / Lab Assistant and active boosts from the export
 
-heroOrder:                # heroes tier order; the Archer Queen's Tier 0 rule is tied to her, not to slot 1
+heroOrder:                # heroes tier order; the Archer Queen is always first (locked: her Tier 0 rule)
   - archer-queen
   - grand-warden
   - dragon-duke
