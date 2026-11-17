@@ -35,11 +35,33 @@ export function pickItemImages(items: Iterable<Item>, sizeOf: (path: string) => 
   return { byKey, skipped };
 }
 
-/** Source of the `virtual:item-images` module: item key → URL, one import per distinct file. */
-export function itemImagesModule(byKey: Map<string, string>, specifier: (path: string) => string): string {
+/**
+ * Source of the `virtual:item-images` module: item key → URL, one import per distinct file. `extraUrls` (item key →
+ * URL of a public/item-images-extra/ file, already a small icon) are added as plain URLs.
+ */
+export function itemImagesModule(byKey: Map<string, string>, specifier: (path: string) => string, extraUrls: Map<string, string> = new Map()): string {
   const paths = [...new Set(byKey.values())].sort();
   const varOf = new Map(paths.map((p, i) => [p, `u${i}`]));
   const imports = paths.map((p) => `import ${varOf.get(p)} from ${JSON.stringify(specifier(p))};`);
-  const entries = [...byKey.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([k, p]) => `  ${JSON.stringify(k)}: ${varOf.get(p)},`);
+  const all: [string, string][] = [...[...byKey].map(([k, p]): [string, string] => [k, varOf.get(p)!]), ...[...extraUrls].filter(([k]) => !byKey.has(k)).map(([k, u]): [string, string] => [k, JSON.stringify(u)])];
+  const entries = all.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([k, v]) => `  ${JSON.stringify(k)}: ${v},`);
   return `${imports.join('\n')}\nexport default {\n${entries.join('\n')}\n};\n`;
+}
+
+/**
+ * Items clash-of-clans-data has no picture for, with one saved by `npm run sync` / the data-update Action in
+ * public/item-images-extra/ (SPEC §13): item key → file name. clash-of-clans-data's image always wins
+ * (`cocKeys`), so a saved image is only used until the package ships one. `sources` is the parsed
+ * sources.json (anything malformed is ignored); `exists` checks the file is really there.
+ */
+export function extraImageFiles(items: Iterable<Item>, cocKeys: Set<string>, sources: unknown, exists: (file: string) => boolean): Map<string, string> {
+  const out = new Map<string, string>();
+  const images = (sources as { images?: Record<string, { file?: unknown }> } | null)?.images;
+  if (!images || typeof images !== 'object') return out;
+  for (const item of items) {
+    if (cocKeys.has(item.key)) continue;
+    const file = images[item.key]?.file;
+    if (typeof file === 'string' && /^[a-z0-9][a-z0-9-]*\.webp$/.test(file) && exists(file)) out.set(item.key, file);
+  }
+  return out;
 }

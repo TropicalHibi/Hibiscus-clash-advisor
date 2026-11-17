@@ -2,9 +2,12 @@
 #   ClashKing static data (the game data, pinned in data/clashking/) and clash-of-clans-data (item images,
 #   TH weapons, backup source). No secrets: it talks to GitHub (ClashKing's releases; the workflow's own token
 #   only for rate limits, never printed), the npm registry and this repo (never `npm run meta`).
-#   nothing new               → exits successfully, nothing else happens
+#   nothing new               → exits successfully, nothing else happens (unless new item images were found)
 #   new + everything passes   → commits data/clashking/, package.json, package-lock.json, public/data-changes.json
 #                               to main, then starts the Pages workflow (a GITHUB_TOKEN push alone wouldn't trigger it)
+#   new item images           → every run looks up icons for items clash-of-clans-data has no picture for
+#                               (ClashKing assets → Fandom wiki), saves them in public/item-images-extra/ and
+#                               commits + deploys them the same way, with or without a data update
 #   anything fails            → commits nothing (the known-good copy stays); opens or updates the issue
 #                               "Data update failed: <version>"
 name: Daily game-data update
@@ -50,25 +53,33 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: npx tsx scripts/data-update.ts check --out "$RUNNER_TEMP/data-update.json"
 
+      # Item images for new items (SPEC §13): an item clash-of-clans-data has no picture for gets one from
+      # assets.clashk.ing, else the Fandom wiki's MediaWiki API, resized to 96 px WebP in public/item-images-extra/
+      # (sources.json records where each came from; a saved image is never downloaded again). Runs on every run,
+      # since a picture can appear upstream after the data did, and never fails the job (name only instead).
+      - id: images
+        name: Item images for new items
+        run: npx tsx scripts/data-update.ts images --check "$RUNNER_TEMP/data-update.json"
+
       # Rule + validation tests (npm run test:ci): facts about the previous data (tests/current-data.test.ts)
       # are not run, so a new ClashKing level or TH never blocks the update.
       - id: test
         name: Tests on the new data
-        if: steps.check.outputs.status == 'updated'
+        if: steps.check.outputs.status == 'updated' || (steps.images.outputs.added || '0') != '0'
         run: |
           set -o pipefail
           npm run test:ci 2>&1 | tee "$RUNNER_TEMP/test.log"
 
       - id: commit
         name: Commit and push the data update
-        if: steps.check.outputs.status == 'updated'
+        if: steps.check.outputs.status == 'updated' || (steps.images.outputs.added || '0') != '0'
         env:
-          MESSAGE: ${{ steps.check.outputs.message }}
+          MESSAGE: ${{ steps.images.outputs.message || steps.check.outputs.message }}
           GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json public/data-changes.json data/clashking/
+          git add package.json package-lock.json public/data-changes.json data/clashking/ public/item-images-extra/
           git commit -m "$MESSAGE"
           bash .github/scripts/git-auth.sh pull --rebase origin main
           bash .github/scripts/git-auth.sh push origin HEAD:main
@@ -76,7 +87,7 @@ jobs:
       # Pushes made with GITHUB_TOKEN don't trigger other workflows; a workflow_dispatch does.
       - id: deploy
         name: Deploy (start the Pages workflow on main)
-        if: steps.check.outputs.status == 'updated'
+        if: steps.check.outputs.status == 'updated' || (steps.images.outputs.added || '0') != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run pages.yml --ref main

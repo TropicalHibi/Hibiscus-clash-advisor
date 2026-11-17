@@ -5,12 +5,16 @@
 //     data, pinned in data/clashking/), validation, snapshot + diff, cross-check (+ the recipes must explain
 //     every merge). Writes the result JSON, the GitHub step outputs (status, from, to, changes, message) and a
 //     step summary. Exit 0 for "nothing new" or "updated" (ready to test + commit), 1 for a failure.
+//   npx tsx scripts/data-update.ts images --check <result.json> [--out <images.json>]
+//     Item images for new items (SPEC §13): ClashKing assets → Fandom wiki → name only, saved in
+//     public/item-images-extra/. Always exit 0. Step outputs: added, message (the commit message).
 //   npx tsx scripts/data-update.ts issue --result <result.json> --step <name> [--test-log f] [--run-url u]
 //       [--committed] --title-out <file> --body-out <file>
 //     Writes the issue title ("Data update failed: <version>") and body for a failed run.
 import fs from 'node:fs';
-import { loadGameDataFresh, PROJECT_ROOT } from '../src/data/loadNode';
+import { loadGameDataFresh, PKG_DIR, PROJECT_ROOT } from '../src/data/loadNode';
 import { issueBody, issueTitle, runDataUpdate, type DataUpdateResult } from './lib/dataUpdate';
+import { imagesCommitMessage, nodeExtraImageDeps, runExtraImages } from './lib/extraImages';
 import { setOutputs } from './lib/ghText';
 import { checkCocBackup, nodeClashKingDeps, nodeCrossCheck, nodeSyncDeps } from './lib/nodeDeps';
 
@@ -44,6 +48,36 @@ if (args[0] === 'check') {
     fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Game-data update\n\n${line}\n${cross}`);
   }
   process.exitCode = r.status === 'failed' ? 1 : 0;
+} else if (args[0] === 'images') {
+  // Item images for new items (SPEC §13, §9b step 2b): runs after `check` on every run, whether or not the data
+  // changed, so a picture that appears upstream later is still picked up. Never fails the job: a lookup problem
+  // leaves that item on name only. Outputs: added (count) and message (the commit message, with or without a data update).
+  let check: Partial<DataUpdateResult> = {};
+  try {
+    check = JSON.parse(readIf(flag('--check')) ?? '{}');
+  } catch {
+    check = {};
+  }
+  let added: Awaited<ReturnType<typeof runExtraImages>>['added'] = [];
+  let lines: string[] = [];
+  try {
+    const log = (l: string) => {
+      lines.push(l);
+      console.log(l);
+    };
+    const r = await runExtraImages(loadGameDataFresh(), await nodeExtraImageDeps(PROJECT_ROOT, log), PKG_DIR);
+    added = r.added;
+    const out = flag('--out');
+    if (out) fs.writeFileSync(out, JSON.stringify(r, null, 2));
+  } catch (e) {
+    lines = [`Item image lookup skipped: ${(e as Error).message}`];
+    console.log(lines[0]);
+  }
+  const message = imagesCommitMessage(check.status === 'updated' ? check.commitMessage : undefined, added);
+  setOutputs({ added: String(added.length), message });
+  if (process.env.GITHUB_STEP_SUMMARY)
+    fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Item images for new items\n\n\`\`\`\n${lines.join('\n')}\n\`\`\`\n`);
+  process.exitCode = 0;
 } else if (args[0] === 'issue') {
   let r: DataUpdateResult | undefined;
   try {
@@ -55,6 +89,6 @@ if (args[0] === 'check') {
   fs.writeFileSync(flag('--title-out')!, issueTitle(r ?? {}));
   fs.writeFileSync(flag('--body-out')!, body);
 } else {
-  console.error('Usage: tsx scripts/data-update.ts check --out <file> | issue --result <file> --step <name> --title-out <file> --body-out <file>');
+  console.error('Usage: tsx scripts/data-update.ts check --out <file> | images --check <file> | issue --result <file> --step <name> --title-out <file> --body-out <file>');
   process.exitCode = 2;
 }
