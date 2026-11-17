@@ -990,3 +990,101 @@ The 1 MB of JS is the bundled game data (REVIEW finding 16, left for v2), not im
 **Check**
 - [ ] On developer.clashofclans.com you should now see a key named **hibiscus-ci** (description "auto-managed … safe to revoke"). Your other keys should be unchanged.
 - [ ] Privacy: the `meta-data` branch is public. It holds army codes, stars, destruction and battle times with **pseudonymous** player tags (a stable hash, not the tag). Say if you'd rather keep it encrypted or private.
+
+
+# Data source: ClashKing
+
+**Status:** the game data now comes from ClashKing's `static/static_data.json` (`ClashKingInc/clashy.go`), pinned at **release v0.1.20, commit `04babd0`** in `data/clashking/`. clash-of-clans-data stays for item images, TH weapon levels and as the backup source. `npm test` passes (**325 tests in 19 files**) and `npm run build` succeeds. The live site serves the new data (footer: "Game data: ClashKing v0.1.20").
+
+**Timing:** this switch landed on the day of the TH19 / Hero Hall 13 update (16 Nov). ClashKing published TH19 that afternoon; clash-of-clans-data 0.19.1 is still at TH18. Most of the differences below come from that.
+
+## What changed
+- **`npm run sync` and the daily Action download ClashKing's file** from the latest release (main if no release has it), at that release's commit. Before anything is replaced, the file is checked: it must load and normalize, its levels must be contiguous, it must contain the core items, the max TH must not drop, and it must not lose more than 10 % of its items. A file that fails **keeps the previous copy**, and the Action opens or updates its issue (`Data update failed: clashking-v…`). `pin.json` records the tag, commit and sha256.
+- **Everything the hand-kept files held now comes from the data:**
+  - merges from the merged defense's level-1 `merge_requirement`, with exact source levels;
+  - super troops from `super_troop`;
+  - every dataId, including the Alchemist.
+
+  `config/merges.yaml`, `config/super-troops.yaml` and `config/id-overrides.yaml` ship **empty**. An entry you add there wins over the data.
+- **Seasonal troops and spells** are recognised but never appear in the lab queue or the meta. The new squads are normal lab troops.
+- **Backup:** with no usable ClashKing copy, the site runs on clash-of-clans-data (with its old recipes built in) and says so on the Plan tab, in `npm run sync` and on every `npm run dev`.
+- **Cross-check on every sync** (and in the Action's step summary): ClashKing vs clash-of-clans-data on costs, times and TH requirements, plus which source has the higher max TH and the newer items. It never fails a sync.
+- The site loads faster: clash-of-clans-data's JSON is no longer in the main bundle (**772 kB / 116 kB gzip, was 1,017 kB / 153 kB**).
+
+## Cross-check (ClashKing v0.1.20 vs clash-of-clans-data 0.19.1)
+```
+Max TH: ClashKing is ahead (TH19 vs TH18).
+Newer items: ClashKing has more items (50 only in ClashKing, 22 only in clash-of-clans-data).
+Differences on shared levels: 867 (345 cost, 363 time, 159 TH requirement).
+```
+- **New in ClashKing (TH19 update):**
+  - **TH19 itself.**
+  - **Hero Hall 13:** hero levels up to 115 / 90 / 30 / 60 / 100 for AQ & BK / GW / DD / RC / MP.
+  - **Smasher (guardian) levels 6–10.**
+  - **New level at TH19** on many buildings: X-Bow 14, Air Defense 17, Laboratory 17, Clan Castle 15, collectors and storages, and others.
+  - **New buildings:** **Squad Barracks** (TH8+), **Spiky Tower** and **Firecracker Tower** (TH19).
+  - **New merge:** **Firecracker Tower = Archer Tower 21 + Scattershot 7** (2 at TH19), which takes the last plain Archer Towers.
+  - **New lab units:** 12 squad troops, Heroic Spell.
+  - **27 seasonal units.** Plus new lab levels on most troops and spells, and Monolith Arrow 19–27.
+- **Only in clash-of-clans-data:**
+  - 10 supercharges ClashKing no longer has: Air Defense, Builder's Hut, X-Bow, Hidden Tesla, Multi-Archer, Multi-Gear, Ricochet, the three collectors. Every one of those buildings got a TH19 level.
+  - Last season's crafted defenses: Air Bombs, Lava Launcher, Roaster. ClashKing lists only the current phase (Hot Candle, Hero Hunter, Cake-A-Pult).
+- **Costs and times:** ClashKing is lower on older levels almost everywhere (the usual rebalance when a new TH ships). Examples:
+
+  | Item | clash-of-clans-data | ClashKing |
+  |---|---|---|
+  | Air Defense 10 | 5M | 3.8M |
+  | Mortar 18 | 21M, 12d 12h | 15.5M, 8d 12h |
+  | Wall 18 | 7M | 6M |
+  | Barbarian 13 | 24M, 12d 12h | 18M, 9d |
+  | Archer Queen 110 | 490K | 465K |
+  | Archer Queen 96–100 | 8d | 7d |
+  | Town Hall 17 | 10d | 9d 12h |
+- **TH requirements:** most of the 159 are low levels (e.g. Cannon 2 needs TH2 vs TH1, spells' level-1 unlock THs). The rest:
+  - crafted-defense modules now carry per-level TH requirements: levels 8–10 need TH18, so a TH16 player tops out at 6 (clash-of-clans-data had none);
+  - Battle Drill 1–4 need TH15 vs TH16;
+  - Bat Spell 8 needs TH18 vs TH17.
+- **Two dataId pairs were swapped in clash-of-clans-data.** ClashKing is right, checked against the Legend army codes: equipment 16 is always worn by the Archer Queen, 59 by the Dragon Duke.
+  - **90000016 = Monolith Arrow** (AQ, epic), **90000059 = Electro Fangs** (DD).
+  - **93000002 = Alchemist**, 93000003 = Prospector.
+
+  Your export has 90000016 at level 15, so that's your **Monolith Arrow**. The old data called it Electro Fangs and capped it at 18. The next meta run will name it correctly in `meta.json` as well.
+
+## Plan before / after
+**The code alone changes nothing.** Run on clash-of-clans-data through the new code, both exports give **byte-identical** plans to before the switch (24 h, 14 days, and Gold Pass max without helpers; only the "data …" label differs). Every difference below comes from the data.
+
+**Your export** (`samples/myexport.json`, TH18, `npm run plan -- --at-export`):
+| | Before (clash-of-clans-data 0.19.1) | After (ClashKing v0.1.20) | Why |
+|---|---|---|---|
+| Mode | MAX-TH (max TH18) | **RUSH (max TH19)** | TH19 exists now (SPEC §6.1: the mode flips on its own) |
+| Top priority | Barbarian King 83, Minion Prince 53, Firespitter 3, merged defenses | **Town Hall 18 → 19 (27M gold, 13d)**, then Spell Factory 10 (new TH19 level), heroes, collectors (new TH19 levels) | rush tiers; TH gate clear |
+| B6 running job | "Unknown item 1000106 (not in game data yet)" | **Squad Barracks → 1** | the building you're constructing is in ClashKing |
+| Free builders (24 h) | Minion Prince 53, Royal Champion 39, Barbarian King 83, Firespitter 3, Scattershot 4 ×2 | **Town Hall 19** (11:51 PM), Spell Factory 10, Scattershot 4 ×2, **Archer Tower 7 → … and Archer Tower 21** | Archer Towers: "TH-upgrade lookahead: merge for Firecracker Tower (TH19) needs Archer Tower 21" (SPEC §6.3, starts once TH19 is upgrading). Your two Archer Towers are at 6 and 20. Scattershot 4 now also counts as lookahead (Firecracker needs Scattershot 7). |
+| Book-ready | GW 79: 26.5M elixir · DD 23: 440K DE | GW 79: 24.5M · DD 23: 430K | lower costs |
+| Wall dump | 17→18: 7M each | 17→18: **6M** each | lower cost |
+| Lab top 4 | Dragon 12: 10d 18.5M · Dragon Rider 3: 8d 12M · Bowler 6: 6d 110K · Balloon 11: 8d 12h 14M | Dragon 12: **8d 12h 15.5M** · Dragon Rider 3: **7d 12h 11M** · Bowler 6: **5d 12h 100K** · Balloon 11: **8d 13M** | same order (same meta), lower costs and times |
+| Resources (24 h) | gold 52M, DE 705K | gold 55.2M, DE 200K, elixir 18.5M | Town Hall 19 + Spell Factory instead of heroes |
+| Warnings | unknown 1000106 (Squad Barracks), 90000062, 90000063 | 90000062, 90000063 only | Squad Barracks known now. 90000062/63 are in neither source (probably the newest equipment). |
+
+**Committed fixture** (`tests/fixtures/export-th16.json`, TH16):
+| | Before | After | Why |
+|---|---|---|---|
+| Max TH | 18 | 19 | TH19 (still rush) |
+| B5 / B6 "start now" | Town Hall 17 (10d), Barracks 18 | **Squad Barracks 1** (1.7M elixir, 2d), Town Hall 17 (**9d 12h**) | Squad Barracks is a new TH8+ building → Tier 0 (SPEC §6.2), ahead of the TH; TH17 is half a day faster |
+| Offense costs | Dark Barracks 13: 23M · Spell Factory 9: 24M | 15.5M · 16M | lower costs |
+| Elixir in 24 h | 75M | 45.2M | same jobs, cheaper |
+
+The 14-day and Gold Pass runs show the same differences, shifted in time (e.g. 14-day elixir 159M → 133M, gold 50M → 64M as the Town Hall 17 → 18 path comes sooner).
+
+## Daily data-update run (workflow_dispatch, 17 Nov 2026, 05:28 UTC)
+**Passed in 19 s.** https://github.com/TropicalHibi/Hibiscus-clash-advisor/actions/runs/44024369881
+- It asked GitHub for ClashKing's latest release and got v0.1.20, the pinned commit, so nothing changed. clash-of-clans-data 0.19.1 is still the newest 0.x.
+- It printed the cross-check above. "Nothing new" → the test, commit, deploy and issue steps were skipped. The token showed as `***`.
+- The push of this work also ran the Pages workflow: tests and build passed on Linux, and it deployed.
+
+## Check / follow-ups
+- [ ] **Town Hall 17 needs Eagle Artillery 7** (ClashKing: TH17's own `merge_requirement`). The planner counts the Eagle Artillery as gone from TH17, as before, but doesn't gate the TH17 upgrade on it. If the game really blocks the TH17 upgrade until EA 7, that should become a TH-gate rule. Say if you want it.
+- [ ] **Supercharges for the 10 buildings that got a TH19 level are gone in ClashKing** (Air Defense, X-Bow, Builder's Hut, …). If the game still offers them to TH18 players, they'll need a `supercharge` override (not built yet) or ClashKing data.
+- [ ] **Crafting Station unlocks at TH19 in ClashKing** (TH18 before). It doesn't affect you (you own one), but a TH18 player without one won't be told to build it.
+- [ ] Two squads (Baby Dragon Squad, P.E.K.K.A Titan Squad) have no housing space in ClashKing. If they show up in Legend armies, they rank by usage instead of army share.
+- [ ] clash-of-clans-data is still on TH18. The daily cross-check will show when it catches up; until then, ClashKing-only items have no icon (name only).
