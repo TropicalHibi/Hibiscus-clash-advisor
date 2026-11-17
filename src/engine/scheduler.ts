@@ -1,5 +1,5 @@
 // Discrete-event simulation of builders, lab and pet house (SPEC §10.1).
-import type { GameData, OwnedInstance, Resource } from '../data/types';
+import type { Category, GameData, OwnedInstance, Resource } from '../data/types';
 import type { MetaFile } from '../meta/meta';
 import type { AccountState } from '../state/parseExport';
 import type { Settings } from '../state/settings';
@@ -159,7 +159,10 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
     if (inst.upgradingTo === undefined) continue;
     const item = data.items.get(inst.itemKey);
     if (!item) continue;
-    const q: SlotQueue | undefined = item.queue === 'builder' ? 'builder' : item.queue === 'lab' ? 'lab' : item.queue === 'petHouse' ? 'petHouse' : undefined;
+    // A known item with no levels (queue 'none', e.g. Guardian Shrine under construction) still holds its slot,
+    // mapped by category like an unknown id (SPEC §3.2); it's shown as "<name> (no level data)".
+    const noLevels = item.queue === 'none';
+    const q = noLevels ? queueByCategory(item.category) : item.queue === 'builder' || item.queue === 'lab' || item.queue === 'petHouse' ? item.queue : undefined;
     if (!q) continue;
     const target = inst;
     running.push({
@@ -168,7 +171,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       lockUid: lockOf(inst),
       remainingSec: inst.remainingSec ?? 0,
       itemKey: item.key,
-      itemName: item.name,
+      itemName: noLevels ? `${item.name} (no level data)` : item.name,
       toLevel: inst.upgradingTo,
       tier: runningJobTier(item, inst, exportMode),
       townHall: item.category === 'townHall',
@@ -448,6 +451,26 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
 
   nowState ??= { instances: instances.map((i) => ({ ...i })), busy: new Set(state.busy) };
   return { slots, timeline, elapsedSec, nowState, idle, finalInstances: instances, helpers: helperInfo.helpers, helperSuggestions, activeBoosts, warnings };
+}
+
+/**
+ * The slot a running upgrade on a known item without levels holds (§3.2): units the lab, pets the pet house,
+ * equipment nothing (instant), everything else (buildings, traps, heroes, guardians, modules) a builder.
+ */
+export function queueByCategory(category: Category): SlotQueue | undefined {
+  switch (category) {
+    case 'troop':
+    case 'spell':
+    case 'siege':
+      return 'lab';
+    case 'pet':
+      return 'petHouse';
+    case 'equipment':
+    case 'helper':
+      return undefined;
+    default:
+      return 'builder';
+  }
 }
 
 /** Short labels for the boosts still running at "now". The Clock Tower is Builder Base only. */

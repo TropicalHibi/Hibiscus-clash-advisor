@@ -316,26 +316,51 @@ function recipeSources(data: GameData): Set<number> {
   return new Set(data.merges.flatMap((m) => m.sources.map((s) => s.dataId)));
 }
 
-/** Buildings allowed at the TH but not owned: allowed − consumed by existing merges − owned. */
-function plannedBuildings(c: Ctx): OwnedInstance[] {
+/** A counted building the planner can actually build: on the builder queue with a first level in the data. */
+const hasBuildLevel = (item: Item) => item.queue === 'builder' && !!item.levels[0];
+
+/** Counted buildings allowed at `th` but not owned, by item: allowed − consumed by existing merges − owned. */
+function missingBuildings(data: GameData, instances: OwnedInstance[], th: number): { item: Item; missing: number }[] {
   const consumedBy = new Map<number, number>();
-  for (const r of c.data.merges) {
-    const mergedOwned = c.instances.filter((i) => i.dataId === r.dataId).length;
+  for (const r of data.merges) {
+    const mergedOwned = instances.filter((i) => i.dataId === r.dataId).length;
     for (const s of r.sources) consumedBy.set(s.dataId, (consumedBy.get(s.dataId) ?? 0) + s.qty * mergedOwned);
   }
-  const known = recipeSources(c.data);
-  const planned: OwnedInstance[] = [];
-  for (const item of c.data.byDataId.values()) {
+  const known = recipeSources(data);
+  const out: { item: Item; missing: number }[] = [];
+  for (const item of data.byDataId.values()) {
     if (!BUILDABLE.has(item.category) || NOT_BUILDABLE_IDS.has(item.id) || !item.countPerTH) continue;
     // A merge source that merges.yaml doesn't know: its raw count would suggest copies the player
     // can't build (they were merged away). Never plan copies of it (§7, Plan-tab warning instead).
     if (item.countAfterMergesPerTH && !known.has(item.dataId)) continue;
-    const allowed = countAt(item.countPerTH, c.lv.th) ?? 0;
-    const owned = c.instances.filter((i) => i.dataId === item.dataId).length;
+    const allowed = countAt(item.countPerTH, th) ?? 0;
+    const owned = instances.filter((i) => i.dataId === item.dataId).length;
     const missing = allowed - (consumedBy.get(item.dataId) ?? 0) - owned;
+    if (missing > 0) out.push({ item, missing });
+  }
+  return out;
+}
+
+/** Buildings allowed at the TH but not owned, as planned (level 0) instances. Only buildable ones (§6.2). */
+function plannedBuildings(c: Ctx): OwnedInstance[] {
+  const planned: OwnedInstance[] = [];
+  for (const { item, missing } of missingBuildings(c.data, c.instances, c.lv.th)) {
+    if (!hasBuildLevel(item)) continue; // no level data: an info row (newBuildingsWithoutLevels), never the gate
     for (let n = 1; n <= missing; n++) planned.push({ uid: `${item.key}#new${n}`, dataId: item.dataId, itemKey: item.key, level: 0, planned: true });
   }
   return planned;
+}
+
+/**
+ * Buildings the data counts at the player's TH but gives no levels (Guardian Shrine in ClashKing v0.1.20), not
+ * owned yet. They can't be planned or timed, so they never hold the TH gate (SPEC §6.2, §6.3); the Plan tab and
+ * `npm run plan` show them as an informational Tier 0 row "Build <name> (no level data yet)".
+ */
+export function newBuildingsWithoutLevels(data: GameData, instances: OwnedInstance[]): string[] {
+  const th = levelsOf(instances).th;
+  return missingBuildings(data, instances, th)
+    .filter(({ item }) => !hasBuildLevel(item))
+    .map(({ item, missing }) => `Build ${item.name}${missing > 1 ? ` ×${missing}` : ''} (no level data yet)`);
 }
 
 interface MergePlan {
@@ -583,7 +608,11 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
   // built, every building level the next TH requires reached.
   if (th.thInst && th.thNext && !opts.noTownHall) {
     const gateOpen = [...merges.gateOpen, ...reqs.gateOpen];
-    for (const p of planned) if ((data.items.get(p.itemKey)!.levels[0]?.thRequired ?? 0) <= lv.th) gateOpen.push(p.itemKey);
+    // Only buildable new buildings hold the gate (planned instances all have a first level, see plannedBuildings).
+    for (const p of planned) {
+      const first = data.items.get(p.itemKey)!.levels[0];
+      if (first && (first.thRequired ?? 0) <= lv.th) gateOpen.push(p.itemKey);
+    }
     if (!gateOpen.length) {
       const reqText = reqs.met.length ? `, TH${lv.th + 1} requirements met: ${reqs.met.join(', ')}` : '';
       drafts.push(draft(data.byDataId.get(IDS.townHall)!, th.thInst, th.thNext, { g: 'th' }, `Rush: Town Hall upgrade, TH gate clear (all merges done, all new buildings built${reqText})`, 'upgrade'));

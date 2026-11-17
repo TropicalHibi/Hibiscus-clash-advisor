@@ -43,6 +43,9 @@ export function renderPlan(p: Plan): string {
         `<div class="now-item"><span class="slot">${esc(next.slotId)}</span><span class="what">${icon(next.itemKey)}Next: ${esc(next.itemName)} ${next.toLevel} at ${esc(at(next.start))}</span><span class="reason">${esc(next.reason)} · ${esc(fmtCost(next.cost, next.resource))}</span></div>`,
       );
   }
+  // Counted buildings without level data (SPEC §6.2): informational, never the TH gate.
+  for (const row of p.newBuildingsInfo)
+    out.push(`<div class="now-item info"><span class="slot">T0</span><span class="what">${esc(row)}</span><span class="reason">Tier 0 (info): not in the game data's levels yet, so it can't be planned and doesn't hold the TH gate</span></div>`);
   out.push('</div>');
 
   // Timeline

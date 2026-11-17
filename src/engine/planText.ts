@@ -18,6 +18,7 @@ export function planToText(p: Plan): string {
   L.push('== Now ==');
   if (p.startNow.length === 0) L.push('  No builder/lab/pet slot is free right now.');
   for (const e of p.startNow) L.push(`  ${e.slotId}: start ${e.itemName} → ${e.toLevel} (${fmtCost(e.cost, e.resource)}, ${fmtDuration(e.end - e.start)}) — ${e.reason}`);
+  for (const row of p.newBuildingsInfo) L.push(`  T0 (info): ${row} — can't be planned yet; doesn't hold the TH gate`);
   L.push('');
 
   L.push('== Top builder priorities right now ==');

@@ -13,7 +13,7 @@ import { fmtClock } from './format';
 import { forecast, wallDump, type Forecast, type WallDump } from './forecast';
 import { equipmentCandidates, labSections, researchCandidates, type QueueCandidate } from './queues';
 import { boostsFor, simulate, type SimResult, type TimelineEntry } from './scheduler';
-import { builderCandidates, detectMode, TIER_NAMES, type Candidate, type Mode } from './tiers';
+import { builderCandidates, detectMode, newBuildingsWithoutLevels, TIER_NAMES, type Candidate, type Mode } from './tiers';
 
 export interface BookReadyHero {
   itemKey: string;
@@ -50,7 +50,7 @@ export interface Plan {
   goldPass: Settings['goldPass'];
   /** "Simulate helpers" setting (helpers + active boosts applied). */
   simulateHelpers: boolean;
-  /** One line about helpers and boosts for the summary ("Builder's Apprentice L8 (8h/day) …"). */
+  /** One line about helpers and boosts for the summary ("Builder's Apprentice L8 (−8h per 23h cycle) …"). */
   helperLine: string;
   /** "Apprentice: repeating on Grand Warden. Suggest switching to Town Hall 19 …" (§10.1; suggestion only). */
   helperSuggestions: string[];
@@ -64,6 +64,8 @@ export interface Plan {
   startNow: TimelineEntry[];
   /** Ranked builder candidates at the initial state (top of the list). */
   topCandidates: Candidate[];
+  /** Informational Tier 0 rows: "Build Guardian Shrine (no level data yet)" (SPEC §6.2; never the TH gate). */
+  newBuildingsInfo: string[];
   forecast: Forecast;
   bookReady: BookReadyHero[];
   wallDump: WallDump | null;
@@ -84,7 +86,7 @@ export function helperLine(account: AccountState, sim: SimResult, nowSec: number
   if (sim.helpers.length) {
     // Helpers share one cooldown, so they all work at the same time.
     const next = Math.min(...sim.helpers.map((h) => nextHelperTime(h, 0)));
-    parts.push(`${sim.helpers.map((h) => `${h.name} L${h.level} (−${h.workRate}h/day)`).join(', ')}; next work hour ${fmtClock(nowSec + next, nowSec)}`);
+    parts.push(`${sim.helpers.map((h) => `${h.name} L${h.level} (−${h.workRate}h per 23h cycle)`).join(', ')}; next work hour ${fmtClock(nowSec + next, nowSec)}`);
   }
   if (sim.activeBoosts.length) parts.push(`Boosts: ${sim.activeBoosts.join(', ')}`);
   return parts.join(' · ');
@@ -161,6 +163,7 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
     sim,
     startNow: sim.timeline.filter((e) => !e.inProgress && e.start === 0),
     topCandidates: builderCandidates(data, state, settings, { builderBoost: boosts.builder }).slice(0, 15),
+    newBuildingsInfo: newBuildingsWithoutLevels(data, state.instances),
     forecast: forecast(sim.timeline, windowSec),
     bookReady,
     wallDump: wallDump(data, account),
