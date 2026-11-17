@@ -65,7 +65,7 @@ describe('auth: developer-site login or COC_API_TOKEN', () => {
   });
 
   it('redact() removes listed secrets, JWT-like tokens, emails, player tags and IPs', () => {
-    expect(redact(`x ${PASSWORD} ${TOKEN} a.b@c.de #2PP0JQ8 10.0.0.1`, [PASSWORD])).toBe('x [redacted] [token] [email] #[tag] [ip]');
+    expect(redact(`x ${PASSWORD} ${TOKEN} a.b@c.de #ABC123X 10.0.0.1`, [PASSWORD])).toBe('x [redacted] [token] [email] #[tag] [ip]');
     expect(hasCredentials({ COC_DEV_EMAIL: 'a', COC_DEV_PASSWORD: 'b' })).toBe(true);
     expect(hasCredentials({ COC_DEV_EMAIL: 'a' })).toBe(false);
     expect(hasCredentials({ COC_API_TOKEN: 't' })).toBe(true);
