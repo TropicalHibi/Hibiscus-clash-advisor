@@ -167,10 +167,16 @@ describe('real refresh wiring (scripts/lib/nodeDeps.ts)', () => {
     const exec = (() => {
       throw Object.assign(new Error('spawnSync npm ETIMEDOUT'), { code: 'ETIMEDOUT', stderr: '' });
     }) as never;
-    expect(() => runRefresh(nodeRefreshDeps({ root, execSync: exec, log: (l) => logs.push(l) }))).not.toThrow();
+    const execFile = (() => {
+      throw Object.assign(new Error('node ETIMEDOUT'), { code: 'ETIMEDOUT', stderr: 'fetch failed' });
+    }) as never;
+    expect(() => runRefresh(nodeRefreshDeps({ root, execSync: exec, execFile, log: (l) => logs.push(l) }))).not.toThrow();
     expect(logs[0]).toBe('[refresh] warning: git pull --ff-only failed (timed out); continuing with the local copy.');
-    expect(logs[1]).toBe('[refresh] warning: game-data check skipped (npm registry unreachable: timed out); starting the site anyway.');
-    expect(logs[2]).toContain('no COC_DEV_EMAIL/COC_DEV_PASSWORD or COC_API_TOKEN'); // meta.json missing in the temp root, no token
+    // The temp root has no data/clashking/: the site would run on the backup, said on every start.
+    expect(logs[1]).toContain('[refresh] warning: Game data: using the clash-of-clans-data backup');
+    expect(logs[2]).toBe('[refresh] warning: ClashKing check skipped (network error (fetch failed)); starting the site anyway.');
+    expect(logs[3]).toBe('[refresh] warning: game-data check skipped (npm registry unreachable: timed out); starting the site anyway.');
+    expect(logs[4]).toContain('no COC_DEV_EMAIL/COC_DEV_PASSWORD or COC_API_TOKEN'); // meta.json missing in the temp root, no token
     expect(fs.existsSync(path.join(root, 'data', 'refresh-state.json'))).toBe(false);
   });
 
@@ -184,7 +190,10 @@ describe('real refresh wiring (scripts/lib/nodeDeps.ts)', () => {
       spawned.push(cmd);
       return { status: 1, stderr: 'npm error code 1\nAPI error: HTTP 403 on /locations: accessDenied' };
     }) as never;
-    runRefresh(nodeRefreshDeps({ root, execSync: exec, spawnSync: spawn, log: (l) => logs.push(l) }));
+    const execFile = (() => {
+      throw new Error('no network in tests');
+    }) as never;
+    runRefresh(nodeRefreshDeps({ root, execSync: exec, spawnSync: spawn, execFile, log: (l) => logs.push(l) }));
     expect(spawned).toEqual(['npm run meta']);
     expect(logs.at(-1)).toContain('(403: the API key is locked to a different IP)');
   });

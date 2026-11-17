@@ -1,0 +1,132 @@
+{
+  "buildings": [
+    {
+      "_id": 1000001, "name": "Town Hall", "info": "long text", "TID": { "name": "TID_TH" }, "type": "Town Hall", "upgrade_resource": "Gold", "village": "home",
+      "levels": [
+        { "level": 1, "build_cost": 0, "build_time": 0, "required_townhall": 0, "unlocks": [
+          { "name": "Cannon", "_id": 1000008, "quantity": 2 }, { "name": "Laboratory", "_id": 1000007, "quantity": 1 },
+          { "name": "Builder's Hut", "_id": 1000015, "quantity": 1 }, { "name": "Wall", "_id": 1000010, "quantity": 10 }, { "name": "Bomb", "_id": 12000000, "quantity": 1 } ] },
+        { "level": 2, "build_cost": 1000, "build_time": 10, "required_townhall": 1, "unlocks": [
+          { "name": "Cannon", "_id": 1000008, "quantity": 2 }, { "name": "Eagle Artillery", "_id": 1000031, "quantity": 1 }, { "name": "Wall", "_id": 1000010, "quantity": 15 } ] },
+        { "level": 3, "build_cost": 4000, "build_time": 3600, "required_townhall": 2,
+          "merge_requirement": [{ "name": "Eagle Artillery", "_id": 1000031, "geared_up": false, "level": 2 }],
+          "unlocks": [{ "name": "Twin Cannon", "_id": 1000200, "quantity": 1 }, { "name": "Crafting Station", "_id": 1000097, "quantity": 1 }] }
+      ]
+    },
+    {
+      "_id": 1000008, "name": "Cannon", "type": "Defense", "upgrade_resource": "Gold", "village": "home", "superchargeable": true,
+      "levels": [
+        { "level": 1, "build_cost": 250, "build_time": 5, "required_townhall": 1 },
+        { "level": 2, "build_cost": 1000, "build_time": 30, "required_townhall": 2 },
+        { "level": 3, "build_cost": 5000, "build_time": 600, "required_townhall": 2,
+          "supercharge": { "upgrade_resource": "Gold", "required_townhall": 3, "levels": [
+            { "level": 1, "build_cost": 9000, "build_time": 7200 }, { "level": 2, "build_cost": 11000, "build_time": 9000 } ] } }
+      ]
+    },
+    {
+      "_id": 1000200, "name": "Twin Cannon", "type": "Defense", "upgrade_resource": "Gold", "village": "home",
+      "levels": [
+        { "level": 1, "build_cost": 20000, "build_time": 86400, "required_townhall": null,
+          "merge_requirement": [{ "name": "Cannon", "_id": 1000008, "geared_up": false, "level": 3 }, { "name": "Cannon", "_id": 1000008, "geared_up": false, "level": 3 }] },
+        { "level": 2, "build_cost": 30000, "build_time": 172800, "required_townhall": 3 }
+      ]
+    },
+    {
+      "_id": 1000031, "name": "Eagle Artillery", "type": "Defense", "upgrade_resource": "Gold", "village": "home",
+      "levels": [{ "level": 1, "build_cost": 3000, "build_time": 600, "required_townhall": 2 }, { "level": 2, "build_cost": 3500, "build_time": 900, "required_townhall": 2 }]
+    },
+    {
+      "_id": 1000007, "name": "Laboratory", "type": "Army", "upgrade_resource": "Elixir", "village": "home",
+      "levels": [{ "level": 1, "build_cost": 500, "build_time": 60, "required_townhall": 1 }, { "level": 2, "build_cost": 2500, "build_time": 600, "required_townhall": 2 }]
+    },
+    {
+      "_id": 1000015, "name": "Builder's Hut", "type": "Worker", "upgrade_resource": "Gold", "village": "home",
+      "levels": [{ "level": 1, "build_cost": 0, "build_time": 0, "required_townhall": 1 }]
+    },
+    {
+      "_id": 1000010, "name": "Wall", "type": "Wall", "upgrade_resource": "Gold", "village": "home",
+      "levels": [{ "level": 1, "build_cost": 50, "build_time": 0, "required_townhall": 1 }, { "level": 2, "build_cost": 1000, "build_time": 0, "required_townhall": 2, "alt_upgrade_resource": "Elixir" }]
+    },
+    {
+      "_id": 1000093, "name": "Helper Hut", "type": "Helper", "upgrade_resource": "Elixir", "village": "home", "levels": []
+    },
+    {
+      "_id": 1000097, "name": "Crafting Station", "type": "Defense", "upgrade_resource": "Gold", "village": "home", "levels": [],
+      "seasonal_defenses": [
+        { "_id": 103000011, "name": "Hot Candle", "info": "x", "TID": { "name": "T" }, "modules": [
+          { "_id": 102000033, "name": "Hot Candle Hitpoints", "upgrade_resource": "Elixir", "levels": [
+            { "level": 1, "required_townhall": 3, "build_cost": 0, "build_time": 0 }, { "level": 2, "required_townhall": 3, "build_cost": 3500000, "build_time": 21600 } ] },
+          { "_id": 102000034, "name": "Hot Candle Damage", "upgrade_resource": "Gold", "levels": [
+            { "level": 1, "required_townhall": 3, "build_cost": 0, "build_time": 0 }, { "level": 2, "required_townhall": 3, "build_cost": 4000000, "build_time": 28800 } ] } ] }
+      ]
+    },
+    {
+      "_id": 1000044, "name": "Cannon", "type": "Defense", "upgrade_resource": "Gold", "village": "builderBase",
+      "levels": [{ "level": 1, "build_cost": 1, "build_time": 1, "required_townhall": 1 }]
+    }
+  ],
+  "traps": [
+    { "_id": 12000000, "name": "Bomb", "upgrade_resource": "Gold", "village": "home",
+      "levels": [{ "level": 1, "build_cost": 400, "build_time": 0, "required_townhall": 1 }, { "level": 2, "build_cost": 1000, "build_time": 60, "required_townhall": 2 }] }
+  ],
+  "troops": [
+    { "_id": 4000000, "name": "Barbarian", "production_building": "Barracks", "upgrade_resource": "Elixir", "housing_space": 1, "village": "home",
+      "levels": [
+        { "level": 1, "upgrade_time": 0, "upgrade_cost": 10000, "required_lab_level": null, "required_townhall": 1 },
+        { "level": 2, "upgrade_time": 3600, "upgrade_cost": 50000, "required_lab_level": 1, "required_townhall": 2 },
+        { "level": 3, "upgrade_time": 0, "upgrade_cost": 0, "required_lab_level": 2, "required_townhall": 3 } ] },
+    { "_id": 4000026, "name": "Super Barbarian", "production_building": "Barracks", "upgrade_resource": "Elixir", "housing_space": 5, "village": "home",
+      "super_troop": { "original_id": 4000000, "original_min_level": 2 },
+      "levels": [{ "level": 1, "upgrade_time": 0, "upgrade_cost": 0, "required_lab_level": 1, "required_townhall": 2 }] },
+    { "_id": 4000030, "name": "Ice Wizard", "production_building": "Barracks", "upgrade_resource": "Elixir", "housing_space": 4, "village": "home", "is_seasonal": true,
+      "levels": [{ "level": 1, "upgrade_time": 0, "upgrade_cost": 0, "required_lab_level": null, "required_townhall": 1 }] },
+    { "_id": 4000051, "name": "Wall Wrecker", "production_building": "Workshop", "upgrade_resource": "Elixir", "housing_space": 1, "village": "home",
+      "levels": [
+        { "level": 1, "upgrade_time": 7200, "upgrade_cost": 20000, "required_lab_level": 1, "required_townhall": 2 },
+        { "level": 2, "upgrade_time": 0, "upgrade_cost": 0, "required_lab_level": 2, "required_townhall": 3 } ] }
+  ],
+  "spells": [
+    { "_id": 26000002, "name": "Rage Spell", "production_building": "Spell Factory", "upgrade_resource": "Elixir", "housing_space": 2,
+      "levels": [
+        { "level": 1, "upgrade_time": 1800, "upgrade_cost": 15000, "required_lab_level": 1, "required_townhall": 2 },
+        { "level": 2, "upgrade_time": 0, "upgrade_cost": 0, "required_lab_level": 2, "required_townhall": 3 } ] },
+    { "_id": 26000006, "name": "Santa's Surprise", "production_building": "Spell Factory", "upgrade_resource": "Elixir", "housing_space": 2, "is_seasonal": true,
+      "levels": [{ "level": 1, "upgrade_time": 0, "upgrade_cost": 0, "required_lab_level": null, "required_townhall": 1 }] }
+  ],
+  "heroes": [
+    { "_id": 28000001, "name": "Archer Queen", "production_building": "Hero Hall", "upgrade_resource": "Dark Elixir", "village": "home",
+      "levels": [
+        { "level": 1, "upgrade_time": 7200, "upgrade_cost": 5000, "required_townhall": 2, "required_hero_tavern_level": 1 },
+        { "level": 2, "upgrade_time": 691200, "upgrade_cost": 5500, "required_townhall": 2, "required_hero_tavern_level": 1 },
+        { "level": 3, "upgrade_time": 0, "upgrade_cost": 0, "required_townhall": 3, "required_hero_tavern_level": 2 } ] },
+    { "_id": 28000003, "name": "Battle Machine", "village": "builderBase", "levels": [] }
+  ],
+  "pets": [
+    { "_id": 73000000, "name": "L.A.S.S.I", "upgrade_resource": "Dark Elixir",
+      "levels": [
+        { "level": 1, "upgrade_time": 86400, "upgrade_cost": 100000, "required_pet_house_level": 1, "required_townhall": 2 },
+        { "level": 2, "upgrade_time": 0, "upgrade_cost": 0, "required_pet_house_level": 2, "required_townhall": 3 } ] }
+  ],
+  "equipment": [
+    { "_id": 90000000, "name": "Barbarian Puppet", "rarity": "Common", "hero": "Barbarian King",
+      "levels": [
+        { "level": 1, "required_blacksmith_level": 1, "required_townhall": 2, "upgrade_cost": { "shiny_ore": 120, "glowy_ore": 0, "starry_ore": 0 } },
+        { "level": 2, "required_blacksmith_level": 1, "required_townhall": 2, "upgrade_cost": { "shiny_ore": 240, "glowy_ore": 20, "starry_ore": 0 } },
+        { "level": 3, "required_blacksmith_level": 3, "required_townhall": 3, "upgrade_cost": { "shiny_ore": 0, "glowy_ore": 0, "starry_ore": 0 } } ] }
+  ],
+  "guardians": [
+    { "_id": 107000000, "name": "Longshot", "upgrade_resource": "Elixir",
+      "levels": [
+        { "level": 1, "upgrade_time": 604800, "upgrade_cost": 18000000, "required_townhall": 3 },
+        { "level": 2, "upgrade_time": 0, "upgrade_cost": 0, "required_townhall": 3 } ] }
+  ],
+  "helpers": [
+    { "_id": 93000000, "name": "Builder's Apprentice", "upgrade_resource": "Gems",
+      "levels": [{ "level": 1, "required_townhall": 1, "upgrade_cost": 500, "boost_time_seconds": 3600, "boost_multiplier": 1 }, { "level": 2, "required_townhall": 1, "upgrade_cost": 500, "boost_time_seconds": 3600, "boost_multiplier": 2 }] },
+    { "_id": 93000002, "name": "Alchemist", "upgrade_resource": "Gems",
+      "levels": [{ "level": 1, "required_townhall": 1, "upgrade_cost": 100, "boost_time_seconds": 4, "boost_multiplier": 0 }] },
+    { "_id": 93000003, "name": "Prospector", "levels": [], "requires_gold_pass": true }
+  ],
+  "achievements": [{ "name": "Not used" }],
+  "locales": [{ "locale": "en" }]
+}

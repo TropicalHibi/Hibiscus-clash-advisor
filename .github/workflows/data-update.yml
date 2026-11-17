@@ -1,9 +1,12 @@
-# Daily game-data update (SPEC §9b). Keeps clash-of-clans-data on the live site current without a local
-# machine. No secrets: it only talks to the npm registry and this repo (never `npm run meta`).
-#   no newer version         → exits successfully, nothing else happens
-#   newer + everything passes → commits package.json, package-lock.json, public/data-changes.json to main,
-#                               then starts the Pages workflow (a GITHUB_TOKEN push alone wouldn't trigger it)
-#   anything fails            → commits nothing; opens or updates the issue "Data update failed: <version>"
+# Daily game-data update (SPEC §9b). Keeps the game data on the live site current without a local machine:
+#   ClashKing static data (the game data, pinned in data/clashking/) and clash-of-clans-data (item images,
+#   TH weapons, backup source). No secrets: it talks to GitHub (ClashKing's releases; the workflow's own token
+#   only for rate limits, never printed), the npm registry and this repo (never `npm run meta`).
+#   nothing new               → exits successfully, nothing else happens
+#   new + everything passes   → commits data/clashking/, package.json, package-lock.json, public/data-changes.json
+#                               to main, then starts the Pages workflow (a GITHUB_TOKEN push alone wouldn't trigger it)
+#   anything fails            → commits nothing (the known-good copy stays); opens or updates the issue
+#                               "Data update failed: <version>"
 name: Daily game-data update
 
 on:
@@ -34,11 +37,14 @@ jobs:
       - id: install
         run: npm ci
 
-      # Same code path as a local `npm run sync`: snapshot the installed version, install the newest one in
-      # the same major, normalize + validate it (known-good restore on failure), diff, write
-      # public/data-changes.json. Unattended, a merge missing from config/merges.yaml is also a failure.
+      # Same code path as a local `npm run sync`: clash-of-clans-data (newest in the major, known-good restore),
+      # then ClashKing (latest clashy.go release at its commit; validated before it replaces the pinned copy,
+      # otherwise the previous copy stays), snapshot before + after, diff → public/data-changes.json, and the
+      # cross-check report (in the step summary). Unattended, a merge the recipes don't explain also fails.
       - id: check
-        name: Check npm and update clash-of-clans-data
+        name: Check ClashKing and npm, update the game data
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: npx tsx scripts/data-update.ts check --out "$RUNNER_TEMP/data-update.json"
 
       - id: test
@@ -56,7 +62,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json public/data-changes.json
+          git add package.json package-lock.json public/data-changes.json data/clashking/
           git commit -m "$MESSAGE"
           git pull --rebase origin main
           git push origin HEAD:main

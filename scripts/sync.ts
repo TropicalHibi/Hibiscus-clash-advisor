@@ -1,11 +1,14 @@
-// npm run sync [-- --offline] (SPEC §9): update clash-of-clans-data within the current major, validate it,
-// keep the last known-good version if the new one can't be loaded, then snapshot the normalized data and
-// print the diff vs the previous snapshot (also saved to public/data-changes.json for the site banner).
-// --offline skips npm entirely: validate + snapshot the installed version.
-// Exit codes: 0 up to date / updated, 1 failed or restored (so the predev refresh prints a warning).
+// npm run sync [-- --offline] (SPEC §9):
+//   1. clash-of-clans-data (item images, TH weapons, backup source): newest within the current major,
+//      known-good restore if it can't be loaded.
+//   2. ClashKing static data (the game data): latest clashy.go release (main as fallback), downloaded at its
+//      commit, validated, then pinned in data/clashking/; a file that fails keeps the previous copy.
+//   3. Validation of the active data, snapshot + diff (public/data-changes.json), cross-check report.
+// --offline skips npm and GitHub: validate + snapshot what's installed / pinned.
+// Exit codes: 0 up to date / updated, 1 failed, restored or kept the previous ClashKing copy.
 import { PROJECT_ROOT } from '../src/data/loadNode';
-import { nodeSyncDeps } from './lib/nodeDeps';
-import { syncData } from './lib/sync';
+import { nodeFullSyncDeps } from './lib/nodeDeps';
+import { syncAll } from './lib/sync';
 
-const outcome = syncData(nodeSyncDeps({ root: PROJECT_ROOT }), { offline: process.argv.includes('--offline') });
-process.exitCode = outcome === 'up-to-date' || outcome === 'updated' ? 0 : 1;
+const r = syncAll(nodeFullSyncDeps({ root: PROJECT_ROOT }), { offline: process.argv.includes('--offline') });
+process.exitCode = r.outcome === 'up-to-date' || r.outcome === 'updated' ? 0 : 1;

@@ -17,6 +17,10 @@ export interface RefreshState {
   lastGoodDataVersion?: string;
   /** A version that failed to load; sync restored the last good one. Warned about on every start until fixed. */
   dataFailure?: { version: string; reason: string; at: number };
+  /** Newest ClashKing version that validated and was pinned (SPEC §9). */
+  lastGoodClashKing?: string;
+  /** A ClashKing file that failed to load / validate; the pinned copy was kept. Warned about until a sync succeeds. */
+  clashKingFailure?: { version: string; reason: string; at: number };
 }
 
 export interface RefreshDeps {
@@ -45,6 +49,12 @@ export interface RefreshDeps {
   installDeps?(): void;
   /** `npm run sync -- --offline`: validate + snapshot the installed data (no npm registry). */
   syncOffline?(): void;
+  /** Pinned ClashKing commit (data/clashking/pin.json), or undefined when nothing is pinned. */
+  clashKingPinned?(): string | undefined;
+  /** Latest ClashKing release (or main) commit and version label. Throws when GitHub can't be reached. */
+  clashKingLatest?(): { commit: string; version: string };
+  /** The backup warning when the site would run on clash-of-clans-data (no usable ClashKing copy). */
+  backupWarning?(): string | undefined;
   log(line: string): void;
 }
 
@@ -113,27 +123,52 @@ export function refreshGameData(d: RefreshDeps): DataOutcome {
     d.log(
       `[refresh] warning: clash-of-clans-data ${bad.version} can't be used (${oneLine(bad.reason, 'load failed')}); staying on ${d.installedVersion() ?? 'the previous version'}. Fix config/merges.yaml or the code, then run npm run sync.`,
     );
+  const ckBad = state.clashKingFailure;
+  if (ckBad)
+    d.log(`[refresh] warning: ClashKing ${ckBad.version} can't be used (${oneLine(ckBad.reason, 'load failed')}); staying on the pinned known-good copy. Run npm run sync after a fix.`);
+  try {
+    const backup = d.backupWarning?.();
+    if (backup) d.log(`[refresh] warning: ${backup}`);
+  } catch {
+    // the check itself failing is not worth a second warning
+  }
   if (state.lastDataCheck !== undefined && now - state.lastDataCheck < REFRESH_MAX_AGE_MS) return 'checked-recently';
+  // ClashKing (SPEC §9a step 1): a newer release than the pinned commit → full sync. Optional dependency.
+  let ckReason: string | undefined;
+  let ckKnownBad = false;
+  if (d.clashKingLatest) {
+    try {
+      const latest = d.clashKingLatest();
+      const pinned = d.clashKingPinned?.();
+      if (latest.commit !== pinned) {
+        if (ckBad && latest.version === ckBad.version) ckKnownBad = true; // don't retry a known-bad file on every start
+        else ckReason = `ClashKing ${latest.version} is out (pinned: ${pinned ? pinned.slice(0, 7) : 'none'})`;
+      }
+    } catch (e) {
+      d.log(`[refresh] warning: ClashKing check skipped (${oneLine(msg(e), 'GitHub unreachable')}); starting the site anyway.`);
+    }
+  }
   let latest: string;
   try {
     latest = d.latestVersion().trim();
     if (!latest) throw new Error('npm returned no version');
   } catch (e) {
     d.log(`[refresh] warning: game-data check skipped (${oneLine(msg(e), 'npm view failed')}); starting the site anyway.`);
-    return 'failed';
+    if (!ckReason) return 'failed';
+    latest = d.installedVersion() ?? '';
   }
   const installed = d.installedVersion();
-  if (bad && latest === bad.version && isNewerVersion(latest, installed)) {
+  const npmKnownBad = !!(bad && latest === bad.version && isNewerVersion(latest, installed));
+  const npmNew = !npmKnownBad && isNewerVersion(latest, installed);
+  if (!npmNew && !ckReason) {
+    d.writeState({ ...state, lastDataCheck: now });
     // Known to fail: don't reinstall it on every start. `npm run sync` by hand retries it after a fix.
-    d.writeState({ ...state, lastDataCheck: now });
-    return 'known-bad';
-  }
-  if (!isNewerVersion(latest, installed)) {
-    d.writeState({ ...state, lastDataCheck: now });
-    d.log(`[refresh] game data up to date (clash-of-clans-data ${installed}).`);
+    if (npmKnownBad || ckKnownBad) return 'known-bad';
+    d.log(`[refresh] game data up to date (${d.clashKingPinned?.() ? 'ClashKing pinned, ' : ''}clash-of-clans-data ${installed}).`);
     return 'up-to-date';
   }
-  d.log(`[refresh] clash-of-clans-data ${latest} is out (installed: ${installed ?? 'none'}); running npm run sync…`);
+  if (npmNew) d.log(`[refresh] clash-of-clans-data ${latest} is out (installed: ${installed ?? 'none'}); running npm run sync…`);
+  else d.log(`[refresh] ${ckReason}; running npm run sync…`);
   try {
     d.runSync();
   } catch (e) {

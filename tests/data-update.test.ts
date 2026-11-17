@@ -8,24 +8,26 @@ import { nodeGitPull } from '../scripts/lib/nodeDeps';
 import { refreshGit, type RefreshDeps } from '../scripts/lib/refresh';
 import { recordSnapshot, type SnapshotIO } from '../scripts/lib/snapshots';
 import { syncData, type DataCheck, type SyncDeps } from '../scripts/lib/sync';
-import { readConfig } from '../src/data/loadNode';
 import { toSnapshot, type DataChangesFile, type Snapshot } from '../src/data/snapshot';
 import type { GameData } from '../src/data/types';
 import { checkLevels, describeMissingMerges, explainMissingMerges } from '../src/data/validate';
-import { data, modifiedData, rawItem } from './helpers';
+import { cocData, data, modifiedData, rawItem } from './helpers';
 
 // ── fake registry ──
 const cannon = data.byId.get('cannon')!;
 const cannonTop = cannon.levels[cannon.levels.length - 1];
 /** "0.20.0": Cannon's top level is cheaper and faster. */
-const nextData = modifiedData((files) => {
-  const l = rawItem(files, 'cannon').levels.find((x: any) => !x.supercharge && x.level === cannonTop.level);
-  l.buildCost = cannonTop.cost - 1_000_000;
-  l.buildTime = { days: 2, hours: 0, minutes: 0, seconds: 0 };
+const nextData = modifiedData((raw) => {
+  const l = rawItem(raw, 'cannon').levels.find((x: any) => x.level === cannonTop.level);
+  l.build_cost = cannonTop.cost - 1_000_000;
+  l.build_time = 2 * 86400;
 });
-/** "0.20.0" with a merge merges.yaml doesn't know (here: the Super Wizard Tower recipe is missing). */
-const mergesWithoutSWT = readConfig('merges.yaml').replace(/\n {2}super-wizard-tower:[\s\S]*$/, '\n');
-const nextDataMissingMerge = modifiedData(() => {}, mergesWithoutSWT);
+/**
+ * "0.20.0" with a merge the recipes don't know. ClashKing carries every merge itself, so this can only happen
+ * on the clash-of-clans-data backup (built-in recipes) or through a bad override: here, the backup without
+ * the Super Wizard Tower recipe.
+ */
+const nextDataMissingMerge = cocData(() => {}, { dropRecipes: ['super-wizard-tower'] });
 
 function memIO(initial: Record<string, Snapshot> = {}) {
   const files = new Map(Object.entries(initial));

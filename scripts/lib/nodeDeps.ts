@@ -1,16 +1,19 @@
 // Real (Node) side effects for the refresh and sync logic. Process runners are injectable so the
 // wiring — timeouts, npm errors, exit codes — can be tested without npm or the network.
-import { execSync as realExecSync, spawnSync as realSpawnSync } from 'node:child_process';
+import { execFileSync as realExecFileSync, execSync as realExecSync, spawnSync as realSpawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { parse as parseDotenv } from 'dotenv';
 import { checkHeroCaps, checkLevels, checkMergeConsumption } from '../../src/data/validate';
-import { loadGameDataFresh } from '../../src/data/loadNode';
+import { CK_DIR, loadCocDataFresh, loadGameDataFresh, normalizeClashKingNode, PROJECT_ROOT, readClashKing } from '../../src/data/loadNode';
+import { crossCheck, crossCheckLines } from '../../src/data/crossCheck';
+import { backupWarning, clashKingVersion, dataSourceLabel } from '../../src/data/source';
 import { hasCredentials } from './auth';
 import { toSnapshot, type DataChangesFile, type Snapshot } from '../../src/data/snapshot';
 import { isoDate, recordSnapshot, type SnapshotIO } from './snapshots';
 import { refresh, type RefreshDeps, type RefreshState } from './refresh';
-import { majorOf, newestOf, type DataCheck, type SyncDeps } from './sync';
+import { githubHeaders, rawUrl, resolveLatestWith, type ClashKingDeps } from './clashking';
+import { majorOf, newestOf, type DataCheck, type FullSyncDeps, type SyncDeps } from './sync';
 
 type ExecSync = (cmd: string, opts: { cwd: string; encoding?: 'utf8'; timeout?: number; stdio?: unknown }) => string | Buffer;
 type SpawnSync = (cmd: string, opts: Record<string, unknown>) => { status: number | null; stderr?: string | null; error?: Error };
@@ -19,6 +22,8 @@ export interface NodeOpts {
   root: string;
   execSync?: ExecSync;
   spawnSync?: SpawnSync;
+  /** Runs `node -e` for the GitHub fetches (ClashKing); tests inject a fake, so they never touch the network. */
+  execFile?: ExecFileSync;
   log?: (line: string) => void;
 }
 
@@ -92,6 +97,12 @@ export function nodeRefreshDeps(o: NodeOpts): RefreshDeps {
     syncOffline: () => {
       exec('npm run sync -- --offline', { cwd: o.root, stdio: 'inherit', timeout: 5 * 60_000 });
     },
+    clashKingPinned: () => readClashKing(path.join(o.root, 'data', 'clashking'))?.pin.commit,
+    clashKingLatest: () => {
+      const r = resolveLatestWith((url, headers) => fetchTextSync(url, headers, o.execFile), githubHeaders());
+      return { commit: r.commit, version: clashKingVersion(r) };
+    },
+    backupWarning: () => (readClashKing(path.join(o.root, 'data', 'clashking')) ? undefined : backupWarning('data/clashking/static_data.json is missing or unreadable')),
     runMeta: () => {
       // stdout (progress + summary) is shown live; stderr is captured for the one-line warning.
       const r = spawn('npm run meta', { cwd: o.root, shell: true, encoding: 'utf8', stdio: ['ignore', 'inherit', 'pipe'], timeout: 30 * 60_000 });
@@ -183,5 +194,108 @@ export function nodeSyncDeps(o: NodeOpts): SyncDeps {
     },
     check: checkInstalledData,
     log: o.log ?? ((line) => console.log(line)),
+  };
+}
+
+// ── ClashKing (SPEC §3.1, §9) ──
+
+type ExecFileSync = (file: string, args: string[], opts: Record<string, unknown>) => string | Buffer;
+
+/**
+ * Synchronous HTTP GET via a child `node` process using fetch (same on Windows and Linux; the sync code is
+ * synchronous like its npm calls). The URL and headers go in through the environment and are never printed.
+ */
+export function fetchTextSync(url: string, headers: Record<string, string>, execFile: ExecFileSync = realExecFileSync as unknown as ExecFileSync): { status: number; text: string } {
+  const script =
+    'fetch(process.env.CK_URL,{headers:JSON.parse(process.env.CK_HEADERS),signal:AbortSignal.timeout(30000)})' +
+    '.then(async r=>process.stdout.write(JSON.stringify({status:r.status,text:await r.text()})))' +
+    '.catch(e=>{process.stderr.write(String(e&&e.message||e));process.exit(1)})';
+  try {
+    const out = execFile(process.execPath, ['-e', script], {
+      encoding: 'utf8',
+      timeout: 60_000,
+      maxBuffer: 64 * 1024 * 1024,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, CK_URL: url, CK_HEADERS: JSON.stringify(headers) },
+    });
+    return JSON.parse(String(out)) as { status: number; text: string };
+  } catch (e) {
+    const stderr = String((e as { stderr?: unknown }).stderr ?? '').trim();
+    throw new Error(`network error (${(stderr || (e as Error).message).split(/\r?\n/)[0].slice(0, 120)})`);
+  }
+}
+
+export function nodeClashKingDeps(o: NodeOpts & { dir?: string }): ClashKingDeps {
+  const dir = o.dir ?? (o.root === PROJECT_ROOT ? CK_DIR : path.join(o.root, 'data', 'clashking'));
+  const get = (url: string, headers: Record<string, string>) => fetchTextSync(url, headers, o.execFile);
+  const log = o.log ?? ((line: string) => console.log(line));
+  return {
+    readPinned: () => readClashKing(dir),
+    resolveLatest: () => resolveLatestWith(get, githubHeaders()),
+    download: (commit) => {
+      // raw.githubusercontent.com never gets the token.
+      const r = get(rawUrl(commit), { 'User-Agent': 'hibiscus-clash-advisor-sync' });
+      if (r.status !== 200) throw new Error(`HTTP ${r.status}`);
+      return r.text;
+    },
+    normalize: (raw, version) => normalizeClashKingNode(raw, version),
+    write: (raw, pin) => {
+      fs.mkdirSync(dir, { recursive: true });
+      // One space indent: reviewable git diffs between versions without doubling the file size.
+      fs.writeFileSync(path.join(dir, 'static_data.json'), JSON.stringify(raw, null, 1) + '\n');
+      fs.writeFileSync(path.join(dir, 'pin.json'), JSON.stringify(pin, null, 2) + '\n');
+    },
+    ...stateIO(o.root),
+    snapshot: () => recordSnapshot(nodeSnapshotIO(o.root), toSnapshot(loadGameDataFresh(), isoDate(new Date())), log),
+    now: () => new Date(),
+    log,
+  };
+}
+
+/** clash-of-clans-data as the backup: does it load? (Its own merge / hero-cap findings aren't repeated.) */
+export function checkCocBackup(): DataCheck {
+  try {
+    const data = loadCocDataFresh();
+    if (!data.maxTH || !data.items.size) return { ok: false, error: 'no Town Hall levels / items in the data', warnings: [] };
+    const levelErrors = checkLevels(data);
+    if (levelErrors.length) return { ok: false, error: levelErrors[0].message, warnings: [] };
+    return { ok: true, warnings: [], maxTH: data.maxTH };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message, warnings: [] };
+  }
+}
+
+/** ClashKing vs clash-of-clans-data report lines; empty when either side can't be loaded. */
+export function nodeCrossCheck(max = 60): string[] {
+  const ck = readClashKing();
+  if (!ck) return ['Cross-check skipped: no pinned ClashKing copy.'];
+  let coc;
+  try {
+    coc = loadCocDataFresh();
+  } catch (e) {
+    return [`Cross-check skipped: clash-of-clans-data can't be loaded (${(e as Error).message}).`];
+  }
+  return crossCheckLines(crossCheck(normalizeClashKingNode(ck.raw, ck.pin.version), coc), max);
+}
+
+export function nodeFullSyncDeps(o: NodeOpts): FullSyncDeps {
+  const log = o.log ?? ((line: string) => console.log(line));
+  const coc = nodeSyncDeps({ ...o, log });
+  return {
+    coc: { ...coc, check: checkCocBackup },
+    clashKing: nodeClashKingDeps({ ...o, log }),
+    activeCheck: () => {
+      const c = checkInstalledData();
+      let source: string | undefined;
+      try {
+        source = dataSourceLabel(loadGameDataFresh());
+      } catch {
+        source = undefined;
+      }
+      return { ...c, source };
+    },
+    snapshot: coc.snapshot,
+    crossCheck: () => nodeCrossCheck(),
+    log,
   };
 }

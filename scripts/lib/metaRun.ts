@@ -180,7 +180,7 @@ export async function runMeta(o: MetaRunOptions): Promise<MetaRunResult> {
     for (const [id, name] of result.noHousing) L.push(`  ${id}  ${name}`);
   } else L.push('Housing space:        found for every known troop and spell');
   if (result.unknown.size) {
-    L.push(`Unknown IDs (${result.unknown.size}) — not in clash-of-clans-data ${o.dataVersion} or config/super-troops.yaml:`);
+    L.push(`Unknown IDs (${result.unknown.size}) — not in the game data (${o.dataVersion}) or config/super-troops.yaml:`);
     for (const [id, u] of [...result.unknown].sort((a, b) => b[1].attacks - a[1].attacks))
       L.push(`  ${id}  in ${u.attacks} attacks · sections ${[...u.sections].join(',')} · ${u.counted ? 'counted' : 'not counted (CC/hero)'}`);
   } else L.push('Unknown IDs:          none');
