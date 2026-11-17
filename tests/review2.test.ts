@@ -150,18 +150,19 @@ describe('validation: a level above 1 of a scheduled item that costs nothing and
 // ── #12: small correctness items ──
 describe('Resource buildings that are neither storage nor collector (REVIEW-2 #12)', () => {
   it('are category "other" (never the offense tier), with a warning once they have levels', () => {
-    expect(data.byId.get('sour-elixir-cauldron')?.category ?? 'other').toBe('other');
-    expect(data.warnings.some((w) => w.includes('Sour Elixir Cauldron'))).toBe(false); // no levels yet: no noise
+    // No levels: no noise. (Sour Elixir Cauldron was such a building until ClashKing v0.1.21 dropped it.)
+    for (const it of data.byDataId.values()) if (it.category === 'other' && !it.levels.length) expect(data.warnings.some((w) => w.includes(`"${it.name}"`))).toBe(false);
+    // A Resource building that is neither a storage nor a collector, with levels: built from the data, not today's names.
     const d = modifiedData((raw) => {
-      const c = rawItem(raw, 'sour-elixir-cauldron');
-      c.levels = structuredClone(rawItem(raw, 'gold-mine').levels.slice(0, 3));
+      const mine = rawItem(raw, 'gold-mine');
+      raw.buildings.push({ ...structuredClone(mine), _id: 1000999, name: 'Test Cauldron', type: 'Resource', levels: structuredClone(mine.levels.slice(0, 3)) });
     });
-    const cauldron = d.byId.get('sour-elixir-cauldron')!;
+    const cauldron = d.byId.get('test-cauldron')!;
     expect(cauldron.category).toBe('other');
-    expect(d.warnings.some((w) => w.includes('"Sour Elixir Cauldron" is neither a known storage nor a collector'))).toBe(true);
+    expect(d.warnings.some((w) => w.includes('"Test Cauldron" is neither a known storage nor a collector'))).toBe(true);
     const ex = makeExport(MAX_TH, MAX_TH - 2);
     ex.buildings.push({ data: cauldron.dataId, lvl: 1 });
-    expect(candsWith(d, parseWith(ex, d)).some((c) => c.item.id === 'sour-elixir-cauldron')).toBe(false);
+    expect(candsWith(d, parseWith(ex, d)).some((c) => c.item.id === 'test-cauldron')).toBe(false);
   });
 });
 
