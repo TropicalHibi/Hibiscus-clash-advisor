@@ -9,6 +9,7 @@
 // - every `required_*` field on level N is the requirement to have level N (no shift).
 import { buildMergeRecipes, COLLECTORS, mapResource, maxLevelAt, resolveSuperTroops, STORAGES } from './normalize.ts';
 import { EMPTY_OVERRIDES, type MergeOverride, type Overrides } from './overrides.ts';
+import { loadSquads } from './squads.ts';
 import type { Category, GameData, Item, LevelInfo, OreCost, Queue, ThRequirement } from './types.ts';
 
 /** Sections of static_data.json the planner uses (everything else is dropped when the file is pinned). */
@@ -28,24 +29,28 @@ export function ckSlug(name: string): string {
     .replace(/^-|-$/g, '');
 }
 
+/** A squad (TH19): a troop trained in the Squad Barracks. */
+export const isSquad = (t: any): boolean => t?.production_building === 'Squad Barracks';
+
 /**
- * Keeps the sections the planner reads, home village only, without the long `info` texts and `TID` keys.
+ * Keeps the sections the planner reads, home village only, without the long `info` texts and `TID` keys,
+ * except a squad's `info`: its description names the troops and counts behind config/squads.yaml (SPEC §6.7).
  * Throws when a section is missing or not a list: the file's shape changed and must not be pinned.
  */
 export function trimClashKing(full: unknown): ClashKingRaw {
   if (!full || typeof full !== 'object') throw new Error('ClashKing static data is not a JSON object');
-  const strip = (v: any): any => {
-    if (Array.isArray(v)) return v.map(strip);
+  const strip = (v: any, keepInfo = false): any => {
+    if (Array.isArray(v)) return v.map((x) => strip(x));
     if (!v || typeof v !== 'object') return v;
     const o: Record<string, unknown> = {};
-    for (const [k, x] of Object.entries(v)) if (k !== 'info' && k !== 'TID') o[k] = strip(x);
+    for (const [k, x] of Object.entries(v)) if ((k !== 'info' || (keepInfo && typeof x === 'string')) && k !== 'TID') o[k] = strip(x);
     return o;
   };
   const out = {} as ClashKingRaw;
   for (const s of CK_SECTIONS) {
     const list = (full as Record<string, unknown>)[s];
     if (!Array.isArray(list)) throw new Error(`ClashKing static data has no "${s}" list`);
-    out[s] = strip(list.filter((x: any) => x && x.village !== 'builderBase'));
+    out[s] = list.filter((x: any) => x && x.village !== 'builderBase').map((x: any) => strip(x, s === 'troops' && isSquad(x)));
   }
   return out;
 }
@@ -53,6 +58,8 @@ export function trimClashKing(full: unknown): ClashKingRaw {
 export interface ClashKingOptions {
   version: string;
   overrides?: Overrides;
+  /** config/squads.yaml text (squad → component troops). Not an override: it ships filled in. */
+  squads?: string;
   /** TH weapon items (ClashKing has no weapon levels; taken from clash-of-clans-data). */
   weapons?: Item[];
   /** Image candidates for an item (clash-of-clans-data files, matched by id then dataId). Node only. */
@@ -332,6 +339,7 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
       queue: t.is_seasonal ? 'none' : 'lab',
       levels,
       ...(t.is_seasonal ? { seasonal: true } : {}),
+      ...(isSquad(t) ? { squad: true, ...(typeof t.info === 'string' && t.info ? { description: t.info } : {}) } : {}),
       housingSpace: housing(t.housing_space),
       superHousingSpace: superHousing.get(t._id),
       images: imagesOf(id, t._id),
@@ -456,6 +464,10 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
     if (reqs.size) thRequirements[l.level] = [...reqs.values()];
   }
 
+  // ── Squads (SPEC §6.7, §8.3): component troops from config/squads.yaml ──
+  const sq = loadSquads({ byId }, opts.squads);
+  for (const w of sq.warnings) warn(w);
+
   return {
     version: opts.version,
     source: 'clashking',
@@ -466,6 +478,7 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
     bookThresholdSec,
     merges,
     superTroops,
+    squads: sq.squads,
     thRequirements,
     heroHallCaps: {},
     warnings: [...warningSet],

@@ -1,0 +1,49 @@
+# Squads (TH19, SPEC §6.7 / §8.3): each squad's component troops and, where ClashKing's description
+# (static_data.json `info`, same text in translations.json) states them, the counts.
+# A squad's Legend I share of troop space is credited to these troops, split by count × housing space;
+# without counts (or when one is missing) it's split equally. The squad stays a lab item with its own score.
+# Keys and troop ids are item ids (slugs of the ClashKing names). Unknown ids are skipped with a warning.
+# `npm run sync` lists any squad in the data that has no entry here, with its description.
+squads:
+  barch-squad: # "Fifteen Barbarians. Fifteen Archers."
+    troops:
+      - { id: barbarian, count: 15 }
+      - { id: archer, count: 15 }
+  giant-wizard-squad: # Giants + Wizards; no counts given
+    troops:
+      - { id: giant }
+      - { id: wizard }
+  wall-breaker-squad: # "A demolition Squad of five Wall Breakers"
+    troops:
+      - { id: wall-breaker, count: 5 }
+  minion-squad: # "particularly playful in Squads of eight"
+    troops:
+      - { id: minion, count: 8 }
+  balloon-squad: # Balloons (their Skeletons aren't a lab troop); no count given
+    troops:
+      - { id: balloon }
+  golem-witch-squad: # Golems + Witches (the Skeletons are summoned); no counts given
+    troops:
+      - { id: golem }
+      - { id: witch }
+  hog-rider-squad: # Hogs; no count given
+    troops:
+      - { id: hog-rider }
+  miner-squad: # "Ten shovels. Ten tunnels. Ten surprises"
+    troops:
+      - { id: miner, count: 10 }
+  healer-squad: # "A Balloon swoops first … for Healers"; the Healers aren't counted, so equal split
+    troops:
+      - { id: balloon }
+      - { id: healer }
+  pekka-titan-squad: # "P.E.K.K.A … Electro Titan … this Squad duo" (one of each)
+    troops:
+      - { id: pekka, count: 1 }
+      - { id: electro-titan, count: 1 }
+  dragons-squad: # Dragons + Dragon Riders; no counts given
+    troops:
+      - { id: dragon }
+      - { id: dragon-rider }
+  baby-dragon-squad: # "The Tantrum Triplets" (three Baby Dragons)
+    troops:
+      - { id: baby-dragon, count: 3 }

@@ -105,7 +105,7 @@ export function normalizeClashKingNode(raw: ClashKingRaw, version: string, texts
   const weapons = cocWeapons(files);
   const images = cocImageIndex(files);
   // An override-file problem is reported as such (the data loads without the overrides), never as bad ClashKing data.
-  return loadWithOverrides((use) => normalizeClashKing(raw, { version, overrides: use ? parseOverrides(texts) : EMPTY_OVERRIDES, weapons, images }));
+  return loadWithOverrides((use) => normalizeClashKing(raw, { version, overrides: use ? parseOverrides(texts) : EMPTY_OVERRIDES, weapons, images, squads: readConfigIf('squads.yaml') }));
 }
 
 /** clash-of-clans-data normalized (the backup source), with the optional overrides. */

@@ -9,6 +9,7 @@ import type { GameData } from './types';
 import mergesYaml from '../../config/merges.yaml?raw';
 import superTroopsYaml from '../../config/super-troops.yaml?raw';
 import idOverridesYaml from '../../config/id-overrides.yaml?raw';
+import squadsYaml from '../../config/squads.yaml?raw';
 
 // Globs, so a missing file is an empty result (→ backup) rather than a build error.
 const ckFiles = import.meta.glob('/data/clashking/{static_data,pin}.json', { eager: true, import: 'default' }) as Record<string, unknown>;
@@ -26,7 +27,7 @@ export async function loadGameDataBrowser(): Promise<GameData> {
       const th = Object.values(thFiles)[0];
       const weapons = th ? cocTownHallWeapons(th) : [];
       // An override-file problem is an override warning (data loads without them), not a reason for the backup.
-      return loadWithOverrides((use) => normalizeClashKing(raw, { version: pinVersion(pin), overrides: use ? parseOverrides(texts) : EMPTY_OVERRIDES, weapons }));
+      return loadWithOverrides((use) => normalizeClashKing(raw, { version: pinVersion(pin), overrides: use ? parseOverrides(texts) : EMPTY_OVERRIDES, weapons, squads: squadsYaml }));
     } catch (e) {
       reason = `the pinned ClashKing data can't be loaded (${(e as Error).message})`;
     }

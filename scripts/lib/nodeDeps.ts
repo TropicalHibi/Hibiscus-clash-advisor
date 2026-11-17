@@ -4,7 +4,7 @@ import { execFileSync as realExecFileSync, execSync as realExecSync, spawnSync a
 import fs from 'node:fs';
 import path from 'node:path';
 import { parse as parseDotenv } from 'dotenv';
-import { checkHeroCaps, checkLevels, checkMergeConsumption } from '../../src/data/validate';
+import { checkHeroCaps, checkLevels, checkMergeConsumption, checkSquads } from '../../src/data/validate';
 import { CK_DIR, loadCocDataFresh, loadGameDataFresh, normalizeClashKingNode, PROJECT_ROOT, readClashKing } from '../../src/data/loadNode';
 import { crossCheck, crossCheckLines } from '../../src/data/crossCheck';
 import { backupWarning, clashKingVersion, dataSourceLabel, pinVersion } from '../../src/data/source';
@@ -203,7 +203,7 @@ export function checkInstalledData(): DataCheck {
     if (!data.maxTH || !data.items.size) return { ok: false, error: 'no Town Hall levels / items in the data', warnings: [] };
     const levelErrors = checkLevels(data);
     if (levelErrors.length) return { ok: false, error: levelErrors[0].message, warnings: [] };
-    const warnings = [...data.warnings, ...[...checkMergeConsumption(data), ...checkHeroCaps(data)].map((i) => `${i.check}: ${i.message}`)];
+    const warnings = [...data.warnings, ...[...checkMergeConsumption(data), ...checkHeroCaps(data), ...checkSquads(data)].map((i) => `${i.check}: ${i.message}`)];
     return { ok: true, warnings, maxTH: data.maxTH };
   } catch (e) {
     return { ok: false, error: (e as Error).message, warnings: [] };

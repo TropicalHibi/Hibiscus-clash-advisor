@@ -85,6 +85,10 @@ export interface Item {
   helperWorkRates?: Record<number, number>;
   /** Seasonal / event troops and spells (ClashKing `is_seasonal`): recognised, never in the lab queue or the meta. */
   seasonal?: boolean;
+  /** Squads (ClashKing `production_building: "Squad Barracks"`, TH19): lab items whose share is also credited to their troops. */
+  squad?: boolean;
+  /** Squads only: ClashKing's `info` text (kept when pinning; the source of config/squads.yaml's counts). */
+  description?: string;
   /**
    * Package-relative image paths ("images/home/..."), best first: the item icon, then level images from
    * the top level down. The build bundles the first one that exists and is small enough (SPEC §13 Step 3).
@@ -112,6 +116,27 @@ export interface ThRequirement {
 
 export type DataSource = 'clashking' | 'clash-of-clans-data';
 
+/** One troop of a squad (config/squads.yaml). */
+export interface SquadTroop {
+  id: string;
+  dataId: number;
+  /** How many of this troop the squad holds, when ClashKing's description says. */
+  count?: number;
+  housing?: number;
+  /** Share of the squad credited to this troop: count × housing ÷ Σ, or 1 ÷ n when counts are unknown. */
+  fraction: number;
+}
+
+/** A squad and its component troops (SPEC §6.7, §8.3). */
+export interface Squad {
+  id: string;
+  dataId: number;
+  name: string;
+  troops: SquadTroop[];
+  /** False when some count is unknown: the share is split equally. */
+  countsKnown: boolean;
+}
+
 /** A super troop: its own dataId, credited to its base troop's lab upgrade (SPEC §8.3). */
 export interface SuperTroop {
   name: string;
@@ -136,6 +161,8 @@ export interface GameData {
   thRequirements: Record<number, ThRequirement[]>;
   /** Super troop dataId → base troop (from the data's `super_troop`, or config/super-troops.yaml). */
   superTroops: Record<number, SuperTroop>;
+  /** Squad dataId → its component troops (config/squads.yaml; empty on the backup). */
+  squads?: Record<number, Squad>;
   /** Hero Hall heroLevelCaps table (clash-of-clans-data only, stale there; for validation only). */
   heroHallCaps: Record<number, Record<string, number>>;
   /** Problems found while normalizing (e.g. unknown cost resources). Shown on the Plan tab and by sync. */

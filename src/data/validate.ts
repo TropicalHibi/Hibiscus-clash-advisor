@@ -2,6 +2,7 @@
 import { countAt } from './normalize';
 import type { GameData } from './types';
 import { heroCapAt } from '../engine/book';
+import { unmappedSquads } from './squads';
 
 export interface ValidationIssue {
   level: 'error' | 'warn';
@@ -171,4 +172,17 @@ export function describeMissingMerges(found: MissingMerge[]): string[] {
     const others = rest.length ? ` Other fits (less likely): ${rest.map(fmt).join('; ')}.` : '';
     return `TH${m.th}: merge missing from config/merges.yaml. New merged defense, most likely: ${fmt(best)}. Sources: ${src}.${others}`;
   });
+}
+
+/**
+ * Squads in the data without a config/squads.yaml entry (warn only): their Legend I share isn't credited to their
+ * troops until one is added. The message carries ClashKing's description, which names the troops and counts.
+ */
+export function checkSquads(data: GameData): ValidationIssue[] {
+  if (data.source !== 'clashking') return [];
+  return unmappedSquads(data).map((s) => ({
+    level: 'warn' as const,
+    check: 'squads',
+    message: `${s.name} has no entry in config/squads.yaml, so its share isn't credited to its troops.${s.description ? ` Description: "${s.description.replace(/\n|\n/g, ' ')}"` : ''}`,
+  }));
 }

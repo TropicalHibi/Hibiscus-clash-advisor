@@ -20329,6 +20329,7 @@
   {
    "_id": 4000195,
    "name": "Barch Squad",
+   "info": "Battle called. They answered.\\n\\nFifteen Barbarians. Fifteen Archers. Battle cries at charge with sniper support from the rear. It shouldn’t work, but it does, like a beautiful symphony of destruction.",
    "production_building": "Squad Barracks",
    "production_building_level": 1,
    "upgrade_resource": "Elixir",
@@ -20376,6 +20377,7 @@
   {
    "_id": 4000196,
    "name": "Giant Wizard Squad",
+   "info": "Giants aren’t patient, and Wizards are famed for their fashionable lateness. For this Squad, punctuality isn’t a priority, but destruction sure is!\\n\\nThe big guys get to a smashing start while the brainy guys burn it all to the ground!",
    "production_building": "Squad Barracks",
    "production_building_level": 2,
    "upgrade_resource": "Elixir",
@@ -20423,6 +20425,7 @@
   {
    "_id": 4000197,
    "name": "Wall Breaker Squad",
+   "info": "A demolition Squad of five Wall Breakers who never take lunch breaks. The newbie is keen to impress and rushes first to trigger traps and attention.\\n\\nYour enemies won’t miss their walls. Open-plan is all the rage.",
    "production_building": "Squad Barracks",
    "production_building_level": 3,
    "upgrade_resource": "Elixir",
@@ -20470,6 +20473,7 @@
   {
    "_id": 4000198,
    "name": "Minion Squad",
+   "info": "Minions are surprisingly social creatures. These fellows were found in the crevice of a Dark Elixir ravine and are particularly playful in Squads of eight. Wizard studies show that they enter a village-ravishing frenzy when deployed.",
    "production_building": "Squad Barracks",
    "production_building_level": 4,
    "upgrade_resource": "Dark Elixir",
@@ -20517,6 +20521,7 @@
   {
    "_id": 4000199,
    "name": "Balloon Squad",
+   "info": "These defense-seekers used to live off the generous geysers of Balloon Bay before they enrolled in the Squad Barracks bootcamp. Don’t fret, Skeletons are impervious to homesickness.",
    "production_building": "Squad Barracks",
    "production_building_level": 5,
    "upgrade_resource": "Elixir",
@@ -20564,6 +20569,7 @@
   {
    "_id": 4000200,
    "name": "Golem Witch Squad",
+   "info": "Stones and sorcery.\\n\\nNothing gets to the soft gooey center of a Golem faster than a Witch’s love. The rocky guys take charge at first, followed swiftly behind by Witches and their rickety Skeleton rioters.",
    "production_building": "Squad Barracks",
    "production_building_level": 6,
    "upgrade_resource": "Dark Elixir",
@@ -20611,6 +20617,7 @@
   {
    "_id": 4000201,
    "name": "Hog Rider Squad",
+   "info": "This isn’t a Squad, it’s a stampede!\\n\\nThe ground trembles as the fierce leaping Hogs approach. Walls are a joke, so are defenses, and so is anyone who stands in their way. In truth, these guys have been squadding up for years.",
    "production_building": "Squad Barracks",
    "production_building_level": 7,
    "upgrade_resource": "Dark Elixir",
@@ -20658,6 +20665,7 @@
   {
    "_id": 4000202,
    "name": "Miner Squad",
+   "info": "Ten shovels. Ten tunnels. Ten surprises for your enemy!\\n\\nBonded by their long, sweltering stint in volcanic Gem caverns, walls remain no issue for these rogue terrain terrors who network in the deep to spring a synced attack!",
    "production_building": "Squad Barracks",
    "production_building_level": 8,
    "upgrade_resource": "Elixir",
@@ -20705,6 +20713,7 @@
   {
    "_id": 4000203,
    "name": "Healer Squad",
+   "info": "It's a foolproof strategy.\\n\\nA Balloon swoops first to rouse traps, leaving the skies easy and breezy for Healers to do their thing: Heal other units, obviously.",
    "production_building": "Squad Barracks",
    "production_building_level": 9,
    "upgrade_resource": "Elixir",
@@ -20752,6 +20761,7 @@
   {
    "_id": 4000204,
    "name": "P.E.K.K.A Titan Squad",
+   "info": "P.E.K.K.A doesn’t talk much, Electro Titan likes that.\\n\\nThe way this Squad duo crushes buildings is like music to the ear: Thunk, Zap, Thud, Buzz. Too bad their shock aura eviscerates everyone in earshot.",
    "production_building": "Squad Barracks",
    "production_building_level": 10,
    "upgrade_resource": "Elixir",
@@ -20799,6 +20809,7 @@
   {
    "_id": 4000205,
    "name": "Dragons Squad",
+   "info": "This Squad is all burn, no bite.\\n\\nScorched villages are on the menu, and these beastly sky-dwellers are serving a dangerous double course: Dragons drop a spicy main dish, and if your enemy is still famished, Dragon Riders whirr up a dessert that’s harsh on the tongue and hard to swallow.",
    "production_building": "Squad Barracks",
    "production_building_level": 11,
    "upgrade_resource": "Elixir",
@@ -20846,6 +20857,7 @@
   {
    "_id": 4000206,
    "name": "Baby Dragon Squad",
+   "info": "There’s a heavy bounty for the one who finds The Tantrum Triplets.\\n\\nThey barely had their flying wings beneath them when they busted out of Dragon Momma’s daycare. After their first upgrade, the trio will tantrum in the company of their own Squad, but get shy around others.",
    "production_building": "Squad Barracks",
    "production_building_level": 12,
    "upgrade_resource": "Elixir",
