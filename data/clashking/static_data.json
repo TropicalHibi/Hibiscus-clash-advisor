@@ -5753,7 +5753,16 @@
    "width": 2,
    "hitbox_width": 1,
    "superchargeable": false,
-   "levels": []
+   "levels": [
+    {
+     "level": 1,
+     "build_cost": 0,
+     "build_time": 0,
+     "required_townhall": 1,
+     "hitpoints": 250,
+     "dps": 0
+    }
+   ]
   },
   {
    "_id": 1000067,
@@ -6444,17 +6453,6 @@
    ]
   },
   {
-   "_id": 1000083,
-   "name": "Sour Elixir Cauldron",
-   "type": "Resource",
-   "upgrade_resource": "Gold",
-   "village": "home",
-   "width": 3,
-   "hitbox_width": 2,
-   "superchargeable": false,
-   "levels": []
-  },
-  {
    "_id": 1000084,
    "name": "Multi-Archer Tower",
    "type": "Defense",
@@ -6754,7 +6752,16 @@
    "width": 3,
    "hitbox_width": 2,
    "superchargeable": false,
-   "levels": []
+   "levels": [
+    {
+     "level": 1,
+     "build_cost": 1000000,
+     "build_time": 0,
+     "required_townhall": 9,
+     "hitpoints": 500,
+     "dps": 0
+    }
+   ]
   },
   {
    "_id": 1000097,
@@ -6767,7 +6774,16 @@
    "superchargeable": false,
    "is_air_targeting": false,
    "is_ground_targeting": false,
-   "levels": [],
+   "levels": [
+    {
+     "level": 1,
+     "build_cost": 0,
+     "build_time": 0,
+     "required_townhall": 17,
+     "hitpoints": 1000,
+     "dps": 0
+    }
+   ],
    "seasonal_defenses": [
     {
      "_id": 103000011,
@@ -7751,7 +7767,16 @@
    "width": 3,
    "hitbox_width": 3,
    "superchargeable": false,
-   "levels": []
+   "levels": [
+    {
+     "level": 1,
+     "build_cost": 0,
+     "build_time": 0,
+     "required_townhall": 19,
+     "hitpoints": 6200,
+     "dps": 0
+    }
+   ]
   },
   {
    "_id": 1000106,
@@ -20372,7 +20397,39 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000000,
+      "count": 15
+     },
+     {
+      "troop_id": 4000001,
+      "count": 15
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadSplashCapAbility",
+      "ability_level": 1,
+      "splash_damage_cap": 6
+     },
+     {
+      "level": 3,
+      "ability": "SquadSplashCapAbility",
+      "ability_level": 2,
+      "splash_damage_cap": 5
+     }
+    ]
+   }
   },
   {
    "_id": 4000196,
@@ -20420,7 +20477,39 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000003,
+      "count": 3
+     },
+     {
+      "troop_id": 4000006,
+      "count": 5
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadSplashCapAbility",
+      "ability_level": 2,
+      "splash_damage_cap": 5
+     },
+     {
+      "level": 3,
+      "ability": "SquadSplashCapAbility",
+      "ability_level": 3,
+      "splash_damage_cap": 4
+     }
+    ]
+   }
   },
   {
    "_id": 4000197,
@@ -20468,7 +20557,35 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000004,
+      "count": 5
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadInvisibilityAbility",
+      "ability_level": 1,
+      "duration_ms": 3000
+     },
+     {
+      "level": 3,
+      "ability": "SquadInvisibilityAbility",
+      "ability_level": 2,
+      "duration_ms": 4000
+     }
+    ]
+   }
   },
   {
    "_id": 4000198,
@@ -20516,7 +20633,35 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000010,
+      "count": 8
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadSplashCapAbility",
+      "ability_level": 4,
+      "splash_damage_cap": 3
+     },
+     {
+      "level": 3,
+      "ability": "SquadSplashCapAbility",
+      "ability_level": 5,
+      "splash_damage_cap": 2
+     }
+    ]
+   }
   },
   {
    "_id": 4000199,
@@ -20564,7 +20709,35 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000005,
+      "count": 4
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadTrapShieldAbility",
+      "ability_level": 1,
+      "trap_damage_reduction_percent": 15
+     },
+     {
+      "level": 3,
+      "ability": "SquadTrapShieldAbility",
+      "ability_level": 2,
+      "trap_damage_reduction_percent": 20
+     }
+    ]
+   }
   },
   {
    "_id": 4000200,
@@ -20612,7 +20785,39 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000013,
+      "count": 1
+     },
+     {
+      "troop_id": 4000015,
+      "count": 4
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadSplashCapAbility",
+      "ability_level": 4,
+      "splash_damage_cap": 3
+     },
+     {
+      "level": 3,
+      "ability": "SquadSplashCapAbility",
+      "ability_level": 5,
+      "splash_damage_cap": 2
+     }
+    ]
+   }
   },
   {
    "_id": 4000201,
@@ -20660,7 +20865,35 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000011,
+      "count": 12
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadTrapShieldAbility",
+      "ability_level": 3,
+      "trap_damage_reduction_percent": 30
+     },
+     {
+      "level": 3,
+      "ability": "SquadTrapShieldAbility",
+      "ability_level": 4,
+      "trap_damage_reduction_percent": 40
+     }
+    ]
+   }
   },
   {
    "_id": 4000202,
@@ -20708,7 +20941,35 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000024,
+      "count": 10
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadTrapShieldAbility",
+      "ability_level": 3,
+      "trap_damage_reduction_percent": 30
+     },
+     {
+      "level": 3,
+      "ability": "SquadTrapShieldAbility",
+      "ability_level": 4,
+      "trap_damage_reduction_percent": 40
+     }
+    ]
+   }
   },
   {
    "_id": 4000203,
@@ -20756,7 +21017,41 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000007,
+      "count": 5
+     },
+     {
+      "troop_id": 4000005,
+      "count": 1
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadDeployShieldAbility",
+      "ability_level": 1,
+      "damage_reduction_percent": 100,
+      "duration_ms": 2000
+     },
+     {
+      "level": 3,
+      "ability": "SquadDeployShieldAbility",
+      "ability_level": 2,
+      "damage_reduction_percent": 100,
+      "duration_ms": 3000
+     }
+    ]
+   }
   },
   {
    "_id": 4000204,
@@ -20804,7 +21099,39 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000009,
+      "count": 1
+     },
+     {
+      "troop_id": 4000095,
+      "count": 1
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadSharedTargetAbility",
+      "ability_level": 1,
+      "shared_targeting": true
+     },
+     {
+      "level": 3,
+      "ability": "SquadSharedTargetAbility",
+      "ability_level": 1,
+      "shared_targeting": true
+     }
+    ]
+   }
   },
   {
    "_id": 4000205,
@@ -20852,7 +21179,41 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000008,
+      "count": 2
+     },
+     {
+      "troop_id": 4000065,
+      "count": 2
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadDeployShieldAbility",
+      "ability_level": 1,
+      "damage_reduction_percent": 100,
+      "duration_ms": 2000
+     },
+     {
+      "level": 3,
+      "ability": "SquadDeployShieldAbility",
+      "ability_level": 2,
+      "damage_reduction_percent": 100,
+      "duration_ms": 3000
+     }
+    ]
+   }
   },
   {
    "_id": 4000206,
@@ -20900,7 +21261,37 @@
      "required_townhall": 19,
      "strength_weight": 2400
     }
-   ]
+   ],
+   "squad": {
+    "uses_player_troop_levels": true,
+    "members": [
+     {
+      "troop_id": 4000023,
+      "count": 3
+     }
+    ],
+    "levels": [
+     {
+      "level": 1,
+      "ability": null,
+      "ability_level": null
+     },
+     {
+      "level": 2,
+      "ability": "SquadBabyDragonRageAbility",
+      "ability_level": 1,
+      "damage_increase_percent": 100,
+      "attack_speed_increase_percent": 50
+     },
+     {
+      "level": 3,
+      "ability": "SquadBabyDragonRageAbility",
+      "ability_level": 1,
+      "damage_increase_percent": 100,
+      "attack_speed_increase_percent": 50
+     }
+    ]
+   }
   }
  ],
  "spells": [

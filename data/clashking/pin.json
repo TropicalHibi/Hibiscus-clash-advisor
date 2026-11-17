@@ -1,12 +1,12 @@
 {
   "repo": "ClashKingInc/clashy.go",
-  "ref": "v0.1.20",
-  "tag": "v0.1.20",
-  "commit": "04babd051dfbf807065c8ef3d93e6af859f99c36",
+  "ref": "v0.1.21",
+  "tag": "v0.1.21",
+  "commit": "f804f6737bd43c73bc325a07ad462363b82e4865",
   "path": "static/static_data.json",
-  "sha256": "d62aac5ddfdf840608973508f480dd4d6062cf33363d68378feda2e6f5e49677",
-  "version": "clashking-v0.1.20+04babd0",
-  "fetchedAt": "2026-11-17T05:04:17.948Z",
+  "sha256": "46c99983b795f99a53039dd5b6469aee445e0438fb893e5af12004247644b5a1",
+  "version": "clashking-v0.1.21+f804f67",
+  "fetchedAt": "2026-11-17T19:47:58.861Z",
   "maxTH": 19,
   "items": 230
 }
