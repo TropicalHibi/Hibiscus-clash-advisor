@@ -11,7 +11,7 @@ import { backupWarning, clashKingVersion, dataSourceLabel } from '../../src/data
 import { hasCredentials } from './auth';
 import { toSnapshot, type DataChangesFile, type Snapshot } from '../../src/data/snapshot';
 import { isoDate, recordSnapshot, type SnapshotIO } from './snapshots';
-import { refresh, type RefreshDeps, type RefreshState } from './refresh';
+import { blockerMessage, pullDiscards, refresh, syncOnlyChange, type RefreshDeps, type RefreshState } from './refresh';
 import { githubHeaders, rawUrl, resolveLatestWith, type ClashKingDeps } from './clashking';
 import { majorOf, newestOf, type DataCheck, type FullSyncDeps, type SyncDeps } from './sync';
 
@@ -114,21 +114,73 @@ export function nodeRefreshDeps(o: NodeOpts): RefreshDeps {
 }
 
 /**
- * `git pull --ff-only` with a timeout and no credential prompt. Returns how many commits came in and
- * whether package.json / package-lock.json changed. Throws with git's first stderr line on failure.
+ * `git pull --ff-only` with a timeout and no credential prompt (SPEC §9a step 0). Returns how many commits came
+ * in, whether package.json / package-lock.json changed, and which local copies of refresh-generated files were
+ * discarded first. Before pulling it fetches and, for files the incoming commits touch, discards local changes
+ * to files the refresh itself writes (`pullDiscards`: data/clashking/*, public/meta.json, public/data-changes.json,
+ * package*.json when only the clash-of-clans-data version differs), so they never block the pull. Any other
+ * local change the incoming commits touch is left alone, and the error names the files and the fix.
+ * Throws with git's first stderr line (or that message) on failure.
  */
-export function nodeGitPull(root: string, exec: ExecSync = realExecSync as unknown as ExecSync): { pulled: number; lockChanged: boolean } {
+export function nodeGitPull(
+  root: string,
+  exec: ExecSync = realExecSync as unknown as ExecSync,
+  readWorking: (file: string) => string | undefined = (f) => {
+    try {
+      return fs.readFileSync(path.join(root, f), 'utf8');
+    } catch {
+      return undefined;
+    }
+  },
+): { pulled: number; lockChanged: boolean; discarded: string[] } {
   const git = (cmd: string, timeout = 10_000) =>
     String(exec(`git ${cmd}`, { cwd: root, encoding: 'utf8', timeout, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } } as never)).trim();
+  const lines = (s: string) => s.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  let blockers: string[] = [];
+  let discarded: string[] = [];
   try {
     const before = git('rev-parse HEAD');
+    git('fetch --quiet', 30_000);
+    let upstream: string | undefined;
+    try {
+      upstream = git('rev-parse --verify --quiet @{u}');
+    } catch {
+      upstream = undefined; // no upstream branch: let `git pull` report it
+    }
+    if (upstream && upstream !== before) {
+      const incoming = lines(git('diff --name-only HEAD...@{u}'));
+      // `git status --porcelain`: "XY path" (renames "XY old -> new"); untracked "?? path".
+      // Not trimmed: the first column can be a space (" M path").
+      const status = String(exec('git status --porcelain --untracked-files=all', { cwd: root, encoding: 'utf8', timeout: 10_000, stdio: ['ignore', 'pipe', 'pipe'] } as never));
+      const dirty = status
+        .split(/\r?\n/)
+        .filter((l) => l.length > 3)
+        .map((l) => l.slice(3).split(' -> ').pop()!.replace(/^"|"$/g, ''));
+      const headFile = (f: string) => {
+        try {
+          return git(`show HEAD:${f}`);
+        } catch {
+          return undefined;
+        }
+      };
+      const plan = pullDiscards(dirty, incoming, (f) => syncOnlyChange(f, headFile(f), readWorking(f)));
+      blockers = plan.blockers;
+      if (plan.discard.length) {
+        const tracked = plan.discard.filter((f) => headFile(f) !== undefined);
+        const untracked = plan.discard.filter((f) => !tracked.includes(f));
+        if (tracked.length) git(`checkout HEAD -- ${tracked.map((f) => JSON.stringify(f)).join(' ')}`);
+        for (const f of untracked) fs.rmSync(path.join(root, f), { force: true });
+        discarded = plan.discard;
+      }
+    }
     git('pull --ff-only', 30_000);
     const after = git('rev-parse HEAD');
-    if (before === after) return { pulled: 0, lockChanged: false };
+    if (before === after) return { pulled: 0, lockChanged: false, discarded };
     const pulled = Number(git(`rev-list --count ${before}..${after}`)) || 1;
     const lockChanged = git(`diff --name-only ${before} ${after} -- package.json package-lock.json`) !== '';
-    return { pulled, lockChanged };
+    return { pulled, lockChanged, discarded };
   } catch (e) {
+    if (blockers.length) throw new Error(blockerMessage(blockers));
     const stderr = String((e as { stderr?: unknown }).stderr ?? '');
     const line = stderr.split(/\r?\n/).map((l) => l.trim()).find((l) => l && !/^hint:/i.test(l));
     throw new Error(line ?? ((e as { code?: string }).code === 'ETIMEDOUT' ? 'timed out' : (e as Error).message));

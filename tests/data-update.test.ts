@@ -209,10 +209,10 @@ describe('predev git pull', () => {
       if (cmd.startsWith('git diff')) return 'package-lock.json\n';
       return '';
     }) as never;
-    expect(nodeGitPull('.', exec)).toEqual({ pulled: 3, lockChanged: true });
+    expect(nodeGitPull('.', exec)).toEqual({ pulled: 3, lockChanged: true, discarded: [] });
     expect(run).toContain('git diff --name-only aaa bbb -- package.json package-lock.json');
     const same = (() => 'aaa') as never;
-    expect(nodeGitPull('.', same)).toEqual({ pulled: 0, lockChanged: false });
+    expect(nodeGitPull('.', same)).toEqual({ pulled: 0, lockChanged: false, discarded: [] });
     const failing = ((cmd: string) => {
       if (cmd === 'git pull --ff-only') throw Object.assign(new Error('Command failed'), { stderr: 'hint: something\nfatal: Not possible to fast-forward, aborting.\n' });
       return 'aaa';

@@ -44,7 +44,7 @@ export interface RefreshDeps {
    * committed. Returns whether anything came in and whether package.json / package-lock.json changed.
    * Throws (one-line message) when it can't fast-forward: uncommitted changes, diverged, offline, no repo.
    */
-  gitPull?(): { pulled: number; lockChanged: boolean };
+  gitPull?(): { pulled: number; lockChanged: boolean; discarded?: string[] };
   /** `npm install` (after a pull changed the lockfile) so node_modules matches the committed data version. */
   installDeps?(): void;
   /** `npm run sync -- --offline`: validate + snapshot the installed data (no npm registry). */
@@ -86,6 +86,57 @@ export function oneLine(text: string, fallback: string): string {
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
+/** Committed files the refresh itself writes (local `npm run sync` / `npm run meta`, SPEC §9a steps 1–2). */
+export const isRefreshGenerated = (f: string) => f.startsWith('data/clashking/') || f === 'public/meta.json' || f === 'public/data-changes.json';
+const PACKAGE_FILES = new Set(['package.json', 'package-lock.json']);
+
+/**
+ * Step 0 before `git pull --ff-only` (SPEC §9a, REVIEW-2 #4): which local changes to discard so the pull can
+ * fast-forward. Only files the incoming commits touch and the refresh generated: data/clashking/*,
+ * public/meta.json, public/data-changes.json, and package.json / package-lock.json when `syncOnly` says the
+ * only difference is what `npm run sync` writes (the clash-of-clans-data version). Everything else the incoming
+ * commits touch is a blocker (named in the warning, never discarded).
+ */
+export function pullDiscards(dirty: string[], incoming: string[], syncOnly: (file: string) => boolean): { discard: string[]; blockers: string[] } {
+  const inc = new Set(incoming);
+  const discard: string[] = [];
+  const blockers: string[] = [];
+  for (const f of new Set(dirty)) {
+    if (!inc.has(f)) continue;
+    if (isRefreshGenerated(f) || (PACKAGE_FILES.has(f) && syncOnly(f))) discard.push(f);
+    else blockers.push(f);
+  }
+  return { discard: discard.sort(), blockers: blockers.sort() };
+}
+
+/**
+ * True when package.json / package-lock.json differ from HEAD only in what `npm run sync` changes: the
+ * clash-of-clans-data version (its dependency range, and its lockfile entries). Anything else, or a file that
+ * can't be read or parsed, is a hand edit: false.
+ */
+export function syncOnlyChange(file: string, head: string | undefined, working: string | undefined): boolean {
+  if (head === undefined || working === undefined) return false;
+  const PKG = 'clash-of-clans-data';
+  const strip = (text: string) => {
+    const j = JSON.parse(text);
+    for (const deps of [j.dependencies, j.packages?.['']?.dependencies]) if (deps) delete deps[PKG];
+    if (j.packages) delete j.packages[`node_modules/${PKG}`];
+    return JSON.stringify(j);
+  };
+  try {
+    return PACKAGE_FILES.has(file) && strip(head) === strip(working);
+  } catch {
+    return false;
+  }
+}
+
+/** The warning text when local changes block the pull: the files and the command that fixes it. */
+export function blockerMessage(files: string[]): string {
+  const list = files.slice(0, 5).join(', ') + (files.length > 5 ? `, … (${files.length} files)` : '');
+  const quoted = files.map((f) => (/\s/.test(f) ? `"${f}"` : f)).join(' ');
+  return `local changes to ${list} conflict with the incoming commits; keep them with \`git stash\` (then \`git stash pop\` after the pull) or discard them with \`git checkout -- ${quoted}\``;
+}
+
 /**
  * Step 0: fast-forward to origin so the data check sees what the daily Action committed. A pull that
  * changes the lockfile also runs `npm install` (node_modules must match) and an offline sync (local
@@ -93,13 +144,15 @@ const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
  */
 export function refreshGit(d: RefreshDeps): GitOutcome {
   if (!d.gitPull) return 'skipped';
-  let r: { pulled: number; lockChanged: boolean };
+  let r: { pulled: number; lockChanged: boolean; discarded?: string[] };
   try {
     r = d.gitPull();
   } catch (e) {
     d.log(`[refresh] warning: git pull --ff-only failed (${oneLine(msg(e), 'git pull failed')}); continuing with the local copy.`);
     return 'failed';
   }
+  if (r.discarded?.length)
+    d.log(`[refresh] discarded the local copy of ${r.discarded.join(', ')} (written by an earlier refresh; the incoming commits replace it).`);
   if (!r.pulled) return 'up-to-date';
   d.log(`[refresh] pulled ${r.pulled} new commit${r.pulled === 1 ? '' : 's'} from origin.`);
   if (!r.lockChanged || !d.installDeps) return 'pulled';
