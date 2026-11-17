@@ -77,6 +77,34 @@ export function detectMode(th: number, data: GameData): Mode {
   return th < data.maxTH ? 'rush' : 'maxTH';
 }
 
+/**
+ * The tier an upgrade already running at the export belongs to (it has no candidate, so no tier of its own).
+ * Used to rank helper targets (§10.1). By category: Laboratory, Archer Queen and buildings under construction
+ * are Tier 0; the Town Hall and its weapon the TH path; then offense, heroes, resources, defenses, temporary.
+ */
+export function runningJobTier(item: Item, inst: OwnedInstance | undefined, mode: Mode): number {
+  const T = TIERS[mode];
+  if (item.category === 'townHall') return T.thPath;
+  if (item.category === 'thWeapon') return T.weapon;
+  if (item.id === 'laboratory' || item.id === 'archer-queen' || (inst && inst.level === 0)) return T.tier0;
+  switch (item.category) {
+    case 'army':
+      return T.offense;
+    case 'hero':
+      return T.heroes;
+    case 'resourceStorage':
+    case 'resourceCollector':
+      return T.resources;
+    case 'defense':
+    case 'trap':
+    case 'mergedDefense':
+    case 'wall':
+      return T.defenses;
+    default:
+      return T.temporary;
+  }
+}
+
 export function lockOf(inst: OwnedInstance): string {
   return inst.parentUid ?? inst.uid;
 }

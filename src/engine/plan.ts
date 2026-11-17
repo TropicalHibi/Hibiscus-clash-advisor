@@ -52,6 +52,8 @@ export interface Plan {
   simulateHelpers: boolean;
   /** One line about helpers and boosts for the summary ("Builder's Apprentice L8 (8h/day) …"). */
   helperLine: string;
+  /** "Apprentice: repeating on Grand Warden. Suggest switching to Town Hall 19 …" (§10.1; suggestion only). */
+  helperSuggestions: string[];
   bookThresholdSec: number;
   dataVersion: string;
   exportTimestamp?: number;
@@ -84,6 +86,16 @@ export function helperLine(account: AccountState, sim: SimResult, nowSec: number
   }
   if (sim.activeBoosts.length) parts.push(`Boosts: ${sim.activeBoosts.join(', ')}`);
   return parts.join(' · ');
+}
+
+const HELPER_SHORT: Record<string, string> = { 'builders-apprentice': 'Apprentice', 'lab-assistant': 'Lab Assistant' };
+
+/** One line per helper whose export repeat setting differs from the planner's pick (§10.1). */
+export function helperSuggestionLines(sim: SimResult): string[] {
+  return sim.helperSuggestions.map((s) => {
+    const who = HELPER_SHORT[s.helper.id] ?? s.helper.name;
+    return `${who}: repeating on ${s.repeating.itemName}. Suggest switching to ${s.suggested.itemName} ${s.suggested.toLevel} after ${s.repeating.itemName} finishes (or now).`;
+  });
 }
 
 export function buildPlan(data: GameData, account: AccountState, settings: Settings, meta: MetaFile, nowSec: number): Plan {
@@ -138,6 +150,7 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
     goldPass: settings.goldPass,
     simulateHelpers: settings.simulateHelpers,
     helperLine: helperLine(account, sim, nowSec, settings.simulateHelpers),
+    helperSuggestions: helperSuggestionLines(sim),
     bookThresholdSec: data.bookThresholdSec,
     dataVersion: dataSourceLabel(data),
     exportTimestamp: account.exportTimestamp,

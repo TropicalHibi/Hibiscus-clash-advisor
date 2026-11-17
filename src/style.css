@@ -204,4 +204,4 @@ button.pin[aria-pressed='true'] { color: var(--accent); border-color: var(--acce
 .hero-order .grip { color: var(--muted); cursor: grab; user-select: none; padding: 0 4px; }
 .hero-order li.locked { cursor: default; opacity: 0.55; }
 .hero-order li.locked .grip { cursor: default; width: 1.6em; }
-.summary .helpers { flex-basis: 100%; }
+.summary .helpers, .summary .helper-suggestion { flex-basis: 100%; }

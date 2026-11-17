@@ -12,6 +12,8 @@ import { WorkClock, helperGain } from '../src/engine/boosts';
 import { buildEverything } from '../src/engine/everything';
 import { fmtDuration, fmtNum } from '../src/engine/format';
 import { buildPlan } from '../src/engine/plan';
+import { planToText } from '../src/engine/planText';
+import { renderPlan } from '../src/ui/planView';
 import { simulate, type SimResult, type TimelineEntry } from '../src/engine/scheduler';
 import { builderCandidates } from '../src/engine/tiers';
 import { EMPTY_META } from '../src/meta/meta';
@@ -51,7 +53,7 @@ describe('helpers in the scheduler', () => {
     expect(on.helperSavedSec).toBe(8 * H);
   });
 
-  it('Builder Apprentice without a recurrent target: helps the builder job with the most time left (never a Goblin)', () => {
+  it('Builder Apprentice without a recurrent target: helps the highest-priority builder job, longest remaining on ties (never a Goblin)', () => {
     const ex = baseExport({ bkTimer: 2 * D });
     ex.helpers.push(helper(APPRENTICE, 4, H));
     const off = sim(ex, settings({ simulateHelpers: false }));
@@ -61,9 +63,72 @@ describe('helpers in the scheduler', () => {
     expect(helped[0].helperSavedSec).toBe(4 * H);
     const builders = new Set(off.slots.filter((s) => s.queue === 'builder' && !s.goblin).map((s) => s.id));
     const runningAt = off.timeline.filter((e) => builders.has(e.slotId) && e.start <= H && e.end > H);
-    const longest = runningAt.reduce((a, b) => (b.end > a.end ? b : a));
-    expect(`${helped[0].slotId}|${helped[0].itemKey}`).toBe(`${longest.slotId}|${longest.itemKey}`);
-    expect(helped[0].end).toBe(longest.end - 4 * H);
+    // The running Barbarian King (export) is a hero: tier 3 in rush mode. New jobs carry their candidate tier.
+    const key = (e: TimelineEntry) => (e.itemKey === data.byId.get('town-hall')!.key ? -1 : (e.tier ?? 3));
+    const best = [...runningAt].sort((x, y) => key(x) - key(y) || y.end - x.end)[0];
+    expect(key(best)).toBeLessThan(3); // a higher tier than the King's beats his longer timer
+    expect(`${helped[0].slotId}|${helped[0].itemKey}`).toBe(`${best.slotId}|${best.itemKey}`);
+    expect(helped[0].end).toBe(best.end - 4 * H);
+    expect(on.helperSuggestions).toEqual([]); // nothing set to repeat → nothing to suggest
+  });
+
+  it('a repeating helper on a running upgrade is respected even when the planner would pick another job; the plan suggests the switch', () => {
+    const ex = baseExport({ bkTimer: 3 * D });
+    setLevel(ex, 'buildings', 'town-hall', { timer: 5 * D }); // TH16 → 17 upgrading: the planner's pick
+    setLevel(ex, 'heroes', 'barbarian-king', { helper_recurrent: true } as Partial<Entry>);
+    ex.helpers.push(helper(APPRENTICE, 8, H));
+    const r = sim(ex);
+    expect(entryFor(r, 'barbarian-king').helperSavedSec).toBe(8 * H); // the timeline follows the export
+    expect(entryFor(r, 'town-hall').helperSavedSec).toBeUndefined();
+    expect(r.helperSuggestions).toHaveLength(1);
+    expect(r.helperSuggestions[0]).toMatchObject({ at: H, repeating: { itemName: 'Barbarian King' }, suggested: { itemName: 'Town Hall', toLevel: 17 } });
+    const plan = buildPlan(data, parse(ex), settings(), EMPTY_META, T0);
+    expect(plan.helperSuggestions).toEqual(['Apprentice: repeating on Barbarian King. Suggest switching to Town Hall 17 after Barbarian King finishes (or now).']);
+    expect(renderPlan(plan)).toContain('Apprentice: repeating on Barbarian King. Suggest switching to Town Hall 17');
+    expect(planToText(plan)).toContain('Suggestion: Apprentice: repeating on Barbarian King.');
+  });
+
+  it('no suggestion when the repeat target is what the planner would pick (Town Hall first)', () => {
+    const ex = baseExport({ bkTimer: 3 * D });
+    setLevel(ex, 'buildings', 'town-hall', { timer: 5 * D, helper_recurrent: true } as Partial<Entry>);
+    ex.helpers.push(helper(APPRENTICE, 8, H));
+    const r = sim(ex);
+    expect(entryFor(r, 'town-hall').helperSavedSec).toBe(8 * H);
+    expect(r.helperSuggestions).toEqual([]);
+    const plan = buildPlan(data, parse(ex), settings(), EMPTY_META, T0);
+    expect(plan.helperSuggestions).toEqual([]);
+    expect(renderPlan(plan)).not.toContain('helper-suggestion');
+  });
+
+  it('once the repeated upgrade finishes, the planner picks the target (new jobs never inherit the repeat setting)', () => {
+    const ex = baseExport({ bkTimer: 12 * H });
+    setLevel(ex, 'buildings', 'town-hall', { timer: 5 * D });
+    setLevel(ex, 'heroes', 'barbarian-king', { helper_recurrent: true } as Partial<Entry>);
+    ex.helpers.push(helper(APPRENTICE, 8, H)); // hours at +1 h (King running), +24 h and +47 h (King done)
+    const r = sim(ex, settings(), T0, 2 * D);
+    const king = r.timeline.filter((e) => e.itemKey === data.byId.get('barbarian-king')!.key);
+    expect(king[0].inProgress && king[0].helperSavedSec).toBe(8 * H);
+    for (const k of king.slice(1)) expect(k.helperSavedSec).toBeUndefined(); // a later King job: no repeat
+    expect(entryFor(r, 'town-hall').helperSavedSec).toBe(2 * 8 * H); // later hours: the planner's pick
+  });
+
+  it('a repeat target that has finished before the work hour counts as nothing set: planner pick, no suggestion', () => {
+    const ex = baseExport({ bkTimer: 30 * 60 });
+    setLevel(ex, 'buildings', 'town-hall', { timer: 5 * D });
+    setLevel(ex, 'heroes', 'barbarian-king', { helper_recurrent: true } as Partial<Entry>);
+    ex.helpers.push(helper(APPRENTICE, 8, H));
+    const r = sim(ex);
+    expect(entryFor(r, 'town-hall').helperSavedSec).toBe(8 * H);
+    expect(r.helperSuggestions).toEqual([]);
+  });
+
+  it('Lab Assistant repeating on the running research: works on it, no suggestion', () => {
+    const ex = baseExport({ archerTimer: 3 * D });
+    setLevel(ex, 'units', 'archer', { helper_recurrent: true } as Partial<Entry>);
+    ex.helpers.push(helper(ASSISTANT, 6, 0));
+    const r = sim(ex);
+    expect(entryFor(r, 'archer').end).toBe(3 * D - 2 * 6 * H);
+    expect(r.helperSuggestions).toEqual([]);
   });
 
   it('Lab Assistant: shortens the running research by its work rate, once per 23-hour cycle', () => {

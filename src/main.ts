@@ -182,7 +182,7 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
     </div>
     <div class="card">
       <label class="toggle"><input type="checkbox" id="sim-helpers" ${settings.simulateHelpers ? 'checked' : ''}> <b>Simulate helpers and boosts</b></label>
-      <p class="small muted">On: the Builder's Apprentice and Lab Assistant from your export each take their work rate (hours) off one job once a day: the job they're set to repeat on, else the builder job with the most time left / the running research. Active potions from the export speed up their queue. Off: raw timers only (to compare).</p>
+      <p class="small muted">On: the Builder's Apprentice and Lab Assistant from your export each take their work rate (hours) off one job once a day: the upgrade they're set to repeat on while it's still running (as in the game), else the running builder job with the highest priority (Town Hall first) / the running research. The Plan tab suggests a better repeat target when there is one. Active potions from the export speed up their queue. Off: raw timers only (to compare).</p>
     </div>
     <div class="card">
       <div><b>Lab pick weights</b> <span class="small muted">(score ÷ Legend I top of its kind × weight; 0 = never auto-pick that kind)</span></div>

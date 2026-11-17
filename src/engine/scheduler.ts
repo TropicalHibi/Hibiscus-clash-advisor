@@ -10,7 +10,7 @@ import { nextResearch, researchCandidates } from './queues';
 
 /** An export timestamp more than this far ahead of "now" is reported as clock skew. */
 export const FUTURE_TOLERANCE_SEC = 300;
-import { builderCandidates, lockOf, type CandidateKind, type EngineState } from './tiers';
+import { builderCandidates, detectMode, levelsOf, lockOf, runningJobTier, type CandidateKind, type EngineState } from './tiers';
 
 export type SlotQueue = 'builder' | 'lab' | 'petHouse';
 
@@ -67,13 +67,31 @@ export interface SimResult {
   finalInstances: OwnedInstance[];
   /** Helpers applied in this run (empty when "Simulate helpers" is off). */
   helpers: HelperSpec[];
+  /**
+   * Helpers repeating (export `helper_recurrent`) on a job the planner wouldn't pick, checked at the first
+   * work hour from now that the repeat setting decides (§10.1). Suggestion only: the timeline follows the export.
+   */
+  helperSuggestions: HelperSuggestion[];
   /** Active boosts applied in this run, as short labels (e.g. "Builder Potion 42m left"). */
   activeBoosts: string[];
   warnings: string[];
 }
 
+export interface HelperSuggestion {
+  helper: HelperSpec;
+  /** The job the helper repeats on (the export's setting). */
+  repeating: TimelineEntry;
+  /** The job the planner would pick instead. */
+  suggested: TimelineEntry;
+  /** Work hour (seconds from now) the comparison was made at. */
+  at: number;
+}
+
 interface Job {
   slot: Slot;
+  /** Priority tier for helper targets: the candidate's tier, or runningJobTier() for jobs running at the export. */
+  tier: number;
+  townHall: boolean;
   start: number;
   end: number;
   lockUid: string;
@@ -94,6 +112,8 @@ interface Running {
   itemKey: string;
   itemName: string;
   toLevel: number;
+  tier: number;
+  townHall: boolean;
   recurrent: boolean;
   helperTimerSec?: number;
   apply: () => void;
@@ -134,6 +154,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
   // In-progress upgrades occupy their slot until their remaining time elapses: known items, and running
   // upgrades on ids the game data doesn't know yet (they still hold a builder / the lab / the pet house).
   const running: Running[] = [];
+  const exportMode = detectMode(levelsOf(instances).th, data);
   for (const inst of instances) {
     if (inst.upgradingTo === undefined) continue;
     const item = data.items.get(inst.itemKey);
@@ -149,6 +170,8 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       itemKey: item.key,
       itemName: item.name,
       toLevel: inst.upgradingTo,
+      tier: runningJobTier(item, inst, exportMode),
+      townHall: item.category === 'townHall',
       recurrent: !!inst.helperRecurrent,
       helperTimerSec: inst.helperTimerSec,
       apply: () => {
@@ -167,6 +190,8 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       itemKey: `unknown:${u.dataId}`,
       itemName: `Unknown item ${u.dataId} (not in game data yet)`,
       toLevel: u.level + 1,
+      tier: 99, // unknown item: lowest priority for helpers
+      townHall: false,
       recurrent: u.helperRecurrent,
       helperTimerSec: u.helperTimerSec,
       apply: () => {},
@@ -211,7 +236,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       inProgress: true,
     };
     timeline.push(entry);
-    jobs.push({ slot, start: -elapsedSec, end, lockUid, entry, recurrent: r.recurrent, helperTimerSec: r.helperTimerSec, apply: r.apply });
+    jobs.push({ slot, start: -elapsedSec, end, lockUid, entry, tier: r.tier, townHall: r.townHall, recurrent: r.recurrent, helperTimerSec: r.helperTimerSec, apply: r.apply });
   }
 
   // ── Helpers (Builder's Apprentice → a builder job, Lab Assistant → the running research) ──
@@ -228,14 +253,23 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
     const end = clock.end(t, left - gain);
     setEnd(j, end, j.end - end);
   };
-  // Assignment rule: the job the export marks recurrent if it's running; else the Apprentice takes the
-  // builder job with the most time left, the Assistant the running research. Never a Goblin job.
-  const helperTarget = (h: HelperSpec, t: number): Job | undefined => {
-    const running = jobs.filter((j) => j.slot.queue === h.queue && !j.slot.goblin && j.start <= t && j.end > t);
-    const recurrent = running.find((j) => j.recurrent);
-    if (recurrent) return recurrent;
-    return running.sort((a, b) => b.end - a.end || (a.slot.id < b.slot.id ? -1 : 1))[0];
-  };
+  // Assignment rule (§10.1): the export's repeat setting first — a helper set to repeat (helper_recurrent)
+  // on an upgrade still running at its work hour works on it, as the game does. Only the export's running
+  // upgrades carry that flag; jobs the planner starts never do. Otherwise the planner picks: the Apprentice
+  // takes the running builder job with the highest priority (the Town Hall first, then the lowest tier),
+  // longest remaining on ties; the Assistant the running research. Never a Goblin job.
+  const runningAt = (h: HelperSpec, t: number) => jobs.filter((j) => j.slot.queue === h.queue && !j.slot.goblin && j.start <= t && j.end > t);
+  const plannerTarget = (h: HelperSpec, t: number): Job | undefined =>
+    runningAt(h, t).sort(
+      (a, b) =>
+        (a.townHall ? -1 : a.tier) - (b.townHall ? -1 : b.tier) ||
+        clockOf(b.slot.queue).remaining(t, b.end) - clockOf(a.slot.queue).remaining(t, a.end) ||
+        (a.slot.id < b.slot.id ? -1 : 1),
+    )[0];
+  const repeatTarget = (h: HelperSpec, t: number): Job | undefined => runningAt(h, t).find((j) => j.recurrent);
+  const helperTarget = (h: HelperSpec, t: number): Job | undefined => repeatTarget(h, t) ?? plannerTarget(h, t);
+  const helperSuggestions: HelperSuggestion[] = [];
+  const suggestionChecked = new Set<HelperSpec>();
   for (const h of helperInfo.helpers) {
     // A helper already at work at the export time (helper_timer on the item) adds the rest of its hour.
     for (const j of jobs) {
@@ -323,7 +357,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       inProgress: false,
     };
     timeline.push(entry);
-    jobs.push({ slot, start: t, end, lockUid, entry, recurrent: !!t0.helperRecurrent, apply });
+    jobs.push({ slot, start: t, end, lockUid, entry, tier: c.tier, townHall: c.item.category === 'townHall', recurrent: false, apply });
     return true;
   };
 
@@ -359,7 +393,9 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       end,
       lockUid: target.uid,
       entry,
-      recurrent: !!target.helperRecurrent,
+      tier: 0,
+      townHall: false,
+      recurrent: false, // only the export's running upgrade carries the repeat setting
       apply: () => {
         target.level = c.toLevel;
         delete target.upgradingTo;
@@ -393,7 +429,14 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
     // Helpers whose work hour starts now (after new jobs started, so a job starting now can be helped).
     for (const [h, at] of helperNext) {
       if (at > t) continue;
-      const j = helperTarget(h, t);
+      const rep = repeatTarget(h, t);
+      const pick = plannerTarget(h, t);
+      // The first work hour the repeat setting decides: suggest the planner's pick if it differs.
+      if (rep && !suggestionChecked.has(h)) {
+        suggestionChecked.add(h);
+        if (pick && pick !== rep) helperSuggestions.push({ helper: h, repeating: rep.entry, suggested: pick.entry, at: t });
+      }
+      const j = rep ?? pick;
       if (j) helpJob(j, h.workRate, t);
       helperNext.set(h, at + HELPER_PERIOD_SEC);
     }
@@ -404,7 +447,7 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
   }
 
   nowState ??= { instances: instances.map((i) => ({ ...i })), busy: new Set(state.busy) };
-  return { slots, timeline, elapsedSec, nowState, idle, finalInstances: instances, helpers: helperInfo.helpers, activeBoosts, warnings };
+  return { slots, timeline, elapsedSec, nowState, idle, finalInstances: instances, helpers: helperInfo.helpers, helperSuggestions, activeBoosts, warnings };
 }
 
 /** Short labels for the boosts still running at "now". The Clock Tower is Builder Base only. */

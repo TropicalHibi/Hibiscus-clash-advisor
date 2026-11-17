@@ -25,6 +25,7 @@ export function renderPlan(p: Plan): string {
     <span>Gold Pass: <b>${p.goldPass === 'max' ? 'Max' : 'None'}</b></span>
     <span class="muted">${baseline}</span>
     ${p.helperLine ? `<span class="muted helpers">${esc(p.helperLine)}</span>` : ''}
+    ${p.helperSuggestions.map((s) => `<span class="helper-suggestion">💡 ${esc(s)}</span>`).join('')}
   </div>`);
 
   // Now
