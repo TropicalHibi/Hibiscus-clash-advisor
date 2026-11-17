@@ -166,7 +166,7 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
     newBuildingsInfo: newBuildingsWithoutLevels(data, state.instances),
     forecast: forecast(sim.timeline, windowSec),
     bookReady,
-    wallDump: wallDump(data, account),
+    wallDump: wallDump(data, account, lvNow.th), // from "now": a TH finished since the export counts (§10.4)
     lab,
     labByKind: labSections(lab, settings.lab.pinned),
     pets: researchCandidates(data, state, 'petHouse', settings, meta, boosts.research),

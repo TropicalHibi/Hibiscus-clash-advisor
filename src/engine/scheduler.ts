@@ -262,14 +262,16 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
   // takes the running builder job with the highest priority (the Town Hall first, then the lowest tier),
   // longest remaining on ties; the Assistant the running research. Never a Goblin job.
   const runningAt = (h: HelperSpec, t: number) => jobs.filter((j) => j.slot.queue === h.queue && !j.slot.goblin && j.start <= t && j.end > t);
-  const plannerTarget = (h: HelperSpec, t: number): Job | undefined =>
-    runningAt(h, t).sort(
+  const byPriority = (list: Job[], t: number) =>
+    list.sort(
       (a, b) =>
         (a.townHall ? -1 : a.tier) - (b.townHall ? -1 : b.tier) ||
         clockOf(b.slot.queue).remaining(t, b.end) - clockOf(a.slot.queue).remaining(t, a.end) ||
         (a.slot.id < b.slot.id ? -1 : 1),
-    )[0];
-  const repeatTarget = (h: HelperSpec, t: number): Job | undefined => runningAt(h, t).find((j) => j.recurrent);
+    );
+  const plannerTarget = (h: HelperSpec, t: number): Job | undefined => byPriority(runningAt(h, t), t)[0];
+  // Several upgrades flagged to repeat (the export allows it): the planner's priority picks among them.
+  const repeatTarget = (h: HelperSpec, t: number): Job | undefined => byPriority(runningAt(h, t).filter((j) => j.recurrent), t)[0];
   const helperTarget = (h: HelperSpec, t: number): Job | undefined => repeatTarget(h, t) ?? plannerTarget(h, t);
   const helperSuggestions: HelperSuggestion[] = [];
   const suggestionChecked = new Set<HelperSpec>();
@@ -282,7 +284,13 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       helpJob(j, h.workRate, -elapsedSec, Math.min(h.workRate * left, (remaining * h.workRate) / (1 + h.workRate)));
     }
   }
-  // Work hours between the export and now help the jobs that were running then.
+  // Work hours between the export and now help the jobs that were running then. The 23-hour cycle only runs
+  // while a helper is assigned (§10.1, REVIEW-2 ambiguity 7): at a work hour with no eligible job the helper
+  // waits, and its next cycle starts when it's next assigned. Before now no job starts, so a helper that finds
+  // nothing to do waits until now.
+  const helperNext = new Map<HelperSpec, number>();
+  /** Helpers waiting for an eligible job (their cycle is paused). */
+  const helperWaiting = new Set<HelperSpec>();
   const pastHours = helperInfo.helpers
     .flatMap((h) => {
       const out: { h: HelperSpec; at: number }[] = [];
@@ -290,12 +298,16 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
       return out;
     })
     .sort((a, b) => a.at - b.at);
+  for (const h of helperInfo.helpers) helperNext.set(h, nextHelperTime(h, 0));
   for (const { h, at } of pastHours) {
+    if (helperWaiting.has(h)) continue;
     const j = helperTarget(h, at);
     if (j) helpJob(j, h.workRate, at);
+    else {
+      helperWaiting.add(h);
+      helperNext.set(h, 0); // assigned as soon as something runs (from now on)
+    }
   }
-  const helperNext = new Map<HelperSpec, number>();
-  for (const h of helperInfo.helpers) helperNext.set(h, nextHelperTime(h, 0));
   // A job whose (helped / boosted) timer ran out before now finishes at t = 0.
   for (const j of jobs) if (j.end < 0) setEnd(j, 0, 0);
 
@@ -440,13 +452,20 @@ export function simulate(data: GameData, account: AccountState, settings: Settin
         if (pick && pick !== rep) helperSuggestions.push({ helper: h, repeating: rep.entry, suggested: pick.entry, at: t });
       }
       const j = rep ?? pick;
-      if (j) helpJob(j, h.workRate, t);
-      helperNext.set(h, at + HELPER_PERIOD_SEC);
+      if (j) {
+        helpJob(j, h.workRate, t);
+        // The cycle counts from the assignment: on time, or later if the helper had to wait for a job.
+        helperNext.set(h, (helperWaiting.has(h) ? t : at) + HELPER_PERIOD_SEC);
+        helperWaiting.delete(h);
+      } else {
+        helperWaiting.add(h); // nothing eligible: wait (re-checked whenever the event loop advances)
+        helperNext.set(h, t);
+      }
     }
     // A zero-time job finishes immediately; loop again at the same t.
     if (jobs.some((j) => j.end <= t)) continue;
     if (!jobs.length) break;
-    t = Math.min(...jobs.map((j) => j.end), ...helperNext.values());
+    t = Math.min(...jobs.map((j) => j.end), ...[...helperNext].filter(([h]) => !helperWaiting.has(h)).map(([, at]) => at));
   }
 
   nowState ??= { instances: instances.map((i) => ({ ...i })), busy: new Set(state.busy) };

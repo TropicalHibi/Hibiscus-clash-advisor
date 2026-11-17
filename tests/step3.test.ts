@@ -14,6 +14,7 @@ import { fmtDuration, fmtNum } from '../src/engine/format';
 import { buildPlan } from '../src/engine/plan';
 import { planToText } from '../src/engine/planText';
 import { renderPlan } from '../src/ui/planView';
+import { renderEverything } from '../src/ui/everythingView';
 import { simulate, type SimResult, type TimelineEntry } from '../src/engine/scheduler';
 import { builderCandidates } from '../src/engine/tiers';
 import { EMPTY_META } from '../src/meta/meta';
@@ -436,9 +437,18 @@ describe('Everything tab engine', () => {
     expect(ev.blacksmith.count).toBeGreaterThan(0);
     expect(ev.blacksmith.ore!.shinyOre).toBeGreaterThan(0);
     expect(ev.walls.costs.goldOrElixir).toBeGreaterThan(0);
-    const total = (r: 'gold' | 'elixir') => [...ev.tiers, ev.lab, ev.pets, ev.walls, ev.notScheduled].reduce((s, g) => s + (g.costs[r] ?? 0), 0);
+    // Total = scheduled groups + walls; "Not scheduled" (next TH, book-ready levels) is its own subtotal (REVIEW-2 #10).
+    const total = (r: 'gold' | 'elixir') => [...ev.tiers, ev.lab, ev.pets, ev.walls].reduce((s, g) => s + (g.costs[r] ?? 0), 0);
     expect(ev.totalCosts.gold).toBe(total('gold'));
     expect(ev.totalCosts.elixir).toBe(total('elixir'));
+    const th = ev.notScheduled.rows.find((r) => r.name === 'Town Hall')!;
+    expect(ev.notScheduled.costs.gold).toBeGreaterThanOrEqual(th.cost);
+    const withNotScheduled = total('gold') + (ev.notScheduled.costs.gold ?? 0);
+    expect(ev.totalCosts.gold).toBe(withNotScheduled - (ev.notScheduled.costs.gold ?? 0));
+    expect(ev.totalCosts.gold).toBeLessThan(withNotScheduled); // the next TH's gold is not in the total
+    expect(ev.totalCount).toBe([...ev.tiers, ev.lab, ev.pets, ev.blacksmith, ev.walls].reduce((n, g) => n + g.count, 0));
+    const html = renderEverything(ev);
+    expect(html).toContain(`Not scheduled (${ev.notScheduled.count}, not in the total)`);
   });
 });
 

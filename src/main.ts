@@ -274,23 +274,27 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
     li.addEventListener('dragstart', (ev) => {
       dragFrom = Number(li.dataset.idx);
       li.classList.add('dragging');
-      ev.dataTransfer?.setData('text/plain', String(dragFrom));
+      ev.dataTransfer?.setData('text/plain', String(dragFrom)); // some browsers only start a drag with data set
       if (ev.dataTransfer) ev.dataTransfer.effectAllowed = 'move';
     });
     li.addEventListener('dragend', () => {
       li.classList.remove('dragging');
       dragFrom = -1; // e.g. dropped on the locked Queen or outside the list
     });
+    // Only drags that started in this list are accepted (REVIEW-2 #11): text dragged in from elsewhere
+    // (e.g. a selected "3") is never a drop target and never reorders.
     li.addEventListener('dragover', (ev) => {
+      if (dragFrom < 0) return;
       ev.preventDefault();
       li.classList.add('drop-target');
     });
     li.addEventListener('dragleave', () => li.classList.remove('drop-target'));
     li.addEventListener('drop', (ev) => {
       ev.preventDefault();
-      const from = dragFrom >= 0 ? dragFrom : Number(ev.dataTransfer?.getData('text/plain'));
+      li.classList.remove('drop-target');
+      const from = dragFrom;
       dragFrom = -1;
-      if (!Number.isInteger(from)) return; // no drag source from this list
+      if (from < 0) return; // no drag source from this list
       setHeroOrder(moveHero(settings.heroOrder, from, Number(li.dataset.idx)));
     });
   });

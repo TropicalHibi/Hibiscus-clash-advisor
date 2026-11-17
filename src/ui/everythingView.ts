@@ -49,6 +49,7 @@ export function renderEverything(ev: Everything): string {
     <div class="ev-big"><span class="k">Lab / Pet House done</span><span class="v">${esc(fmtDuration(ev.labDoneSec))} / ${esc(fmtDuration(ev.petsDoneSec))}</span></div>
     <div class="ev-big"><span class="k">Total cost (${ev.totalCount} upgrades)</span><span class="v small-v">${esc(costs(ev.totalCosts))}</span>
       ${ore(ev.totalOre) ? `<span class="small muted">Ore: ${esc(ore(ev.totalOre))}</span>` : ''}</div>
+    ${ev.notScheduled.count ? `<div class="ev-big not-scheduled"><span class="k">Not scheduled (${ev.notScheduled.count}, not in the total)</span><span class="v small-v">${esc(costs(ev.notScheduled.costs))}</span><span class="small muted">Book-ready hero levels, lab kinds with weight 0${ev.mode === 'rush' ? ', the next Town Hall' : ''}.</span></div>` : ''}
   </div>
   <p class="small muted">Everything left at your current Town Hall from now, as the scheduler would run it. Builder upgrades are grouped by the tier the engine gives them${ev.mode === 'rush' ? '; the next Town Hall is listed under "Not scheduled" (it opens new levels)' : ''}. Tap a section to expand it.</p>`);
   if (!ev.tiers.length) out.push('<div class="card muted">No builder upgrades left at this Town Hall.</div>');

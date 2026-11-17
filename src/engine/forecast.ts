@@ -49,11 +49,14 @@ export interface WallDump {
   text: string;
 }
 
-/** Lowest owned wall level whose next level is available at the player's TH. */
-export function wallDump(data: GameData, account: AccountState): WallDump | null {
+/**
+ * Lowest owned wall level whose next level is available at the player's TH. `th` = the Town Hall at "now"
+ * (SPEC §10.4: a TH upgrade that finished since the export counts); defaults to the export's.
+ */
+export function wallDump(data: GameData, account: Pick<AccountState, 'townHall' | 'walls'>, th = account.townHall): WallDump | null {
   const wall = data.byId.get('wall');
   if (!wall) return null;
-  const max = maxLevelAt(wall, { th: account.townHall });
+  const max = maxLevelAt(wall, { th });
   for (const w of account.walls) {
     if (w.level >= max) continue;
     const next = levelInfo(wall, w.level + 1);

@@ -138,6 +138,21 @@ describe('Step 3 UI', () => {
     expect(saved.slice(0, 2)).toEqual(['archer-queen', 'minion-prince']);
   });
 
+  it('hero order: text dragged in from outside the list (e.g. "3") is no drop target and never reorders (REVIEW-2 #11)', () => {
+    const before = heroNames();
+    const external = (type: string) => {
+      const ev = new Event(type, { cancelable: true }) as Event & { dataTransfer: unknown };
+      ev.dataTransfer = { getData: () => '3', setData: () => {} };
+      return ev;
+    };
+    const over = external('dragover');
+    items()[1].dispatchEvent(over);
+    expect(over.defaultPrevented).toBe(false); // not accepted as a drop target
+    expect(items()[1].classList.contains('drop-target')).toBe(false);
+    items()[1].dispatchEvent(external('drop'));
+    expect(heroNames()).toEqual(before);
+  });
+
   it('hero order: reset to default keeps the Queen at 1', () => {
     expect($<HTMLButtonElement>('#btn-hero-reset').disabled).toBe(false);
     click('#btn-hero-reset');

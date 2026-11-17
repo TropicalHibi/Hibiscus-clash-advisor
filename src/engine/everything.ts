@@ -81,9 +81,10 @@ export interface Everything {
   notScheduled: EverythingGroup;
   labDoneSec: number;
   petsDoneSec: number;
-  /** Builder tiers + lab + pets + walls + not-scheduled (ore separate). */
+  /** Builder tiers + lab + pets + walls (ore separate). "Not scheduled" is its own subtotal (notScheduled.costs). */
   totalCosts: Costs;
   totalOre: OreCost;
+  /** Upgrades in the total (builder tiers, lab, pets, blacksmith, walls), not the "Not scheduled" ones. */
   totalCount: number;
 }
 
@@ -220,8 +221,10 @@ export function buildEverything(data: GameData, account: AccountState, settings:
   }
   const walls = group('walls', 'Walls', wallRows, 0);
 
+  // "Total cost" = what's left at this TH as scheduled (builder tiers, lab, pets) + walls. The "Not scheduled"
+  // group (book-ready hero levels, weight-0 lab kinds, the next Town Hall) has its own subtotal (SPEC §11, REVIEW-2 #10).
   const totalCosts: Costs = {};
-  for (const g of [...tiers, lab, pets, walls, notScheduled]) for (const [r, n] of Object.entries(g.costs)) addCost(totalCosts, r as Resource, n ?? 0);
+  for (const g of [...tiers, lab, pets, walls]) for (const [r, n] of Object.entries(g.costs)) addCost(totalCosts, r as Resource, n ?? 0);
   return {
     mode,
     townHall: lvNow.th,
@@ -239,6 +242,6 @@ export function buildEverything(data: GameData, account: AccountState, settings:
     petsDoneSec: runEnd(sim, 'petHouse'),
     totalCosts,
     totalOre: blacksmith.ore ?? NO_ORE,
-    totalCount: [...tiers, lab, pets, blacksmith, walls, notScheduled].reduce((n, g) => n + g.count, 0),
+    totalCount: [...tiers, lab, pets, blacksmith, walls].reduce((n, g) => n + g.count, 0),
   };
 }
