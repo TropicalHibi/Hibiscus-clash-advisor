@@ -1164,3 +1164,75 @@ All 14 findings in REVIEW-2.md are fixed, plus the 11 spec ambiguities and the "
 ## Check
 - **Banner:** the banner for v0.1.20 may show once more in a browser that had dismissed it, because the dismissal is keyed by the new version name.
 - **Mobile layout:** still not checked visually, as in REVIEW-2's last missing test.
+
+# Squads + new item images
+
+Squads (TH19) now count toward the lab score of the troops they're made of. Every item clash-of-clans-data has no picture for now has an icon: the daily Action fetched them and the live site shows them. SPEC §6.7, §8.3, §12, §13 and §9b are updated, and the reasoning is under "Decisions (squads + new item images)".
+
+## What changed
+- **Meta:** the squads (4000195–4000206) already had names: the ClashKing data has had them since the switch, and the 17 Nov meta Action's `meta.json` named all twelve with no unknown IDs. What's new is that **seasonal units** are named and flagged too. They're left out of `meta.json` (before, one would have shown up as `Unknown troop <id>`), and the run summary lists them. I regenerated `meta.json` from the `meta-data` branch's 21,620 stored attacks with the new `npm run meta -- --aggregate-only --battles <file>`. The result had the same 132 units and names. The scheduled meta Action has replaced that file since (22,224 attacks).
+- **`config/squads.yaml`** maps each squad to its troops, with counts where ClashKing's description gives them. To support this, the pinned copy now keeps each squad's `info` text. It was re-trimmed from the same download (same sha256), so the data version didn't change. `npm run sync` lists any squad without an entry, along with its description.
+- **Lab score:** each troop gets its squads' share of troop space, split by count × housing space (equally when the counts aren't known), plus the squads' usage. The Lab tab row says `incl. squads +X%: …` and the plan reason says `incl. squads X% (…)`. Squad upgrades are lab items with their own score. Level 2 needs TH19 and Laboratory 17, as the data says.
+- **Item images:** `npm run sync` and the data-update Action look up an icon for each item without a clash-of-clans-data image. The order is ClashKing's asset host (`assets.clashk.ing`, whose `manifest.json` lists every file with a sha256), then the Fandom wiki's MediaWiki API, then name only. Each icon is resized to 96 px WebP in `public/item-images-extra/`, and its source is recorded in `sources.json`. Nothing is downloaded twice, and clash-of-clans-data's own image wins once it ships one. The browser never makes these calls.
+
+## Squad mapping
+Counts are only filled in where the description gives them. **Please confirm** the ones marked ✱, and the rows without counts.
+
+| Squad | Troops | Counts | From the description | Split per troop |
+|---|---|---|---|---|
+| Barch Squad | Barbarian, Archer | 15 + 15 | "Fifteen Barbarians. Fifteen Archers." | 50 % / 50 % |
+| Giant Wizard Squad | Giant, Wizard | — | none given | 50 / 50 (equal) |
+| Wall Breaker Squad | Wall Breaker | 5 | "a demolition Squad of five Wall Breakers" | 100 % |
+| Minion Squad | Minion | 8 | "playful in Squads of eight" | 100 % |
+| Balloon Squad | Balloon | — | none (its Skeletons aren't a lab troop) | 100 % |
+| Golem Witch Squad | Golem, Witch | — | none (the Skeletons are summoned) | 50 / 50 (equal) |
+| Hog Rider Squad | Hog Rider | — | none given | 100 % |
+| Miner Squad | Miner | 10 | "Ten shovels. Ten tunnels." | 100 % |
+| Healer Squad | Balloon, Healer | — | "A Balloon …", but the Healers aren't counted | 50 / 50 (equal) |
+| P.E.K.K.A Titan Squad ✱ | P.E.K.K.A, Electro Titan | 1 + 1 | "this Squad duo" | 44 % / 56 % (by housing 25 / 32) |
+| Dragons Squad | Dragon, Dragon Rider | — | none given | 50 / 50 (equal) |
+| Baby Dragon Squad ✱ | Baby Dragon | 3 | "The Tantrum Triplets" | 100 % |
+
+ClashKing gives no housing space for **P.E.K.K.A Titan Squad** and **Baby Dragon Squad**. Without it there's no army share to credit, so these two add usage only to their troops, never score. **Please confirm** that's acceptable until ClashKing fills it in.
+
+## Lab order changes (your export, `samples/myexport.json`, TH18)
+Your export has no squads (Squad Barracks is still under construction), so the only change is the credit to your troops. The table compares the same meta with and without the squad credit.
+
+| Troop | Troops section | Score (share of troop space) | Credited from |
+|---|---|---|---|
+| Dragon | #1 → #1 | 13.96 % → 14.31 % | Dragons Squad +0.36 % |
+| Dragon Rider | #3 → #3 | 11.03 % → 11.38 % | Dragons Squad +0.36 % |
+| Balloon | #4 → #4 | 7.56 % → 7.98 % | Balloon Squad +0.27 %, Healer Squad +0.14 % |
+| Minion | #9 → #9 | 1.85 % → 1.86 % | Minion Squad +0.01 % |
+| Archer / Barbarian | #10 / #11, unchanged | +0.01 % each | Barch Squad |
+| Miner | **#19 → #18** | 0.03 % → 0.06 % | Miner Squad +0.03 % |
+| P.E.K.K.A | **#18 → #19** | 0.04 % (no credit: the squad has no housing space) | — |
+| Hog Rider | #20 → #20 | 0.02 % → 0.03 % | Hog Rider Squad +0.01 % |
+
+- **The lab pick order is unchanged at the top:** Dragon (1.00) → Bowler (0.80) → Dragon Rider (0.80) → Balloon (0.56) → Sky Wagon (0.50). Dragon Rider closed most of the gap on Bowler (11.38 % vs 11.43 %, was 11.03 %). On the previous meta (21,620 attacks) it did pass Bowler (#3 → #2), so the two may keep swapping from day to day.
+- **The 24 h plan doesn't change:** the lab runs Druid 4, then Dragon 12, with or without the credit. Builders, the forecast and the wall line are untouched.
+- `npm run plan` (ClashKing v0.1.21): B1 Town Hall 19; B2, B5 and B6 on the Firecracker Tower lookahead (Archer Tower 21, Archer Tower 7, Scattershot 4). The lab top 5 reasons now include "incl. squads" for Dragon, Dragon Rider and Balloon.
+
+## Images: where each came from
+**assets.clashk.ing does serve item icons:** `https://assets.clashk.ing/<path>`, with every path listed in `manifest.json`. All 17 icons came from it, and the Fandom fallback wasn't needed. In a local dry run with ClashKing switched off, Fandom alone found Spiky Tower, Squad Barracks, Barch Squad, Heroic Spell, Guardian Shrine and P.E.K.K.A Titan Squad, so the fallback works.
+
+| Item | Source | File on assets.clashk.ing |
+|---|---|---|
+| Spiky Tower | ClashKing | `buildings/home-village/spiky_tower/level_2.webp` |
+| Squad Barracks | ClashKing | `buildings/home-village/squad_barracks/level_12.webp` |
+| Firecracker Tower | ClashKing | `buildings/home-village/firecracker_tower/level_2.webp` |
+| Guardian Shrine | ClashKing | `buildings/home-village/guardian_shrine/level_1.webp` |
+| 12 squads | ClashKing | `troops/<squad>/icon.webp` |
+| Heroic Spell | ClashKing | `spells/heroic_spell.webp` |
+
+There are 17 items, not the 18 I counted on v0.1.20, because ClashKing v0.1.21 removed Sour Elixir Cauldron. Seasonal units never appear on the site, so they aren't looked up.
+
+## Runs on GitHub
+- **Data update, 1st dispatch (run 44161889630): failed, nothing committed.** ClashKing **v0.1.21** had just come out (5 changes: levels for B.O.B's Hut, Crafting Station, Guardian Shrine and Helper Hut; Sour Elixir Cauldron removed). One older rule test named Sour Elixir Cauldron and broke on the new data. The image step itself worked (17 saved). The run opened issue #1, as designed.
+- **Fix:** that test now builds its own Resource building (462d359). Before re-running, I ran `test:ci` locally against the v0.1.21 file.
+- **2nd dispatch (run 44162417284): passed.** It committed `data: ClashKing v0.1.20 → v0.1.21 (5 changes); 17 new item images (Guardian Shrine, Squad Barracks, Spiky Tower, Firecracker Tower, …)` (06afafa) and started Pages. **Pages run 44162508114 passed** (build + deploy). On the live site, `item-images-extra/spiky-tower.webp` and `squad-barracks.webp` return `200 image/webp`, and the deployed bundle references all 17 icons. I closed issue #1 with a link to the passing run.
+- Locally, on the pulled v0.1.21 data: `npm test` 437/437, `npm run test:mutated` passed, `npm run build` and `npm run build:pages` passed ("17 from public/item-images-extra").
+
+## Check
+- **Confirm the squad counts** marked ✱ above and the rows without counts. If you know a count, adding `count:` in `config/squads.yaml` switches that squad to the housing-weighted split.
+- **The squad credits are small today:** at most 0.41 % of troop space (Balloon). They'll matter more if squads catch on in Legend I.
