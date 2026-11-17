@@ -26,15 +26,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # The write token is not kept in .git/config while npm code (and the login secrets) are around;
+      # only the commit and store steps use it (git-auth.sh).
       - uses: actions/checkout@v7
         with:
           ref: main
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
+      # No dependency install scripts: the meta pipeline needs no compiled binary.
       - id: install
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - id: restore
         name: Restore battles.jsonl from the meta-data branch
@@ -61,6 +65,7 @@ jobs:
         if: steps.meta.outputs.commit == 'true'
         env:
           GENERATED_AT: ${{ steps.meta.outputs.generatedAt }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -71,8 +76,8 @@ jobs:
             exit 0
           fi
           git commit -m "meta: $GENERATED_AT"
-          git pull --rebase -X theirs origin main
-          git push origin HEAD:main
+          bash .github/scripts/git-auth.sh pull --rebase -X theirs origin main
+          bash .github/scripts/git-auth.sh push origin HEAD:main
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
       # Pushes made with GITHUB_TOKEN don't trigger other workflows; a workflow_dispatch does.
@@ -89,6 +94,7 @@ jobs:
         env:
           ROWS: ${{ steps.meta.outputs.rows }}
           GENERATED_AT: ${{ steps.meta.outputs.generatedAt }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -97,7 +103,7 @@ jobs:
           readme=$(printf '%s\n' "# meta-data" "" "Legend League I attacks of the last 14 days (battles.jsonl, gzipped), written by" ".github/workflows/meta.yml. Player tags are pseudonyms. Force-pushed as a single commit every day." | git hash-object -w --stdin)
           tree=$(printf '100644 blob %s\tREADME.md\n100644 blob %s\tbattles.jsonl.gz\n' "$readme" "$blob" | git mktree)
           commit=$(git commit-tree "$tree" -m "meta-data: $ROWS rows (14-day window) at $GENERATED_AT")
-          git push --force origin "$commit:refs/heads/meta-data"
+          bash .github/scripts/git-auth.sh push --force origin "$commit:refs/heads/meta-data"
           echo "meta-data: $ROWS rows, $(du -h "$RUNNER_TEMP/battles.jsonl.gz" | cut -f1) gzipped"
 
       - name: Report the failure as an issue
@@ -128,15 +134,7 @@ jobs:
             echo "Meta update failed" > "$RUNNER_TEMP/title.txt"
             printf 'The daily Legend I meta update failed at **%s**. public/meta.json was not changed.\n\nRun: %s\n' "${step:-unknown step}" "$RUN_URL" > "$RUNNER_TEMP/body.md"
           fi
-          title="$(cat "$RUNNER_TEMP/title.txt")"
-          num="$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
-                 --jq "map(select(.title == \"$title\")) | .[0].number // empty")"
-          if [ -n "$num" ]; then
-            gh issue edit "$num" --body-file "$RUNNER_TEMP/body.md"
-            gh issue comment "$num" --body "Again: $RUN_URL"
-          else
-            gh issue create --title "$title" --body-file "$RUNNER_TEMP/body.md"
-          fi
+          bash .github/scripts/upsert-issue.sh "$(cat "$RUNNER_TEMP/title.txt")" "$RUNNER_TEMP/body.md" "Again: $RUN_URL"
 
       - name: Close the failure issue after a clean run
         if: success() && steps.meta.outputs.issue != 'true' && steps.meta.outputs.status != ''
@@ -145,5 +143,5 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           num="$(gh issue list --state open --search '"Meta update failed" in:title' --json number,title \
-                 --jq 'map(select(.title == "Meta update failed")) | .[0].number // empty')"
+                 | jq -r --arg t "Meta update failed" 'map(select(.title == $t)) | .[0].number // empty')"
           if [ -n "$num" ]; then gh issue close "$num" --comment "Recovered: $RUN_URL"; fi

@@ -12,6 +12,7 @@ import { toSnapshot, type DataChangesFile, type Snapshot } from '../src/data/sna
 import type { GameData } from '../src/data/types';
 import { checkLevels, describeMissingMerges, explainMissingMerges } from '../src/data/validate';
 import { cocData, data, modifiedData, rawItem } from './helpers';
+import { normalizeEol, workflowCode } from './workflow';
 
 // ── fake registry ──
 const cannon = data.byId.get('cannon')!;
@@ -222,8 +223,32 @@ describe('predev git pull', () => {
 
 // ── the workflow file ──
 describe('.github/workflows/data-update.yml', () => {
-  const wf = fs.readFileSync('.github/workflows/data-update.yml', 'utf8');
-  const code = wf.replace(/#.*$/gm, '');
+  const code = workflowCode('data-update.yml');
+
+  it('reads the same under a CRLF checkout (Windows core.autocrlf=true)', () => {
+    const crlf = fs.readFileSync('.github/workflows/data-update.yml', 'utf8').replace(/\r?\n/g, '\r\n');
+    expect(normalizeEol(crlf).replace(/#.*$/gm, '')).toBe(code);
+    expect(fs.readFileSync('.gitattributes', 'utf8')).toMatch(/^\* text=auto eol=lf$/m);
+  });
+
+  it('keeps the write token out of .git/config, installs without scripts, pushes through git-auth.sh', () => {
+    expect(code).toMatch(/persist-credentials: false/);
+    expect(code).toContain('npm ci --ignore-scripts');
+    expect(code).not.toMatch(/^\s*git (push|pull)\b/m);
+    expect(code).toContain('bash .github/scripts/git-auth.sh push origin HEAD:main');
+  });
+
+  it('runs the rule tests (test:ci), not the facts about the previous data', () => {
+    expect(code).toContain('npm run test:ci');
+    expect(code).not.toMatch(/\bnpm test\b/);
+  });
+
+  it('the shared issue script passes the title to jq with --arg (a quote in it cannot pick another issue)', () => {
+    expect(code).toContain('bash .github/scripts/upsert-issue.sh');
+    const sh = normalizeEol(fs.readFileSync('.github/scripts/upsert-issue.sh', 'utf8'));
+    expect(sh).toContain(`jq -r --arg t "$title" 'map(select(.title == $t))`);
+    expect(sh).not.toMatch(/--jq/);
+  });
 
   it('runs daily at 10:17 UTC and on demand, with no secrets and never the meta pipeline', () => {
     expect(code).toMatch(/schedule:\s*\n\s*- cron: '17 10 \* \* \*'/);
@@ -241,8 +266,9 @@ describe('.github/workflows/data-update.yml', () => {
   it('only tests, commits and deploys after an update; reports any failure as one issue per version', () => {
     for (const id of ['test', 'commit', 'deploy']) expect(code).toMatch(new RegExp(`id: ${id}\\n[\\s\\S]*?if: steps\\.check\\.outputs\\.status == 'updated'`));
     expect(code).toMatch(/if: failure\(\)/);
-    expect(code).toMatch(/gh issue list --state open/);
-    expect(code).toMatch(/gh issue edit/);
-    expect(code).toMatch(/gh issue create --title/);
+    const sh = fs.readFileSync('.github/scripts/upsert-issue.sh', 'utf8');
+    expect(sh).toMatch(/gh issue list --state open/);
+    expect(sh).toMatch(/gh issue edit/);
+    expect(sh).toMatch(/gh issue create --title/);
   });
 });

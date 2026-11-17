@@ -398,7 +398,7 @@ describe('Gold Pass', () => {
   });
 
   it('book-ready list shows the Gold-Pass time when the toggle is on; the threshold check stays raw', () => {
-    const ex = makeExport(18, 18);
+    const ex = makeExport(MAX_TH, MAX_TH);
     const aq = data.byId.get('archer-queen')!;
     const firstBook = aq.levels.find((l) => l.timeSec >= data.bookThresholdSec)!;
     setLevel(ex, 'heroes', 'archer-queen', { lvl: firstBook.level - 1 });
@@ -411,18 +411,21 @@ describe('Gold Pass', () => {
 });
 
 describe('book threshold follows the data', () => {
-  it('a 9-day hero level raises the threshold to 9d; 8-day levels become eligible', () => {
+  it('a hero level one day longer raises the threshold (8d → 9d today); the old threshold levels become eligible', () => {
+    const T = data.bookThresholdSec;
+    // A hero level at today's threshold, and another hero whose top level gets one day longer than that.
+    const hero = [...data.items.values()].find((i) => i.category === 'hero' && i.levels.some((l) => l.timeSec === T))!;
+    const other = hero.id === 'barbarian-king' ? 'grand-warden' : 'barbarian-king';
     const d = modifiedData((f) => {
-      // ClashKing: row N's upgrade_time is the time of level N+1, so this makes the top level take 9 days.
-      const aq = rawItem(f, 'archer-queen');
-      aq.levels[aq.levels.length - 2].upgrade_time = 9 * DAY;
+      // ClashKing: row N's upgrade_time is the time of level N+1, so this changes the top level's time.
+      const h = rawItem(f, other);
+      h.levels[h.levels.length - 2].upgrade_time = T + DAY;
     });
-    expect(data.bookThresholdSec).toBe(8 * DAY);
-    expect(d.bookThresholdSec).toBe(9 * DAY);
-    const aq = d.byId.get('archer-queen')!;
-    const eightDay = aq.levels.find((l) => l.timeSec === 8 * DAY)!;
-    expect(heroStatus(aq, eightDay.level - 1, 12, d.bookThresholdSec).kind).toBe('eligible');
-    expect(heroStatus(data.byId.get('archer-queen')!, eightDay.level - 1, 12, data.bookThresholdSec).kind).toBe('bookReady');
+    expect(d.bookThresholdSec).toBe(T + DAY);
+    const atOld = hero.levels.find((l) => l.timeSec === T)!;
+    const hh = atOld.heroHallRequired ?? 0;
+    expect(heroStatus(hero, atOld.level - 1, hh, d.bookThresholdSec).kind).toBe('eligible');
+    expect(heroStatus(data.items.get(hero.key)!, atOld.level - 1, hh, data.bookThresholdSec).kind).toBe('bookReady');
   });
 });
 

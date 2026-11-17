@@ -11,6 +11,8 @@
     "build:pages": "tsc --noEmit && vite build --mode pages",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:ci": "vitest run --exclude tests/current-data.test.ts",
+    "test:mutated": "tsx scripts/test-mutated.ts",
     "sync": "tsx scripts/sync.ts",
     "plan": "tsx scripts/plan.ts",
     "meta": "tsx scripts/meta.ts",

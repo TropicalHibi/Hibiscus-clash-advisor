@@ -13,10 +13,11 @@ import type { GameData, Item } from './types';
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const PROJECT_ROOT = path.resolve(here, '..', '..');
 export const PKG_DIR = path.join(PROJECT_ROOT, 'node_modules', 'clash-of-clans-data');
-/** The pinned ClashKing copy: static_data.json (trimmed) + pin.json (release / commit / sha256). */
-export const CK_DIR = path.join(PROJECT_ROOT, 'data', 'clashking');
-export const CK_DATA_FILE = path.join(CK_DIR, 'static_data.json');
-export const CK_PIN_FILE = path.join(CK_DIR, 'pin.json');
+/**
+ * The pinned ClashKing copy: static_data.json (trimmed) + pin.json (release / commit / sha256).
+ * `CK_DATA_DIR` points it elsewhere: only `npm run test:mutated` sets it (the suite on a mutated copy, SPEC §13).
+ */
+export const CK_DIR = process.env.CK_DATA_DIR ? path.resolve(process.env.CK_DATA_DIR) : path.join(PROJECT_ROOT, 'data', 'clashking');
 
 function walk(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
@@ -42,7 +43,6 @@ export function readRawFiles(): RawFile[] {
 export function dataVersion(): string {
   return JSON.parse(fs.readFileSync(path.join(PKG_DIR, 'package.json'), 'utf8')).version;
 }
-export const cocDataVersion = dataVersion;
 
 export function readConfig(name: string): string {
   return fs.readFileSync(path.join(PROJECT_ROOT, 'config', name), 'utf8');
@@ -55,9 +55,6 @@ const readConfigIf = (name: string): string | undefined => {
     return undefined;
   }
 };
-
-/** config/id-overrides.yaml, or undefined when the file is absent. */
-export const readIdOverrides = () => readConfigIf('id-overrides.yaml');
 
 /** The three optional override files (SPEC §12); missing files count as empty. */
 export function readOverrideTexts(): OverrideTexts {

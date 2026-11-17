@@ -27,15 +27,18 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      # The write token is not kept in .git/config while npm code runs; only the push step uses it (git-auth.sh).
       - uses: actions/checkout@v7
         with:
           ref: main
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
+      # No dependency install scripts: nothing here needs a compiled binary (esbuild / sharp ship prebuilt).
       - id: install
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       # Same code path as a local `npm run sync`: clash-of-clans-data (newest in the major, known-good restore),
       # then ClashKing (latest clashy.go release at its commit; validated before it replaces the pinned copy,
@@ -47,25 +50,28 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: npx tsx scripts/data-update.ts check --out "$RUNNER_TEMP/data-update.json"
 
+      # Rule + validation tests (npm run test:ci): facts about the previous data (tests/current-data.test.ts)
+      # are not run, so a new ClashKing level or TH never blocks the update.
       - id: test
-        name: npm test on the new data
+        name: Tests on the new data
         if: steps.check.outputs.status == 'updated'
         run: |
           set -o pipefail
-          npm test 2>&1 | tee "$RUNNER_TEMP/test.log"
+          npm run test:ci 2>&1 | tee "$RUNNER_TEMP/test.log"
 
       - id: commit
         name: Commit and push the data update
         if: steps.check.outputs.status == 'updated'
         env:
           MESSAGE: ${{ steps.check.outputs.message }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add package.json package-lock.json public/data-changes.json data/clashking/
           git commit -m "$MESSAGE"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          bash .github/scripts/git-auth.sh pull --rebase origin main
+          bash .github/scripts/git-auth.sh push origin HEAD:main
 
       # Pushes made with GITHUB_TOKEN don't trigger other workflows; a workflow_dispatch does.
       - id: deploy
@@ -89,7 +95,7 @@ jobs:
           committed=""
           if [ "$INSTALL" = failure ]; then step="npm ci"
           elif [ "$CHECK" = failure ]; then step=""   # the result file names the step
-          elif [ "$TEST" = failure ]; then step="npm test on the new data"
+          elif [ "$TEST" = failure ]; then step="tests on the new data"
           elif [ "$COMMIT" = failure ]; then step="commit and push"
           elif [ "$DEPLOY" = failure ]; then step="start the Pages workflow"; committed="--committed"
           else step="unknown step"; fi
@@ -99,13 +105,5 @@ jobs:
             echo "Data update failed: npm check" > "$RUNNER_TEMP/title.txt"
             printf 'The daily game-data update failed at **%s**. Nothing was committed.\n\nRun: %s\n' "${step:-unknown step}" "$RUN_URL" > "$RUNNER_TEMP/body.md"
           fi
-          title="$(cat "$RUNNER_TEMP/title.txt")"
           # One issue per version: update the open one instead of opening a duplicate.
-          num="$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
-                 --jq "map(select(.title == \"$title\")) | .[0].number // empty")"
-          if [ -n "$num" ]; then
-            gh issue edit "$num" --body-file "$RUNNER_TEMP/body.md"
-            gh issue comment "$num" --body "Failed again: $RUN_URL"
-          else
-            gh issue create --title "$title" --body-file "$RUNNER_TEMP/body.md"
-          fi
+          bash .github/scripts/upsert-issue.sh "$(cat "$RUNNER_TEMP/title.txt")" "$RUNNER_TEMP/body.md" "Failed again: $RUN_URL"

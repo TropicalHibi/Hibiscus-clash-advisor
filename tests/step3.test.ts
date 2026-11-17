@@ -523,9 +523,19 @@ describe('item images', () => {
     });
     expect(r.byKey.size).toBeGreaterThan(150);
     expect(r.skipped.filter((s) => s.reason === 'missing')).toEqual([]);
-    // Buildings use their top level's image, troops/heroes their icon.
+    // Troops/heroes use their icon. Buildings use the highest level image clash-of-clans-data has, which can lag
+    // ClashKing's top level (SPEC §9 "which source updated first"), so this is relative to the package's files.
     expect(data.byId.get('archer-queen')!.images![0]).toMatch(/icon\.png$/);
-    const cannonTop = levelInfo(data.byId.get('cannon')!, data.byId.get('cannon')!.levels.length)!.level;
-    expect(data.byId.get('cannon')!.images![0]).toContain(`level-${cannonTop}.png`);
+    const cannon = data.byId.get('cannon')!;
+    const picked = r.byKey.get(cannon.key)!;
+    expect(picked).toMatch(/level-\d+\.png$/);
+    const dir = picked.slice(0, picked.lastIndexOf('/'));
+    const levelsWithImage = fs
+      .readdirSync(`node_modules/clash-of-clans-data/${dir}`)
+      .map((f) => /^level-(\d+)\.png$/.exec(f)?.[1])
+      .filter((x): x is string => !!x)
+      .map(Number)
+      .filter((n) => levelInfo(cannon, n));
+    expect(picked).toBe(`${dir}/level-${Math.max(...levelsWithImage)}.png`);
   });
 });

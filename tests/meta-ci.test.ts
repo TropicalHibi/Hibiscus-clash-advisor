@@ -13,6 +13,7 @@ import { readConfig } from '../src/data/loadNode';
 import { buildCatalog, parseSuperTroops } from '../src/meta/aggregate';
 import type { MetaFile } from '../src/meta/meta';
 import { data } from './helpers';
+import { workflowCode } from './workflow';
 
 const EMAIL = 'owner@example.com';
 const PASSWORD = 'hunter2-secret';
@@ -203,8 +204,15 @@ describe('issue text', () => {
 });
 
 describe('.github/workflows/meta.yml', () => {
-  const wf = fs.readFileSync('.github/workflows/meta.yml', 'utf8');
-  const code = wf.replace(/#.*$/gm, '');
+  const code = workflowCode('meta.yml');
+
+  it('keeps the write token out of .git/config, installs without scripts, pushes through git-auth.sh', () => {
+    expect(code).toMatch(/persist-credentials: false/);
+    expect(code).toContain('npm ci --ignore-scripts');
+    expect(code).not.toMatch(/^\s*git (push|pull)\b/m);
+    expect(code).toContain('bash .github/scripts/upsert-issue.sh');
+    expect(code).not.toMatch(/--jq/);
+  });
 
   it('runs daily at 11:07 UTC and on demand; only the two login secrets, never printed', () => {
     expect(code).toMatch(/schedule:\s*\n\s*- cron: '7 11 \* \* \*'/);
@@ -219,14 +227,14 @@ describe('.github/workflows/meta.yml', () => {
     expect(code).toContain('git commit -m "meta: $GENERATED_AT"');
     expect(code).toContain('gh workflow run pages.yml --ref main');
     expect(code).toMatch(/git commit-tree "\$tree"/); // a parentless commit: no history growth
-    expect(code).toContain('git push --force origin "$commit:refs/heads/meta-data"');
+    expect(code).toContain('bash .github/scripts/git-auth.sh push --force origin "$commit:refs/heads/meta-data"');
     const order = ['id: restore', 'id: meta', 'id: commit', 'id: deploy', 'id: store'].map((s) => code.indexOf(s));
     expect(order).toEqual([...order].sort((a, b) => a - b));
   });
 
   it('reports failures and partial runs as one "Meta update failed" issue, closed by the next clean run', () => {
     expect(code).toMatch(/if: failure\(\) \|\| steps\.meta\.outputs\.issue == 'true'/);
-    expect(code).toMatch(/gh issue edit/);
+    expect(fs.readFileSync('.github/scripts/upsert-issue.sh', 'utf8')).toMatch(/gh issue edit/);
     expect(code).toMatch(/gh issue close/);
   });
 });

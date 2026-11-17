@@ -5,7 +5,7 @@ import { buildPlan } from '../src/engine/plan';
 import { builderCandidates, detectMode, OFFENSE_ORDER, type EngineState } from '../src/engine/tiers';
 import { EMPTY_META } from '../src/meta/meta';
 import type { AccountState } from '../src/state/parseExport';
-import { cocData, data, makeExport, MAX_TH, maxLab, modifiedData, parse, parseWith, rawItem, setLevel, settings, T0 } from './helpers';
+import { ckRaw, cocData, data, makeExport, MAX_TH, maxLab, modifiedData, parse, parseWith, rawItem, setLevel, settings, T0 } from './helpers';
 import { maxLevelAt } from '../src/data/normalize';
 import type { GameData } from '../src/data/types';
 
@@ -19,9 +19,10 @@ const heroLevel = (id: string, hh: number) => heroCapAt(data.byId.get(id)!, hh);
 
 describe('mode detection', () => {
   it('rush below max TH, max-TH at max TH (max TH comes from data)', () => {
-    expect(data.maxTH).toBe(19); // ClashKing v0.1.20: TH19 (16 Nov 2026)
-    expect(detectMode(18, data)).toBe('rush');
-    expect(detectMode(19, data)).toBe('maxTH');
+    const thLevels = rawItem(ckRaw(), 'town-hall').levels.map((l: { level: number }) => l.level);
+    expect(data.maxTH).toBe(Math.max(...thLevels)); // today's value (19) is in tests/current-data.test.ts
+    expect(detectMode(MAX_TH - 1, data)).toBe('rush');
+    expect(detectMode(MAX_TH, data)).toBe('maxTH');
   });
 });
 
@@ -79,22 +80,21 @@ describe('hero book threshold', () => {
   const aq = data.byId.get('archer-queen')!;
   const threshold = data.bookThresholdSec;
 
-  // Today's data only; tests/engine-rules.test.ts proves the threshold follows a modified copy of the data.
-  it('threshold = longest hero level in the data (today: 8d)', () => {
+  // Today's value (8d) is in tests/current-data.test.ts; tests/engine-rules.test.ts proves the threshold follows a modified copy.
+  it('threshold = longest hero level in the data', () => {
     const max = Math.max(...[...data.items.values()].filter((i) => i.category === 'hero').flatMap((h) => h.levels.map((l) => l.timeSec)));
     expect(threshold).toBe(max);
-    expect(threshold).toBe(8 * 86400);
   });
 
   it('next level time ≥ threshold → book-ready; below → eligible', () => {
     const firstBook = aq.levels.find((l) => l.timeSec >= threshold)!;
     const lastBelow = [...aq.levels].reverse().find((l) => l.timeSec < threshold && l.level < firstBook.level)!;
-    expect(heroStatus(aq, firstBook.level - 1, 12, threshold).kind).toBe('bookReady');
-    expect(heroStatus(aq, lastBelow.level - 1, 12, threshold).kind).toBe('eligible');
+    expect(heroStatus(aq, firstBook.level - 1, firstBook.heroHallRequired ?? 0, threshold).kind).toBe('bookReady');
+    expect(heroStatus(aq, lastBelow.level - 1, lastBelow.heroHallRequired ?? 0, threshold).kind).toBe('eligible');
   });
 
   it('book-ready Queen drops out of scheduling and shows on the book-ready list', () => {
-    const ex = makeExport(18, 18);
+    const ex = makeExport(MAX_TH, MAX_TH); // Hero Hall at its max, so the first book level is reachable
     const firstBook = aq.levels.find((l) => l.timeSec >= threshold)!;
     setLevel(ex, 'heroes', 'archer-queen', { lvl: firstBook.level - 1 });
     const a = parse(ex);
@@ -104,9 +104,13 @@ describe('hero book threshold', () => {
   });
 
   it('hero caps come from per-level heroHallLevelRequired, not the stale Hero Hall table', () => {
-    expect(heroCapAt(aq, 12)).toBe(110);
-    expect(heroCapAt(aq, 13)).toBe(115); // Hero Hall 13 (ClashKing v0.1.20)
-    expect(heroStatus(aq, 107, 12, threshold).kind).not.toBe('cappedByHeroHall');
+    // Today's caps (110 at Hero Hall 12, 115 at 13) are in tests/current-data.test.ts.
+    const hhTop = Math.max(...aq.levels.map((l) => l.heroHallRequired ?? 0));
+    expect(heroCapAt(aq, hhTop)).toBe(aq.levels[aq.levels.length - 1].level);
+    const capBelow = heroCapAt(aq, hhTop - 1);
+    expect(capBelow).toBe(Math.max(...aq.levels.filter((l) => (l.heroHallRequired ?? 0) <= hhTop - 1).map((l) => l.level)));
+    expect(heroStatus(aq, capBelow - 3, hhTop - 1, threshold).kind).not.toBe('cappedByHeroHall');
+    expect(heroStatus(aq, capBelow, hhTop - 1, threshold).kind).toBe('cappedByHeroHall');
     // ClashKing has no Hero Hall cap table; the stale one is clash-of-clans-data's (backup), still checked there.
     expect(data.heroHallCaps).toEqual({});
     const coc = cocData();
@@ -154,19 +158,21 @@ describe('tier order', () => {
   });
 
   it('max-TH mode: offense → heroes → TH gate → resources → defenses → temporary', () => {
-    const ex = makeExport(MAX_TH, MAX_TH - 1);
+    const ex = makeExport(MAX_TH, MAX_TH - 2); // two THs of levels behind: every tier has work in any data release
     const hh = ex.buildings.find((b) => b.data === 1000071)!.lvl;
     setLevel(ex, 'heroes', 'barbarian-king', { lvl: Math.min(50, heroLevel('barbarian-king', hh) - 1) }); // below the 8d book levels
     const c = cands(parse(ex));
     expect(c.some((x) => x.item.id === 'town-hall')).toBe(false);
     const tierOf = (id: string) => c.find((x) => x.item.id === id)!.tier;
+    const firstTier = (cat: string) => c.find((x) => x.item.category === cat && x.tier !== 0)!.tier; // past Tier 0 (Lab, new buildings)
     expect(tierOf('laboratory')).toBe(0); // Laboratory upgrade is Tier 0 in both modes
-    expect(tierOf('clan-castle')).toBe(1); // offense with a TH19 level
+    expect(firstTier('army')).toBe(1); // offense
     expect(tierOf('barbarian-king')).toBe(2);
-    expect(tierOf('multi-archer-tower')).toBe(5); // merged-defense upgrade past L1 → permanent defense
-    expect(tierOf('ricochet-cannon')).toBe(5);
-    expect(tierOf('gold-storage')).toBe(4);
-    expect(tierOf('x-bow')).toBe(5);
+    expect(firstTier('resourceStorage')).toBe(4);
+    expect(firstTier('defense')).toBe(5);
+    const merged = c.filter((y) => y.item.category === 'mergedDefense' && y.toLevel > 1);
+    expect(merged.length).toBeGreaterThan(0);
+    for (const x of merged) expect(x.tier).toBe(5); // merged-defense upgrade past L1 → permanent defense
     const tiers = c.map((x) => x.tier);
     expect([...tiers].sort((a, b) => a - b)).toEqual(tiers);
   });
@@ -184,9 +190,10 @@ describe('tier order', () => {
 
 describe('LPT ordering (tiers 5–6)', () => {
   it('orders longest time first, cheaper first on ties', () => {
-    const c = cands(parse(makeExport(MAX_TH, MAX_TH - 1))); // TH18 levels: tier 6 has the supercharges of buildings maxed at TH18
-    for (const tier of [5, 6]) {
-      const t = c.filter((x) => x.tier === tier);
+    // Tier 5 from levels two THs behind (defense upgrades left in any data release); tier 6 from one TH behind
+    // (supercharges of buildings already maxed then).
+    for (const [tier, behind] of [[5, 2], [6, 1]]) {
+      const t = cands(parse(makeExport(MAX_TH, MAX_TH - behind))).filter((x) => x.tier === tier);
       expect(t.length).toBeGreaterThan(3);
       for (let i = 1; i < t.length; i++) {
         expect(t[i - 1].rawTimeSec).toBeGreaterThanOrEqual(t[i].rawTimeSec);

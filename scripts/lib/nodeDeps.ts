@@ -190,7 +190,8 @@ export function nodeSyncDeps(o: NodeOpts): SyncDeps {
     installedVersion: () => installedVersion(o.root),
     latestInMajor: (major) => npmLatestInMajor(o.root, major, exec),
     install: (version) => {
-      exec(`npm install ${PKG_NAME}@${version}`, { cwd: o.root, stdio: 'inherit' });
+      // A data-only package: no install scripts needed (REVIEW-2 #13; the daily Action installs with --ignore-scripts too).
+      exec(`npm install --ignore-scripts ${PKG_NAME}@${version}`, { cwd: o.root, stdio: 'inherit' });
     },
     check: checkInstalledData,
     log: o.log ?? ((line) => console.log(line)),

@@ -1,4 +1,4 @@
-# GitHub Pages deploy (SPEC §15). Every push to main: npm ci → npm test → Pages build → deploy.
+# GitHub Pages deploy (SPEC §15). Every push to main: npm ci → tests (test:ci, test:mutated) → Pages build → deploy.
 # No API token exists in CI, so this never runs the predev refresh, `npm run meta` or `npm run sync`:
 # the site ships the committed public/meta.json and the locked clash-of-clans-data version.
 name: Deploy to GitHub Pages
@@ -8,10 +8,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Only the deploy job gets pages / id-token write (the build job runs npm code).
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -22,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -34,8 +35,11 @@ jobs:
           key: item-images-${{ hashFiles('package-lock.json', 'scripts/lib/itemImageCache.ts') }}
           restore-keys: item-images-
       # `predev` (the refresh) only runs with `npm run dev`, which CI never calls.
+      # Rule + validation tests (not the facts about today's data, tests/current-data.test.ts), then the same
+      # suite on a mutated copy of the data (a new TH + new top levels): a ClashKing release never blocks a deploy.
       - run: npm ci
-      - run: npm test
+      - run: npm run test:ci
+      - run: npm run test:mutated
       - run: npm run build:pages
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -44,6 +48,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

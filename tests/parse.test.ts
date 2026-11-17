@@ -83,7 +83,8 @@ describe('dataId join', () => {
     expect(sc.levels.map((l) => l.level)).toEqual([1, 2]);
   });
 
-  it('browser loader (import.meta.glob) produces the same data as the Node loader', async () => {
+  // The browser glob always reads the committed data/clashking/, so this is skipped on the mutated copy (npm run test:mutated).
+  it.skipIf(!!process.env.CK_DATA_DIR)('browser loader (import.meta.glob) produces the same data as the Node loader', async () => {
     const b = await loadGameDataBrowser();
     expect(b.items.size).toBe(data.items.size);
     expect(b.maxTH).toBe(data.maxTH);
