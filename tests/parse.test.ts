@@ -66,7 +66,7 @@ describe('export parsing', () => {
 describe('dataId join', () => {
   it('resolves every id in the fixture except the planted unknown one', () => {
     const acct = parseExport(fixtureText, data);
-    expect(acct.unresolved).toEqual([{ section: 'helpers', dataId: 93000099 }]);
+    expect(acct.unresolved).toEqual([{ section: 'helpers', dataId: 93000099, level: 1 }]);
     for (const inst of acct.instances) expect(data.items.has(inst.itemKey)).toBe(true);
   });
 

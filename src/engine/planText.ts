@@ -73,6 +73,11 @@ export function planToText(p: Plan): string {
   }
   L.push('');
 
+  if (p.unrecognized) {
+    L.push('== Info ==');
+    L.push(`  Unrecognized items (likely unreleased): ${p.unrecognized}`);
+    L.push('');
+  }
   if (p.warnings.length) {
     L.push('== Warnings ==');
     for (const w of p.warnings) L.push(`  - ${w}`);

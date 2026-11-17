@@ -8,7 +8,7 @@ import { buildEverything } from './engine/everything';
 import { buildPlan } from './engine/plan';
 import { detectMode } from './engine/tiers';
 import { coerceMeta, EMPTY_META, type MetaFile } from './meta/meta';
-import { parseExport, ExportParseError, type AccountState } from './state/parseExport';
+import { isLikelyUnreleased, parseExport, unreleasedNote, ExportParseError, type AccountState } from './state/parseExport';
 import { DEFAULT_HERO_ORDER, heroOrder, LOCKED_HERO, moveHero, settingsFromYaml, type Settings } from './state/settings';
 import { renderEverything } from './ui/everythingView';
 import { renderLab, type PinList } from './ui/labView';
@@ -156,6 +156,8 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
   const status = account
     ? `<p class="small">Loaded <b>${esc(account.tag ?? 'account')}</b>: TH${account.townHall} → <b>${detectMode(account.townHall, data) === 'rush' ? 'Rush' : 'Max-TH'} mode</b> (max TH in data: ${data.maxTH}). Imported ${esc(new Date(importedAt * 1000).toLocaleString())}${account.exportTimestamp ? `, export taken ${esc(new Date(account.exportTimestamp * 1000).toLocaleString())}` : ', no timestamp in export'}.</p>`
     : '<p class="small muted">No account loaded.</p>';
+  const unreleased = account ? unreleasedNote(account.unresolved) : '';
+  const unreleasedHtml = unreleased ? `<p class="small muted" id="unrecognized-items"><b>Unrecognized items (likely unreleased):</b> ${esc(unreleased)}. Not in the game data yet; ignored until a data update adds them.</p>` : '';
   el.innerHTML = `
     <h2>Import</h2>
     <div class="card">
@@ -166,7 +168,7 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
         ${saved ? '<button class="btn secondary" id="btn-clear">Clear saved export</button>' : ''}
       </div>
       ${msg ? `<div class="msg ${msg.kind}">${esc(msg.text)}</div>` : ''}
-      ${status}
+      ${status}${unreleasedHtml}
     </div>
 
     <h2>Settings</h2>
@@ -220,7 +222,8 @@ function renderImportTab(msg?: { text: string; kind: 'ok' | 'error' }): void {
       account = parsed;
       importedAt = now;
       loadError = '';
-      const unresolved = parsed.unresolved.length ? ` ${parsed.unresolved.length} unknown id(s) ignored.` : '';
+      const warnable = parsed.unresolved.filter((u) => !isLikelyUnreleased(u)).length;
+      const unresolved = warnable ? ` ${warnable} unknown id(s) ignored.` : '';
       renderImportTab({ text: `Imported TH${parsed.townHall}.${unresolved}${ok ? '' : ' (Could not save to browser storage; it will be lost on reload.)'}`, kind: 'ok' });
     } catch (e) {
       renderImportTab({ text: e instanceof ExportParseError ? e.message : `Import failed: ${(e as Error).message}`, kind: 'error' });

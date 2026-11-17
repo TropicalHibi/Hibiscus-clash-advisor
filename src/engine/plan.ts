@@ -4,7 +4,7 @@ import { dataSourceLabel } from '../data/source';
 import { checkMergeConsumption } from '../data/validate';
 import { levelsOf } from '../state/levels';
 import type { MetaFile } from '../meta/meta';
-import type { AccountState } from '../state/parseExport';
+import { isLikelyUnreleased, unreleasedNote, type AccountState } from '../state/parseExport';
 import type { LabKind, Settings } from '../state/settings';
 import { heroStatus } from './book';
 import { nextHelperTime } from './boosts';
@@ -54,6 +54,8 @@ export interface Plan {
   helperLine: string;
   /** "Apprentice: repeating on Grand Warden. Suggest switching to Town Hall 19 …" (§10.1; suggestion only). */
   helperSuggestions: string[];
+  /** "equipment 90000062 (level 1), …": unknown level-1 equipment, likely unreleased (info, not a warning). */
+  unrecognized: string;
   bookThresholdSec: number;
   dataVersion: string;
   exportTimestamp?: number;
@@ -129,7 +131,8 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
   }
 
   const warnings = [...dataIssues(data), ...account.warnings, ...sim.warnings];
-  for (const u of account.unresolved)
+  // Level-1 unknown equipment is likely unreleased: an info note (Import tab, CLI), not a warning.
+  for (const u of account.unresolved.filter((x) => !isLikelyUnreleased(x)))
     warnings.push(
       u.upgrading
         ? `Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${data.version}): its running upgrade still occupies a slot until it finishes.`
@@ -151,6 +154,7 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
     simulateHelpers: settings.simulateHelpers,
     helperLine: helperLine(account, sim, nowSec, settings.simulateHelpers),
     helperSuggestions: helperSuggestionLines(sim),
+    unrecognized: unreleasedNote(account.unresolved),
     bookThresholdSec: data.bookThresholdSec,
     dataVersion: dataSourceLabel(data),
     exportTimestamp: account.exportTimestamp,

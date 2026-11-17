@@ -7,6 +7,25 @@ export interface Unresolved {
   dataId: number;
   /** True when the entry has a running timer (it still occupies a slot: see AccountState.unknownJobs). */
   upgrading?: boolean;
+  /** The entry's `lvl`, when it has one. */
+  level?: number;
+}
+
+/**
+ * Unknown equipment at level 1 (not upgrading): most likely an item the game ships ahead of its release
+ * (every account gets it at level 1). Listed once as "Unrecognized items (likely unreleased)" instead of a
+ * warning. Unknown equipment above level 1 and every other unknown id still warn.
+ */
+export function isLikelyUnreleased(u: Unresolved): boolean {
+  return u.section === 'equipment' && u.level === 1 && !u.upgrading;
+}
+
+/** "equipment 90000062 (level 1), …" for the Import tab and the CLI note; empty when there are none. */
+export function unreleasedNote(unresolved: Unresolved[]): string {
+  return unresolved
+    .filter(isLikelyUnreleased)
+    .map((u) => `${u.section} ${u.dataId} (level ${u.level})`)
+    .join(', ');
 }
 
 /**
@@ -175,7 +194,7 @@ export function parseExport(input: string | object, data: GameData): AccountStat
   const unknown: UnknownJob[] = [];
   const noteUnknown = (section: string, e: any) => {
     const jobs = unknownJobs(section, e);
-    unresolved.push({ section, dataId: e.data, ...(jobs.length ? { upgrading: true } : {}) });
+    unresolved.push({ section, dataId: e.data, ...(jobs.length ? { upgrading: true } : {}), ...(typeof e.lvl === 'number' ? { level: e.lvl } : {}) });
     unknown.push(...jobs);
   };
   const seq = new Map<string, number>();
