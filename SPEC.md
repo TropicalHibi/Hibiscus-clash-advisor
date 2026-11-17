@@ -41,7 +41,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 |---|---|
 | `npm run dev` | Refresh stale game data / meta (§9a), then start the local site |
 | `npm run dev:fast` | Start the local site without the refresh |
-| `npm run sync` | Update game data, run validation, snapshot it and print the diff vs the last snapshot (`-- --offline`: no npm, validate + snapshot the installed version) |
+| `npm run sync` | Update game data (ClashKing, pinned in `data/clashking/`; clash-of-clans-data for images / backup), run validation, snapshot it, print the diff vs the last snapshot and the ClashKing vs clash-of-clans-data cross-check (`-- --offline`: no GitHub / npm, validate + snapshot what's pinned and installed) |
 | `npm run meta` | Pull Legend I battle logs, aggregate, write `public/meta.json` |
 | `npm run push-meta` | Commit `public/meta.json` (only that file) as `meta: <generatedAt>` and push `main`, if it changed — redeploys the live site (§15) |
 | `npm run build` | Typecheck + production build at base `/` |
@@ -52,21 +52,36 @@ A local website that reads a Clash of Clans account export and tells the player 
 
 ## 3. Data sources
 
-### 3.1 Game data — `clash-of-clans-data` (npm, repo `chiefpansancolt/clash-of-clans-data`)
-- Install as a dependency. Package exports `.`, `./data/*`, `./images/*`. JSON lives under `data/home/<category>/<item>.json`.
-- Categories used: `town-hall`, `defenses`, `army-buildings`, `resource-buildings`, `traps`, `walls`, `heroes`, `troops`, `spells`, `siege-machines`, `pets`, `hero-equipment`, `crafted-defenses`, `guardians`, `other/helpers`.
-- Each item has a numeric **`dataId`** (e.g. Ricochet Cannon = `1000085`) which matches the IDs in the account export. **Join on `dataId`, never on names.**
-- Building levels: `buildCost`, `buildCostResource`, `buildTime {days,hours,minutes,seconds}`, `townHallRequired`.
-- Hero levels: `upgradeCost`, `upgradeCostResource`, `upgradeTime`, `heroHallLevelRequired`.
-- Defenses that get merged have `availablePerTownHall[].countAfterMerges`. Merged defenses have their own files with `availablePerTownHall[].count`.
-- Supercharge data is present on some defense files.
-- Walls: `buildCostResource: "Gold or Elixir"`.
+### 3.1 Game data — ClashKing static data (primary), `clash-of-clans-data` (images, TH weapons, backup)
 
-- `other/helpers`: Builder's Apprentice and Lab Assistant levels carry `workRate` (hours of progress per work hour), used by the scheduler (§10.1). The Prospector and Alchemist are recognised but don't affect timing.
-- **Missing dataIds** go in `config/id-overrides.yaml` (`<dataId>: <file id>`). Today: `93000003: alchemist` (the Alchemist file has no `dataId`). If the data later ships its own dataId, the data wins, and a differing value shows a warning.
-- **Images:** item files carry `images.icon` (troops, spells, sieges, heroes, pets, equipment) or per-level `levels[].images.normal` (buildings). The files are WebP saved as `.png`, some up to 4096 px, so the build resizes them (§13 Step 3).
+**Primary: `static/static_data.json` from [ClashKingInc/clashy.go](https://github.com/ClashKingInc/clashy.go).**
+- `npm run sync` and the daily Action (§9, §9b) download it from the **latest release tag** (main when no release has the file), **at that tag's commit**, and pin it in `data/clashking/` (committed): `static_data.json` (trimmed to the sections below, home village only, no `info` / `TID` text) and `pin.json` (`repo`, `ref`, `tag`, `commit`, `sha256` of the downloaded file, `version` such as `clashking-v0.1.20` or `clashking-main-<sha7>`, `fetchedAt`, `maxTH`, `items`). The site and the scripts only ever read the pinned copy.
+- Sections used: `buildings`, `traps`, `troops` (incl. siege machines: `production_building: "Workshop"`), `spells`, `heroes`, `pets`, `equipment`, `guardians`, `helpers`.
+- Each entry's **`_id`** is the dataId used in the account export. **Join on dataId, never on names.** Item ids (`cannon`, `archer-queen`, …) are slugs of the names (`Builder's Hut` → `builders-hut`, `P.E.K.K.A` → `pekka`), the same as the old clash-of-clans-data file ids.
+- **Level semantics** (verified level by level against clash-of-clans-data, DECISIONS):
+  - buildings, traps, crafted-defense modules, supercharges: `build_cost` / `build_time` (seconds) on level N = the cost and time **of level N**;
+  - troops, spells, heroes, pets, guardians, equipment: `upgrade_cost` / `upgrade_time` on level N = the cost of going **N → N+1**, so level N's cost and time are taken from row N−1 and level 1 costs nothing. Equipment `upgrade_cost` is `{shiny_ore, glowy_ore, starry_ore}`;
+  - every `required_*` field on level N (`required_townhall`, `required_hero_tavern_level`, `required_lab_level`, `required_pet_house_level`, `required_blacksmith_level`) is the requirement **to have level N** (not shifted). Equipment keeps only the Blacksmith requirement, heroes only the Hero Hall requirement (both are TH-gated themselves), as before.
+- Resources: the item's `upgrade_resource`; a level with `alt_upgrade_resource` (walls) costs gold **or** elixir. Troops and spells carry `housing_space`.
+- **Supercharges:** the `supercharge` block on a building's top level (`upgrade_resource`, `required_townhall`, `levels[]`) becomes the `<id>:sc` item.
+- **Building counts per TH** = running sum of the Town Hall levels' `unlocks[].quantity` (pre-merge totals). A Town Hall level with its own `merge_requirement` absorbs those buildings (TH17 takes the Eagle Artillery). Guardians count 1 from their first level's TH.
+- **Merges:** a building whose **level 1** has `merge_requirement` is a merged defense; the entries name the sources and their **exact** required levels (2 entries of the same `_id` = 2 copies). Counts after merges are derived (§7).
+- **Super troops:** troops with `super_troop {original_id, original_min_level}` have their own dataId and housing space and are credited to the base troop (§8.3). They are not lab items.
+- **Seasonal units** (`is_seasonal`): recognised (no unknown-id warning) but never in the lab queue, the Lab tab or the meta.
+- **Crafting Station:** `seasonal_defenses[].modules[]` → one item per module (`<defense>:m<module>`), with their own levels and TH requirements.
+- **Helpers:** `boost_multiplier` per level = the Builder's Apprentice / Lab Assistant work rate (hours of progress per work hour, §10.1). The Alchemist and Prospector are recognised but don't affect timing.
+- **TH weapons are not in ClashKing's data**: they're taken from clash-of-clans-data's `town-hall.json`.
+- ClashKing has no Hero Hall cap table: hero caps come from each level's `required_hero_tavern_level` (as before).
 
-**Known data quirk:** Hero Hall `heroLevelCaps` is stale (says Archer Queen cap 105 at Hero Hall 12; in-game max is 110). **Derive hero caps from each hero level's `heroHallLevelRequired`, not from the Hero Hall's cap table.** Validation test (§9) logs the mismatch.
+**Optional overrides** (`config/merges.yaml`, `config/super-troops.yaml`, `config/id-overrides.yaml`, §12) ship **empty**. An entry that exists **wins** over the data (a differing dataId is a warning; two items on one dataId too).
+
+**`clash-of-clans-data` (npm, `chiefpansancolt/clash-of-clans-data`)** stays a dependency for:
+- **Item images:** `images.icon` or per-level `levels[].images.normal`, matched to ClashKing items by item id, then dataId. The files are WebP saved as `.png`, some up to 4096 px, so the build resizes them (§13 Step 3). Items only ClashKing has show their name only.
+- **TH weapon levels** (above).
+- **Backup source:** if there is no usable ClashKing copy (missing, or the pinned file can't be loaded), the planner normalizes clash-of-clans-data instead (its `availablePerTownHall`, `buildCost`/`researchCost`, `townHallRequired`, …) and shows a **visible warning** on the Plan tab, in `npm run sync` and on every `npm run dev`. Its merge recipes, super-troop table and the Alchemist's dataId (which it lacks) are built in (`src/data/cocDataBackup.ts`, frozen at 0.19.1); the override files still win. In the browser it's a separate chunk, fetched only then.
+- The cross-check report (§9).
+
+**Known clash-of-clans-data quirks** (backup only now): Hero Hall `heroLevelCaps` is stale (Archer Queen cap 105 at Hero Hall 12; in-game max 110), so hero caps come from per-level requirements; Monolith Arrow / Electro Fangs and Alchemist / Prospector have swapped dataIds (ClashKing's match the army codes and the export).
 
 ### 3.2 Account state — in-game export JSON
 - Player copies it from in-game settings and pastes it into the site.
@@ -99,10 +114,11 @@ coc-planner/
   SPEC.md
   .github/workflows/
     pages.yml            # test + build + deploy to GitHub Pages on push to main (§15)
-    data-update.yml      # daily clash-of-clans-data update → commit → deploy, or an issue (§9b)
+    data-update.yml      # daily ClashKing + clash-of-clans-data update → commit → deploy, or an issue (§9b)
   config/
-    merges.yaml          # merge recipes (hand-maintained)
-    id-overrides.yaml    # dataIds missing from the game data (§3.1)
+    merges.yaml          # optional merge-recipe overrides (ships empty; ClashKing has the merges)
+    super-troops.yaml    # optional super-troop overrides (ships empty)
+    id-overrides.yaml    # optional dataId overrides (ships empty)
     settings.sample.yaml # defaults the UI starts from
   scripts/
     sync.ts              # npm run sync
@@ -112,7 +128,7 @@ coc-planner/
     push-meta.ts         # npm run push-meta (§15)
     meta-ci.ts           # the daily meta Action's steps (§8.4)
   src/
-    data/                # load + normalize clash-of-clans-data into Item model
+    data/                # load + normalize ClashKing (clashking.ts) or the clash-of-clans-data backup (normalize.ts) into the Item model; overrides, cross-check
     state/               # parse export JSON → AccountState
     engine/
       tiers.ts           # mode detection + tier assignment + eligibility
@@ -127,6 +143,7 @@ coc-planner/
     ui/                  # pages/components
     main.ts
   data/
+    clashking/           # pinned ClashKing static data: static_data.json (trimmed) + pin.json (committed, §3.1)
     snapshots/           # dated normalized game-data snapshots (for diffs; git-ignored, newest 2 kept)
     meta/battles.jsonl   # raw deduped Legend I attacks (git-ignored; the Action keeps its own copy on the meta-data branch, §8.4)
     refresh-state.json   # last game-data check (git-ignored)
@@ -146,12 +163,15 @@ type Resource = 'gold' | 'elixir' | 'darkElixir' | 'goldOrElixir'
 
 interface LevelInfo {
   level: number;
-  cost: number;
+  cost: number;               // cost of reaching this level (ClashKing: build_cost, or the previous row's upgrade_cost, §3.1)
   resource: Resource;
-  timeSec: number;            // raw, unboosted
-  thRequired?: number;
-  heroHallRequired?: number;
-  labRequired?: number;       // for lab items, if present in data
+  timeSec: number;            // raw, unboosted, seconds
+  thRequired?: number;        // required_townhall
+  heroHallRequired?: number;  // required_hero_tavern_level
+  labRequired?: number;       // required_lab_level
+  petHouseRequired?: number;  // required_pet_house_level
+  blacksmithRequired?: number;// required_blacksmith_level
+  ore?: { shinyOre: number; glowyOre: number; starryOre: number }; // equipment
 }
 
 type Category = 'townHall' | 'thWeapon' | 'defense' | 'mergedDefense' | 'army'
@@ -161,11 +181,19 @@ type Category = 'townHall' | 'thWeapon' | 'defense' | 'mergedDefense' | 'army'
 
 interface Item {
   dataId: number;
+  id: string;                // slug of the name, e.g. "cannon"
   name: string;
   category: Category;
-  queue: 'builder' | 'lab' | 'petHouse' | 'blacksmith';
+  queue: 'builder' | 'lab' | 'petHouse' | 'blacksmith' | 'none';
   levels: LevelInfo[];
+  countPerTH?: Record<number, number>;            // cumulative Town Hall unlocks
+  countAfterMergesPerTH?: Record<number, number>; // merge sources (§7)
+  housingSpace?: number; superHousingSpace?: number;
+  helperWorkRates?: Record<number, number>;
+  seasonal?: boolean;        // is_seasonal: never in the lab queue or the meta
 }
+// GameData also carries: source ('clashking' | 'clash-of-clans-data'), version (e.g. "clashking-v0.1.20"),
+// maxTH, bookThresholdSec, merges (§7), superTroops (dataId → base troop), warnings.
 
 interface OwnedInstance {
   dataId: number;
@@ -210,7 +238,7 @@ Tier 0 order: **Laboratory upgrade → new unbuilt buildings → Archer Queen.**
    - Town Hall upgrade itself, **as soon as the TH gate is clear** (below). Until then it isn't a candidate.
    - TH weapon levels. The weapon shares the Town Hall's builder lock, so it is only picked while the TH itself can't be upgraded (gated or maxed for now).
    - **TH gate — everything that must be done before the next TH upgrade:**
-     - **Every available merge is performed:** source defenses at the required level (§7), then the merge itself. Applies to all merged defenses available at the current TH, not just ones new to it. Ordered by the TH that unlocked them (soonest first), then `merges.yaml` order. A merge holds the gate only if it can actually be performed at the current TH: enough source buildings exist and every one of them can reach the required level at this TH. A started merge counts as done.
+     - **Every available merge is performed:** source defenses at the required level (§7), then the merge itself. Applies to all merged defenses available at the current TH, not just ones new to it. Ordered by the TH that unlocked them (soonest first), then recipe order (the former `merges.yaml` order — Ricochet Cannon, Multi-Archer Tower, Multi-Gear Tower, Super Wizard Tower — then newer merges in Town Hall `unlocks` order). A merge holds the gate only if it can actually be performed at the current TH: enough source buildings exist and every one of them can reach the required level at this TH. A started merge counts as done.
      - **Every new building that can be built is built.** These are handled in Tier 0 (§6.2), so they're done before the gate is checked. A building under construction counts as built.
      - Upgrading merged defenses past level 1 is **not** part of the gate; that goes in the permanent-defense tier.
    - **While the Town Hall itself is upgrading** (not while only its weapon is): keep working the gate, and immediately start on the **next** TH's (TH+1 only) merge source upgrades if any are available at the current TH. These lookahead items rank in tier 1 after the current TH's gate items and never hold the gate.
@@ -266,19 +294,21 @@ One list (no kinds, no weights): meta score (usage share) descending, unused at 
 
 ## 7. Merges
 
-`config/merges.yaml` holds the recipes. Everything else is derived from data:
-- **Unlock TH** = merged defense's first `availablePerTownHall` entry (or level 1 `townHallRequired`).
-- **Count needed per TH** = merged defense's `availablePerTownHall[].count`.
-- **Required source level** = the source defense's **max level at the merge's unlock TH**. Cannon and Archer Tower max out before they are fully merged. Levels a later TH adds to a source never raise the requirement for an older merge.
-- **Source consumption check:** for each source, `count − countAfterMerges` at a TH must equal Σ(recipe inputs × merged count) across recipes using it. If it doesn't, the validation test fails. That means a new merge needs adding to `merges.yaml`.
-  - The same check runs **in the browser** and shows a warning on the Plan tab until `merges.yaml` is fixed.
+The recipes come from **ClashKing's data**: the merged defense's **level-1 `merge_requirement`** (one entry per source copy, with the exact level). A new merge in a data release needs no hand edit. `config/merges.yaml` is an optional override (ships empty): an entry for a merged defense **replaces** the data's recipe (`sources: [{ id, qty, level? }]`).
+- **Unlock TH** = the merged defense's first TH with a count (cumulative Town Hall `unlocks`), or its level-1 TH requirement.
+- **Count needed per TH** = the merged defense's count per TH.
+- **Required source level** = the level in `merge_requirement` (or the override's `level`). Without one (the clash-of-clans-data backup, or an override without `level`), the source's **max level at the merge's unlock TH**. Either way, levels a later TH adds to a source never raise the requirement for an older merge.
+- **Counts after merges** (sources): count − Σ(recipe qty × merged count) at each TH from the first merge's unlock TH. (ClashKing's counts are pre-merge totals; the derived values equal clash-of-clans-data's `countAfterMerges` at TH16–18.) `geared_up` in `merge_requirement` is informational: gear-ups aren't modelled.
+- **Source consumption check:** for each source, `count − countAfterMerges` at a TH must equal Σ(recipe inputs × merged count) across recipes using it. With ClashKing it holds by construction; it still catches a bad override, and on the clash-of-clans-data backup (whose recipes are built in) a merge the recipes don't know. The daily Action fails on it (§9b).
+  - The same check runs **in the browser** and shows a warning on the Plan tab until it's fixed (an entry in `config/merges.yaml`).
   - Until then, the planner **never suggests building copies** of an item that has `countAfterMerges` but no recipe (its raw count would ask for buildings that were merged away).
 
-Current recipes (derived from TH17/18 counts — see `merges.yaml`):
-- Ricochet Cannon = 2 Cannon (TH16)
-- Multi-Archer Tower = 2 Archer Tower (TH16)
-- Multi-Gear Tower = 1 Cannon + 1 Archer Tower (TH17)
-- Super Wizard Tower = 2 Wizard Tower (TH18)
+Current recipes (ClashKing v0.1.20):
+- Ricochet Cannon = 2 Cannon 21 (TH16)
+- Multi-Archer Tower = 2 Archer Tower 21 (TH16)
+- Multi-Gear Tower = 1 Cannon 21 + 1 Archer Tower 21, both geared up (TH17)
+- Super Wizard Tower = 2 Wizard Tower 17 (TH18)
+- **Firecracker Tower = 1 Archer Tower 21 + 1 Scattershot 7 (TH19, 2 of them)** — new; at TH19 every Archer Tower is merged.
 
 ---
 
@@ -318,7 +348,7 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
   - **Super troops** use their own housing space and count toward the base troop (base score = own + super, capped at 1).
   - **Spells:** same formula with spell housing space (÷ total spell space in that army).
   - **Sieges, pets, equipment:** plain `usage` (one siege per attack; pets/equipment are on or off).
-  - Housing space comes from the game data (super troops: the `superTroop` block of the base troop file). A unit missing it is listed in the run summary and ranked by `usage` instead. Unknown IDs are left out of the per-attack totals.
+  - Housing space comes from the game data (`housing_space`; super troops: their own entry, mapped to the base troop by `super_troop.original_id`, §3.1). A unit missing it (today: Baby Dragon Squad, P.E.K.K.A Titan Squad) is listed in the run summary and ranked by `usage` instead. Unknown IDs and seasonal units are left out of the per-attack totals.
   - A `meta.json` without `armyShare` (older file) falls back to `usage`.
 - Keep `usage` and `threeStarRate` in the output for display and later tuning.
 - Write `public/meta.json`: `{ generatedAt, windowDays, halfLifeDays, attacks, players, units: { [dataId]: { name, usage, threeStarRate, avgQty?, armyShare?, kind?, baseId? } } }`.
@@ -346,23 +376,25 @@ Runs **daily at 11:07 UTC** and on **manual dispatch**. Secrets: `COC_DEV_EMAIL`
 
 ## 9. Game-data sync (`npm run sync`)
 
-1. Install the newest `clash-of-clans-data` **within the current major** (never jump a major automatically). Record the version. **Before installing**, snapshot the currently installed version (step 2) if it loads, so there is always a "before" to diff against, even on a fresh checkout with an empty `data/snapshots/` (the daily Action, §9b). That's a no-op when its snapshot already exists.
-   - Load and validate it. If it can't be used (normalize throws, or levels are broken), **restore the last known-good version**, record the failure in `data/refresh-state.json`, and exit non-zero.
-   - The `npm run dev` refresh (§9a) warns about the recorded failure on every start until a sync succeeds.
+1. **clash-of-clans-data** (item images, TH weapons, backup source, §3.1): install the newest version **within the current major** (never jump a major automatically). If it can't be loaded, **restore the last known-good version**, record the failure in `data/refresh-state.json`, and exit non-zero.
+   **ClashKing** (the game data): ask GitHub for the latest `clashy.go` release (main when no release has the file). Same commit as `data/clashking/pin.json` → nothing to do. Otherwise **snapshot the pinned data first** (step 2; a no-op when its snapshot exists, so even a fresh checkout has a "before"), download `static/static_data.json` **at that commit**, trim it, normalize it and **validate it before anything is replaced**: it must load, have levels that pass §9 step 4's level checks, contain the core items (Laboratory, Archer Queen, Cannon, Barbarian, Builder's Hut), not lower the max TH and not lose more than 10 % of the items. Pass → write `static_data.json` + `pin.json` (commit, sha256, version). Fail → **keep the previous pinned copy** (known-good rollback), record `clashKingFailure` in `data/refresh-state.json`, exit non-zero (the daily Action opens / updates its issue, §9b).
+   - With **no usable ClashKing copy at all** (none pinned and GitHub unreachable, or the pinned file can't be loaded), the planner falls back to clash-of-clans-data with a visible warning (§3.1).
+   - The `npm run dev` refresh (§9a) warns about a recorded failure (either source) on every start until a sync succeeds, and whenever the backup is in use.
    - Merge-consumption and hero-cap findings are warnings, not failures (the site warns about merges itself, §7).
-2. Normalize into the `Item` model; write `data/snapshots/<date>_<version>.json` (Item model only, no raw JSON or image paths), once per data version. Snapshots are ~0.3 MB each, so `data/snapshots/` is **git-ignored** and only the newest two are kept on disk.
+2. Normalize the active data (ClashKing, or the backup) into the `Item` model; write `data/snapshots/<date>_<version>.json` (Item model only, no raw JSON or image paths), once per data version (`clashking-v0.1.20`, …; the backup uses the clash-of-clans-data version). Snapshots are ~0.3 MB each, so `data/snapshots/` is **git-ignored** and only the newest two are kept on disk.
 3. Diff vs the newest snapshot of another version and print human-readable changes: new / removed items, new / removed levels, renames, and per-level cost, time and requirement changes. Examples: `Archer Tower 21: 18d → 16d`, `Gold Mine 17: 8M gold → 7.2M gold`, `NEW: Town Hall 19 (…)`, `NEW ITEM: …`, `REMOVED ITEM: …`. Items match by key (dataId), never by name. Equipment compares all three ores.
-   - The diff is saved to `public/data-changes.json` (`{ version, previousVersion, date, changes[] }`). It's committed with `package.json` / `package-lock.json`, so the live site gets it too. If the file already holds the same diff (same versions and changes), it isn't rewritten, so the date alone never dirties the working tree (e.g. a local sync after pulling the Action's commit).
+   - The diff is saved to `public/data-changes.json` (`{ version, previousVersion, date, changes[] }`). It's committed with `data/clashking/` (and `package.json` / `package-lock.json`), so the live site gets it too. If the file already holds the same diff (same versions and changes), it isn't rewritten, so the date alone never dirties the working tree (e.g. a local sync after pulling the Action's commit).
    - The Plan tab shows a dismissible **"Game data updated: N changes"** banner with the list when `data-changes.json` matches the bundled data version and that version hasn't been dismissed yet (dismissal is per version, in localStorage).
    - The first snapshot has nothing to compare with and writes no diff. A snapshot/diff failure is a warning, not a failed sync.
-   - `npm run sync -- --offline` validates and snapshots the installed version without asking npm.
+   - `npm run sync -- --offline` validates and snapshots the pinned / installed data without asking GitHub or npm.
 4. Run validation tests; print warnings (don't block the site):
    - Every dataId in a sample export resolves to an item.
    - Levels are contiguous and costs/times are non-negative.
-   - **Hero cap mismatch:** Hero Hall `heroLevelCaps` vs per-level `heroHallLevelRequired` (known mismatch today — log, don't fail).
+   - **Hero cap mismatch:** Hero Hall `heroLevelCaps` vs per-level `heroHallLevelRequired` (clash-of-clans-data backup only; ClashKing has no cap table — log, don't fail).
    - **Merge consumption check** (§7).
    - Max TH changed → print "mode may flip to rush".
-5. Site footer shows: data version + snapshot date (from `data-changes.json` when it matches), meta `generatedAt`.
+5. **Cross-check report** (every sync, and in the daily Action's log and step summary): compare the normalized ClashKing data with clash-of-clans-data, item by item (by key) and level by level: **cost** (incl. resource and ore), **time** and **TH requirement**. Print the differences (capped at 60 lines, counts always complete); **never fail** on them. Also print which source has the **higher max TH** and which has **newer items** (items / levels only one side has), so after a patch (e.g. TH19) it's visible which source updated first. TH weapons (taken from clash-of-clans-data in both) aren't compared.
+6. Site footer shows: data source and version (`ClashKing v0.1.20`, or `clash-of-clans-data 0.19.1 (backup)`) + snapshot date (from `data-changes.json` when it matches), meta `generatedAt`.
 
 ## 9a. Automatic refresh — no OS schedulers
 
@@ -370,7 +402,7 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 
 - `npm run dev` runs a `predev` refresh (`scripts/refresh.ts`) before Vite starts:
   0. **Git:** `git pull --ff-only` (30 s timeout, no credential prompt), so the local copy has whatever the daily Action committed. Silent when already up to date; prints one line when commits came in. If the pull changed `package.json` / `package-lock.json`, it runs `npm install` (node_modules must match the committed data version), then `npm run sync -- --offline` to record the local snapshot. If the pull can't fast-forward (uncommitted changes, diverged history, offline, not a git checkout), it prints a one-line warning and continues with the local copy.
-  1. **Game data:** if the last check was >24h ago (`data/refresh-state.json`, git-ignored), ask npm for the newest `clash-of-clans-data` within the installed major; if it is newer than the installed one, run the full `npm run sync`. A version that sync already recorded as unusable isn't reinstalled on every start; a newer release, or `npm run sync` by hand after a fix, retries.
+  1. **Game data:** if the last check was >24h ago (`data/refresh-state.json`, git-ignored), ask GitHub for the latest ClashKing release commit and npm for the newest `clash-of-clans-data` within the installed major; if either is newer than what's pinned / installed, run the full `npm run sync`. A version that sync already recorded as unusable (either source) isn't retried on every start; a newer release, or `npm run sync` by hand after a fix, retries. GitHub or npm being unreachable is one warning line each. Usually step 0 already pulled the Action's pinned copy, so this finds nothing.
   2. **Meta:** the daily Action (§8.4) normally keeps `public/meta.json` fresh, and step 0 pulled its copy. So `npm run meta` runs only if that `meta.json` (`generatedAt`) is **>24h old** or missing, **and** `.env` has `COC_DEV_EMAIL` + `COC_DEV_PASSWORD` (login, key `hibiscus-local`) or `COC_API_TOKEN`. Staleness means "last aggregation" (`generatedAt`), so `npm run meta -- --aggregate-only` also resets the 24 h clock.
   3. **Any failure** (offline, 403, no token, sync error) prints a **one-line warning** and the site starts anyway. A failed check is retried on the next start. A meta run where some players failed counts as updated; those players are retried by the next run (§8.1).
   4. While sync has a recorded data failure, **every start** prints a one-line warning that the site is running on the last known-good data.
@@ -380,14 +412,14 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 
 ## 9b. Daily game-data update (GitHub Action)
 
-`.github/workflows/data-update.yml` keeps `clash-of-clans-data` current on the live site without the local machine. It runs **daily at 10:17 UTC** and on **manual dispatch**. **No secrets**: it only talks to the npm registry and this repo, and never runs `npm run meta`.
+`.github/workflows/data-update.yml` keeps the game data current on the live site without the local machine: **ClashKing** (the game data) and **clash-of-clans-data** (images, TH weapons, backup). It runs **daily at 10:17 UTC** and on **manual dispatch**. **No secrets**: it talks to GitHub (ClashKing's releases; the workflow's own `GITHUB_TOKEN` is passed only for API rate limits and never printed), the npm registry and this repo, and never runs `npm run meta`.
 
-1. `npm ci`, then `scripts/data-update.ts check`. That's the same `syncData` code as `npm run sync` (§9): ask npm for the newest version **within the current major**. If it isn't newer, the run **ends successfully** ("No new clash-of-clans-data version").
-2. If newer: snapshot the installed version, install the new one, normalize + validate it (with the known-good restore if it can't load), snapshot it, diff the two and write `public/data-changes.json`. The CI path and a local `npm run sync` produce the same diff (tested).
-3. **Stricter than local, because nobody is watching:** a merge that `config/merges.yaml` doesn't explain (§7 consumption check) **fails** the update instead of being a warning. So does a missing diff. Hero-cap mismatches stay warnings.
+1. `npm ci`, then `scripts/data-update.ts check`. That's the same code as `npm run sync` (§9): clash-of-clans-data within the current major (`syncData`), then ClashKing's latest release (`syncClashKing`). If neither is newer, the run **ends successfully** ("Nothing new").
+2. If newer: snapshot the pinned data, download + validate the new ClashKing file (the **known-good copy stays** if it fails), pin it, snapshot it, diff the two and write `public/data-changes.json`. A new clash-of-clans-data alone (images / backup) commits with no game-data diff. The cross-check report goes to the log and the step summary. The CI path and a local `npm run sync` produce the same diff (tested).
+3. **Stricter than local, because nobody is watching:** a merge the recipes don't explain (§7 consumption check) **fails** the update instead of being a warning. So does a missing diff for a new ClashKing version. Hero-cap mismatches stay warnings.
 4. `npm test` on the new data.
-5. All good → commit **only** `package.json`, `package-lock.json` and `public/data-changes.json` to `main` as `data: clash-of-clans-data <old> → <new> (N changes)` (author `github-actions[bot]`), rebase on `main` and push. Then start the Pages workflow with `gh workflow run pages.yml --ref main`. A push made with the workflow's `GITHUB_TOKEN` doesn't trigger other workflows, but a `workflow_dispatch` does. Pages then runs its own `npm test` + build on the new commit and deploys.
-6. **Anything fails → nothing is committed**, and the run opens an issue titled **`Data update failed: <new version>`** (`… npm check` when npm couldn't be asked). If an open issue with that exact title exists, it's updated and gets a "Failed again" comment instead of a duplicate. The body names the failing step and has the reason, the sync/validation output, the diff summary and, for a test failure, the end of the test log. If the cause is a merge missing from `config/merges.yaml`, it says so plainly and names the new merged defense and its sources. The data has no "merged from" field, so candidates are derived from the counts and ranked: new in this release, then the name contains a source's name, then ≤ 2 of each source.
+5. All good → commit **only** `data/clashking/`, `package.json`, `package-lock.json` and `public/data-changes.json` to `main` as `data: ClashKing <old> → <new>, clash-of-clans-data <old> → <new> (N changes)` (only the parts that changed; author `github-actions[bot]`), rebase on `main` and push. Then start the Pages workflow with `gh workflow run pages.yml --ref main`. A push made with the workflow's `GITHUB_TOKEN` doesn't trigger other workflows, but a `workflow_dispatch` does. Pages then runs its own `npm test` + build on the new commit and deploys.
+6. **Anything fails → nothing is committed** (the live site keeps the known-good data), and the run opens an issue titled **`Data update failed: <new version>`** (`clashking-v…` for a ClashKing failure, `… ClashKing check` when GitHub couldn't be asked, `… npm check` when npm couldn't be asked). If an open issue with that exact title exists, it's updated and gets a "Failed again" comment instead of a duplicate. The body names the failing step and has the reason, the sync/validation output, the diff summary and, for a test failure, the end of the test log. If the cause is a merge the recipes don't explain, it says so plainly and names the new merged defense and its sources (candidates derived from the counts and ranked: new in this release, then the name contains a source's name, then ≤ 2 of each source); the fix is an entry in `config/merges.yaml`.
 7. Permissions: `contents: write` (push), `issues: write` (report), `actions: write` (dispatch Pages). Concurrency group `data-update`, never cancelled midway.
 
 ---
@@ -456,9 +488,11 @@ Mobile-friendly layout (the player checks on a phone later), single page with ta
 
 ## 12. Config files
 
-- `config/merges.yaml` — recipes (§7).
+- `config/merges.yaml` — optional merge-recipe overrides (§7). Ships empty.
+- `config/super-troops.yaml` — optional super-troop overrides (`<dataId>: { name, base }`, §8.3). Ships empty.
 - `config/settings.sample.yaml` — defaults loaded into the UI on first run. The UI persists edits to localStorage; the YAML is the reset point. Includes `lab.kindWeights` (troop / spell / siege, §6.7) and `simulateHelpers` (§10.1), both editable in the Settings tab. A saved hero order keeps its order, drops duplicates and gets any missing default hero appended.
-- `config/id-overrides.yaml` — dataIds the game data is missing (§3.1).
+- `config/id-overrides.yaml` — optional dataId overrides (`ids: { <dataId>: <item id> }`, §3.1). Ships empty.
+- All three: an entry that exists wins over ClashKing's data (and over the backup's built-in tables).
 
 ---
 
@@ -467,7 +501,7 @@ Mobile-friendly layout (the player checks on a phone later), single page with ta
 ### Step 1 — Functional v1 (end-to-end test)
 Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
 - Project scaffold (Vite + TS, Vitest, scripts wired up).
-- Data layer: load `clash-of-clans-data`, normalize to the `Item` model (§5), merges from `merges.yaml` (§7).
+- Data layer: load `clash-of-clans-data`, normalize to the `Item` model (§5), merges from `merges.yaml` (§7). (Since replaced: game data comes from ClashKing, §3.1.)
 - Export parser (§3.2) + dataId join.
 - Full priority engine (§6): mode detection, Tier 0 Queen, all tiers for both modes, book threshold, merge logic incl. TH-upgrading lookahead, Hero Hall caps from per-level data.
 - Scheduler + Gold Pass toggle + 24h forecast + wall dump (§10).
@@ -509,7 +543,7 @@ Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
 
 - **Live site:** https://tropicalhibi.github.io/Hibiscus-clash-advisor/ — the repo `TropicalHibi/Hibiscus-clash-advisor` is public. Pages source = "GitHub Actions".
 - **Workflow** `.github/workflows/pages.yml`, on every push to `main` (and manual dispatch): `npm ci` → `npm test` → `npm run build:pages` → upload `dist/` → deploy. A failing test stops the job before the build, so nothing is deployed.
-- **No token in the Pages workflow.** It never runs the predev refresh (it never calls `npm run dev`), `npm run meta`, `npm run sync` or `npm run push-meta`. The site ships the committed `public/meta.json` and the `clash-of-clans-data` version locked in `package-lock.json`. Only the meta Action (§8.4) uses secrets.
+- **No token in the Pages workflow.** It never runs the predev refresh (it never calls `npm run dev`), `npm run meta`, `npm run sync` or `npm run push-meta`. The site ships the committed `public/meta.json`, the pinned ClashKing copy in `data/clashking/` and the `clash-of-clans-data` version locked in `package-lock.json` (images, TH weapons, backup). Only the meta Action (§8.4) uses secrets.
 - **Base path:** only `vite build --mode pages` uses base `/Hibiscus-clash-advisor/`; `npm run dev`, `npm run build` and tests stay at `/`. Every runtime fetch uses `import.meta.env.BASE_URL` (§2).
 - **Meta on the site:** the daily meta Action (§8.4) commits `public/meta.json` and redeploys. By hand, `npm run push-meta` still commits that file alone (`meta: <generatedAt>`) and pushes `main` if it changed; it does nothing when unchanged and refuses off `main`. The predev refresh reminds after a local meta pull (§9a step 5) but never pushes.
 - **Game-data updates** reach the site **automatically** through the daily data-update Action (§9b): it commits the new version and starts this workflow by `workflow_dispatch`. A local `npm run sync` + commit + push still works too. `npm run dev` pulls the Action's commits first (§9a step 0).
