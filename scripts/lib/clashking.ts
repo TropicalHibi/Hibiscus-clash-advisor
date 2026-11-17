@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto';
 import { CK_PATH, CK_REPO, trimClashKing, type ClashKingRaw } from '../../src/data/clashking';
 import { clashKingVersion, isSafeTag, pinVersion, type ClashKingPin } from '../../src/data/source';
 import type { GameData } from '../../src/data/types';
-import { checkLevels } from '../../src/data/validate';
+import { checkFreeLevels, checkLevels } from '../../src/data/validate';
 import type { RefreshState } from './refresh';
 import type { SnapshotResult } from './snapshots';
 
@@ -71,7 +71,7 @@ export const sha256 = (text: string) => createHash('sha256').update(text).digest
 /** Validation a new ClashKing file must pass before it replaces the pinned one. Returns the first problem. */
 export function validateClashKing(data: GameData, previous?: Pick<ClashKingPin, 'maxTH' | 'items' | 'version'>): string | undefined {
   if (!data.maxTH || !data.items.size) return 'no Town Hall levels / items in the data';
-  const lv = checkLevels(data);
+  const lv = [...checkLevels(data), ...checkFreeLevels(data)];
   if (lv.length) return lv[0].message;
   for (const id of ['laboratory', 'archer-queen', 'cannon', 'barbarian', 'builders-hut']) if (!data.byId.has(id)) return `"${id}" is missing`;
   if (previous) {

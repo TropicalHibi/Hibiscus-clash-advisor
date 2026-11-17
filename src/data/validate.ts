@@ -71,6 +71,26 @@ export function checkLevels(data: GameData): ValidationIssue[] {
   return issues;
 }
 
+/**
+ * A level above 1 of a scheduled item (queue ≠ none) that costs nothing and takes no time (equipment: all three
+ * ores 0) — the failure mode of the shifted rows (SPEC §3.1): ClashKing adds level N+1 but leaves row N's
+ * upgrade_cost / upgrade_time at 0, so level N+1 would be free and instant (REVIEW-2 #7). Level 1 is free by design;
+ * seasonal units have queue none. A new ClashKing file with such a level is rejected (§9 step 1).
+ */
+export function checkFreeLevels(data: GameData): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  for (const item of data.items.values()) {
+    if (item.queue === 'none') continue;
+    for (const l of item.levels) {
+      if (l.level <= 1) continue;
+      const free = item.queue === 'blacksmith' ? !l.ore || (l.ore.shinyOre === 0 && l.ore.glowyOre === 0 && l.ore.starryOre === 0) : l.cost === 0 && l.timeSec === 0;
+      if (free)
+        issues.push({ level: 'error', check: 'levels', message: `${item.name} ${l.level}: ${item.queue === 'blacksmith' ? 'costs no ore' : 'costs nothing and takes no time'} (the row before it is probably not filled in yet)` });
+    }
+  }
+  return issues;
+}
+
 export interface MissingMerge {
   /** TH where the sources' counts drop without a recipe explaining it. */
   th: number;
