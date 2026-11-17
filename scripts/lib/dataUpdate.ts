@@ -9,6 +9,7 @@ import type { DataChange } from '../../src/data/snapshot';
 import type { GameData } from '../../src/data/types';
 import { checkMergeConsumption, describeMissingMerges, explainMissingMerges } from '../../src/data/validate';
 import { syncClashKing, type ClashKingDeps } from './clashking';
+import { fence, tail } from './ghText';
 import type { SnapshotResult } from './snapshots';
 import { syncData, type SyncDeps } from './sync';
 
@@ -50,7 +51,10 @@ export const commitMessage = (from: string, to: string, n: number) => `data: cla
 
 /** "data: ClashKing v0.1.20 → v0.1.21, clash-of-clans-data 0.19.1 → 0.20.0 (12 changes)" — only the parts that changed. */
 export function fullCommitMessage(p: { ck?: [string | undefined, string]; coc?: [string | undefined, string]; changes: number }): string {
-  const short = (v: string | undefined) => (v ?? 'none').replace(/^clashking-/, '');
+  // Tags only ("v0.1.20 → v0.1.21"); the commits too when the tag didn't change (a re-pointed tag, REVIEW-2 #5).
+  const full = (v: string | undefined) => (v ?? 'none').replace(/^clashking-/, '');
+  const tagOnly = (v: string | undefined) => full(v).replace(/\+[0-9a-f]+$/, '');
+  const short = p.ck && tagOnly(p.ck[0]) === tagOnly(p.ck[1]) ? full : tagOnly;
   const parts = [
     ...(p.ck ? [`ClashKing ${short(p.ck[0])} → ${short(p.ck[1])}`] : []),
     ...(p.coc ? [`clash-of-clans-data ${p.coc[0] ?? 'none'} → ${p.coc[1]}`] : []),
@@ -106,6 +110,7 @@ export function runDataUpdate(d: DataUpdateDeps): DataUpdateResult {
     if (r.outcome === 'download-failed') return fail('ClashKing download', r.reason ?? 'download failed', ckBase);
     if (r.outcome === 'kept-previous') return fail('ClashKing load + validate the new data', r.reason ?? 'the new file could not be used', ckBase);
     if (r.outcome === 'no-copy') return fail('ClashKing: no usable copy', r.reason ?? 'no usable ClashKing copy', ckBase);
+    if (r.outcome === 'release-missing-file') return fail('ClashKing release check', r.reason ?? 'no release has the file', ckBase);
   }
   const ckFields = d.clashKing ? { clashKingFrom: ck.from, clashKingTo: ck.to } : {};
   let crossCheck: string[] = [];
@@ -140,11 +145,19 @@ export function runDataUpdate(d: DataUpdateDeps): DataUpdateResult {
   return { ...base, ...ckFields, to, status: 'updated', changes, crossCheck, commitMessage: message };
 }
 
-export const issueTitle = (r: Pick<DataUpdateResult, 'to' | 'failedStep' | 'clashKingTo'>) =>
-  r.failedStep?.startsWith('ClashKing') ? `Data update failed: ${r.clashKingTo ?? 'ClashKing check'}` : `Data update failed: ${r.to ?? 'npm check'}`;
-
-const tail = (lines: string[], n: number) => (lines.length > n ? [`… (${lines.length - n} earlier lines)`, ...lines.slice(-n)] : lines);
-const fence = (lines: string[]) => ['```', ...lines.map((l) => l.replace(/```/g, "'''")), '```'];
+/**
+ * "Data update failed: <new version>" (SPEC §9b, REVIEW-2 #8): the ClashKing version whenever it changed (also
+ * for a failure after the check: tests, commit, deploy), both when both sources changed, else the
+ * clash-of-clans-data version. A ClashKing step that failed before a version was known: "ClashKing check".
+ */
+export function issueTitle(r: Pick<DataUpdateResult, 'from' | 'to' | 'failedStep' | 'clashKingFrom' | 'clashKingTo'>): string {
+  const ckChanged = !!r.clashKingTo && r.clashKingTo !== r.clashKingFrom;
+  const cocChanged = !!r.to && r.to !== r.from;
+  if (r.failedStep?.startsWith('ClashKing') && !ckChanged) return `Data update failed: ${r.clashKingTo ?? 'ClashKing check'}`;
+  if (ckChanged && cocChanged) return `Data update failed: ${r.clashKingTo}, clash-of-clans-data ${r.to}`;
+  if (ckChanged) return `Data update failed: ${r.clashKingTo}`;
+  return `Data update failed: ${r.to ?? 'npm check'}`;
+}
 
 /**
  * Issue body for a failed run: the failing step, why, a plain "merge missing" section when that's the cause,
@@ -178,7 +191,7 @@ export function issueBody(
     for (const c of r.changes.slice(0, 60)) L.push(`- ${c.text}`);
     if (r.changes.length > 60) L.push(`- … and ${r.changes.length - 60} more`);
   }
-  if (o.testLog?.trim()) L.push('', '## npm test (end of output)', '', ...fence(tail(o.testLog.trimEnd().split(/\r?\n/), 80)));
+  if (o.testLog?.trim()) L.push('', '## Tests (end of output)', '', ...fence(tail(o.testLog.trimEnd().split(/\r?\n/), 80)));
   if (!r) L.push('', 'No result file was written (the run failed before the update step finished). See the run log.');
   return L.join('\n') + '\n';
 }

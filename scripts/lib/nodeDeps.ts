@@ -7,7 +7,7 @@ import { parse as parseDotenv } from 'dotenv';
 import { checkHeroCaps, checkLevels, checkMergeConsumption } from '../../src/data/validate';
 import { CK_DIR, loadCocDataFresh, loadGameDataFresh, normalizeClashKingNode, PROJECT_ROOT, readClashKing } from '../../src/data/loadNode';
 import { crossCheck, crossCheckLines } from '../../src/data/crossCheck';
-import { backupWarning, clashKingVersion, dataSourceLabel } from '../../src/data/source';
+import { backupWarning, clashKingVersion, dataSourceLabel, pinVersion } from '../../src/data/source';
 import { hasCredentials } from './auth';
 import { toSnapshot, type DataChangesFile, type Snapshot } from '../../src/data/snapshot';
 import { isoDate, recordSnapshot, type SnapshotIO } from './snapshots';
@@ -328,7 +328,7 @@ export function nodeCrossCheck(max = 60): string[] {
   } catch (e) {
     return [`Cross-check skipped: clash-of-clans-data can't be loaded (${(e as Error).message}).`];
   }
-  return crossCheckLines(crossCheck(normalizeClashKingNode(ck.raw, ck.pin.version), coc), max);
+  return crossCheckLines(crossCheck(normalizeClashKingNode(ck.raw, pinVersion(ck.pin)), coc), max);
 }
 
 export function nodeFullSyncDeps(o: NodeOpts): FullSyncDeps {

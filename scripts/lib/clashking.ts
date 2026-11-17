@@ -5,7 +5,7 @@
 // `npm run dev` warns and the Action opens / updates its issue. Side effects are injected (tests use fakes).
 import { createHash } from 'node:crypto';
 import { CK_PATH, CK_REPO, trimClashKing, type ClashKingRaw } from '../../src/data/clashking';
-import { clashKingVersion, type ClashKingPin } from '../../src/data/source';
+import { clashKingVersion, isSafeTag, pinVersion, type ClashKingPin } from '../../src/data/source';
 import type { GameData } from '../../src/data/types';
 import { checkLevels } from '../../src/data/validate';
 import type { RefreshState } from './refresh';
@@ -16,6 +16,11 @@ export interface ClashKingRef {
   ref: string;
   tag?: string;
   commit: string;
+  /**
+   * Set on a `main` ref when no release has the file: why (no release at all, or the latest release lacks
+   * static/static_data.json) and that release's tag. With a release already pinned, the pin stays (SPEC §3.1).
+   */
+  releaseProblem?: { reason: string; tag?: string };
 }
 
 export interface ClashKingDeps {
@@ -48,6 +53,8 @@ export type ClashKingOutcome =
   | 'download-failed'
   /** The new file failed to load or validate; the pinned copy stays. */
   | 'kept-previous'
+  /** No release has the file: the release pin stays (never follows main once a release is pinned). */
+  | 'release-missing-file'
   /** No usable ClashKing copy at all: the planner runs on clash-of-clans-data (backup). */
   | 'no-copy';
 
@@ -84,19 +91,19 @@ const baseItems = (d: GameData) => [...d.items.values()].filter((i) => i.key ===
  */
 export function syncClashKing(d: ClashKingDeps, opts: { offline?: boolean } = {}): ClashKingResult {
   const pinned = d.readPinned();
-  const from = pinned?.pin.version;
+  const from = pinned ? pinVersion(pinned.pin) : undefined;
   let current: GameData | undefined;
   let currentError: string | undefined;
   if (pinned) {
     try {
-      current = d.normalize(pinned.raw, pinned.pin.version);
+      current = d.normalize(pinned.raw, from!);
       currentError = validateClashKing(current);
     } catch (e) {
       currentError = (e as Error).message;
     }
   }
   const currentOk = !!current && !currentError;
-  d.log(`ClashKing pinned: ${pinned ? `${pinned.pin.version} (${pinned.pin.commit.slice(0, 7)})` : 'none'}${pinned && !currentOk ? ` — can't be used: ${currentError}` : ''}`);
+  d.log(`ClashKing pinned: ${pinned ? from : 'none'}${pinned && !currentOk ? ` — can't be used: ${currentError}` : ''}`);
   const noCopy = (reason: string): ClashKingResult => {
     d.log(`No usable ClashKing copy (${reason}). The planner falls back to clash-of-clans-data; that's a visible warning on the site.`);
     return { outcome: 'no-copy', from, reason };
@@ -115,6 +122,17 @@ export function syncClashKing(d: ClashKingDeps, opts: { offline?: boolean } = {}
     const reason = `GitHub check failed: ${(e as Error).message}`;
     d.log(reason);
     return currentOk ? { outcome: 'check-failed', from, reason } : noCopy(reason);
+  }
+  if (latest.tag && !isSafeTag(latest.tag)) d.log(`  [WARN] ClashKing release tag ${JSON.stringify(latest.tag)} isn't a plain name; using main-<sha7> as its version.`);
+  // No release has the file (SPEC §3.1, REVIEW-2 ambiguity 10): once a release is pinned, keep it rather than
+  // follow ClashKing's unreleased main; the Action opens / updates its issue.
+  if (latest.releaseProblem && currentOk && pinned!.pin.tag) {
+    const rel = latest.releaseProblem.tag;
+    const reason = `${latest.releaseProblem.reason}; keeping the release pin ${from} instead of following main (${latest.commit.slice(0, 7)})`;
+    d.log(reason);
+    const version = rel ? `clashking-${isSafeTag(rel) ? rel : 'release'}` : 'clashking-release';
+    d.writeState({ ...d.readState(), clashKingFailure: { version: clashKingVersion(latest), reason, at: d.now().getTime() } });
+    return { outcome: 'release-missing-file', from, to: version, reason };
   }
   const to = clashKingVersion(latest);
   if (currentOk && pinned!.pin.commit === latest.commit) {
@@ -161,7 +179,7 @@ export function syncClashKing(d: ClashKingDeps, opts: { offline?: boolean } = {}
   const pin: ClashKingPin = {
     repo: CK_REPO,
     ref: latest.ref,
-    ...(latest.tag ? { tag: latest.tag } : {}),
+    ...(isSafeTag(latest.tag) ? { tag: latest.tag } : {}),
     commit: latest.commit,
     path: CK_PATH,
     sha256: sha256(text),
@@ -193,7 +211,11 @@ export function githubHeaders(env: Record<string, string | undefined> = process.
   return { Accept: 'application/vnd.github+json', 'User-Agent': 'hibiscus-clash-advisor-sync', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
 }
 
-/** Latest release that contains the file; main otherwise. */
+/**
+ * Latest release that contains the file; main otherwise, with `releaseProblem` saying why (syncClashKing keeps
+ * an existing release pin in that case). A GitHub error on the release's commit or contents throws rather than
+ * silently switching to main.
+ */
 export function resolveLatestWith(get: FetchText, headers = githubHeaders()): ClashKingRef {
   const api = `https://api.github.com/repos/${CK_REPO}`;
   const json = (url: string) => {
@@ -201,15 +223,20 @@ export function resolveLatestWith(get: FetchText, headers = githubHeaders()): Cl
     return { status: r.status, body: r.status === 200 ? JSON.parse(r.text) : undefined };
   };
   const rel = json(`${api}/releases/latest`);
+  let releaseProblem: ClashKingRef['releaseProblem'];
   if (rel.status === 200 && rel.body?.tag_name) {
     const tag = String(rel.body.tag_name);
     const c = json(`${api}/commits/${encodeURIComponent(tag)}`);
+    if (c.status !== 200 || !c.body?.sha) throw new Error(`GitHub release ${JSON.stringify(tag)} commit: HTTP ${c.status}`);
     const file = get(`${api}/contents/${CK_PATH}?ref=${encodeURIComponent(tag)}`, headers);
-    if (c.status === 200 && c.body?.sha && file.status === 200) return { ref: tag, tag, commit: String(c.body.sha) };
+    if (file.status === 200) return { ref: tag, tag, commit: String(c.body.sha) };
+    if (file.status !== 404) throw new Error(`GitHub release ${JSON.stringify(tag)} contents: HTTP ${file.status}`);
+    releaseProblem = { reason: `the latest ClashKing release ${JSON.stringify(tag)} has no ${CK_PATH}`, tag };
   } else if (rel.status !== 404) throw new Error(`GitHub releases: HTTP ${rel.status}`);
+  else releaseProblem = { reason: 'ClashKing has no release' };
   const main = json(`${api}/commits/main`);
   if (main.status !== 200 || !main.body?.sha) throw new Error(`GitHub main: HTTP ${main.status}`);
-  return { ref: 'main', commit: String(main.body.sha) };
+  return { ref: 'main', commit: String(main.body.sha), releaseProblem };
 }
 
 export const rawUrl = (commit: string) => `https://raw.githubusercontent.com/${CK_REPO}/${commit}/${CK_PATH}`;

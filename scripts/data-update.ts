@@ -11,6 +11,7 @@
 import fs from 'node:fs';
 import { loadGameDataFresh, PROJECT_ROOT } from '../src/data/loadNode';
 import { issueBody, issueTitle, runDataUpdate, type DataUpdateResult } from './lib/dataUpdate';
+import { setOutputs } from './lib/ghText';
 import { checkCocBackup, nodeClashKingDeps, nodeCrossCheck, nodeSyncDeps } from './lib/nodeDeps';
 
 const args = process.argv.slice(2);
@@ -19,13 +20,6 @@ const flag = (name: string) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 const readIf = (file?: string) => (file && fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : undefined);
-
-function setOutputs(values: Record<string, string>): void {
-  const file = process.env.GITHUB_OUTPUT;
-  if (!file) return;
-  // Single-line values only (versions, counts, the commit message).
-  fs.appendFileSync(file, Object.entries(values).map(([k, v]) => `${k}=${v.replace(/\r?\n/g, ' ')}\n`).join(''));
-}
 
 if (args[0] === 'check') {
   const sync = nodeSyncDeps({ root: PROJECT_ROOT });
@@ -42,7 +36,7 @@ if (args[0] === 'check') {
     r.status === 'none'
       ? `Nothing new: ClashKing ${r.clashKingFrom ?? '?'} is the latest release and clash-of-clans-data ${r.from} the newest ${r.from?.split('.')[0]}.x release.`
       : r.status === 'updated'
-        ? `${r.commitMessage}. Next: npm test, then commit and deploy.`
+        ? `${r.commitMessage}. Next: tests (npm run test:ci), then commit and deploy.`
         : `Data update failed at "${r.failedStep}": ${r.reason?.split('\n')[0]}`;
   console.log(`\n${line}`);
   if (process.env.GITHUB_STEP_SUMMARY) {

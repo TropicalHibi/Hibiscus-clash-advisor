@@ -5,7 +5,7 @@
   "commit": "04babd051dfbf807065c8ef3d93e6af859f99c36",
   "path": "static/static_data.json",
   "sha256": "d62aac5ddfdf840608973508f480dd4d6062cf33363d68378feda2e6f5e49677",
-  "version": "clashking-v0.1.20",
+  "version": "clashking-v0.1.20+04babd0",
   "fetchedAt": "2026-11-17T05:04:17.948Z",
   "maxTH": 19,
   "items": 230

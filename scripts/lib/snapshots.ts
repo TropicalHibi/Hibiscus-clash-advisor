@@ -2,6 +2,7 @@
 // Snapshots (data/snapshots/<date>_<version>.json) are git-ignored; the newest KEEP_SNAPSHOTS stay on disk.
 // The latest diff goes to public/data-changes.json (committed: the site's "Game data updated" banner).
 import { diffSnapshots, snapshotFileName, type DataChange, type DataChangesFile, type Snapshot } from '../../src/data/snapshot';
+import { versionSlug } from '../../src/data/source';
 
 /** Snapshots kept locally: the current one and the one it was compared with. */
 export const KEEP_SNAPSHOTS = 2;
@@ -42,7 +43,8 @@ export function recordSnapshot(io: SnapshotIO, snap: Snapshot, log: (line: strin
     .list()
     .filter((f) => SNAPSHOT_RE.test(f))
     .sort();
-  const same = files.find((f) => versionOf(f) === snap.version);
+  const slug = versionSlug(snap.version);
+  const same = files.find((f) => versionOf(f) === slug);
   if (same) {
     log(`Snapshot for ${snap.version} already recorded (data/snapshots/${same}).`);
     return { file: same, written: false };
@@ -50,7 +52,7 @@ export function recordSnapshot(io: SnapshotIO, snap: Snapshot, log: (line: strin
   const name = snapshotFileName(snap);
   io.write(name, snap);
   log(`Snapshot written: data/snapshots/${name}`);
-  const prevFile = files.filter((f) => versionOf(f) !== snap.version).at(-1);
+  const prevFile = files.filter((f) => versionOf(f) !== slug).at(-1);
   let result: SnapshotResult = { file: name, written: true };
   if (!prevFile) log('No earlier snapshot to compare with (first snapshot); the next data update will print a diff.');
   else {

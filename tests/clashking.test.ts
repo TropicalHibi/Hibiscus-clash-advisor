@@ -16,7 +16,9 @@ import { crossCheck, crossCheckLines } from '../src/data/crossCheck';
 import { CK_DIR, loadGameDataFresh } from '../src/data/loadNode';
 import { countAt, levelInfo } from '../src/data/normalize';
 import { parseOverrides } from '../src/data/overrides';
-import { backupWarning, clashKingVersion, dataSourceLabel, type ClashKingPin } from '../src/data/source';
+import { recordSnapshot, type SnapshotIO } from '../scripts/lib/snapshots';
+import { snapshotFileName, toSnapshot, type Snapshot } from '../src/data/snapshot';
+import { backupWarning, clashKingVersion, dataSourceLabel, pinVersion, versionLabel, versionSlug, type ClashKingPin } from '../src/data/source';
 import type { GameData } from '../src/data/types';
 import { checkLevels, checkMergeConsumption } from '../src/data/validate';
 import { buildCatalog } from '../src/meta/aggregate';
@@ -292,6 +294,9 @@ describe('backup: clash-of-clans-data when there is no usable ClashKing copy', (
 // ── the pinned-copy sync (fake GitHub) ──
 const OLD = { ref: 'v1.0.0', tag: 'v1.0.0', commit: 'a'.repeat(40) };
 const NEW = { ref: 'v1.0.1', tag: 'v1.0.1', commit: 'b'.repeat(40) };
+/** Data identity = tag + commit (REVIEW-2 #5). */
+const V_OLD = 'clashking-v1.0.0+aaaaaaa';
+const V_NEW = 'clashking-v1.0.1+bbbbbbb';
 const pinOf = (r: typeof OLD, d: GameData): ClashKingPin => ({
   repo: 'ClashKingInc/clashy.go',
   ref: r.ref,
@@ -345,20 +350,20 @@ function fakeGitHub(o: { latest?: typeof OLD | Error; file?: string | Error; pin
 describe('npm run sync: the ClashKing stage', () => {
   it('same commit as pinned → up to date, nothing downloaded', () => {
     const f = fakeGitHub({ latest: OLD });
-    expect(syncClashKing(f.deps)).toMatchObject({ outcome: 'up-to-date', from: 'clashking-v1.0.0' });
+    expect(syncClashKing(f.deps)).toMatchObject({ outcome: 'up-to-date', from: V_OLD });
     expect(f.calls).toEqual(['resolve']);
   });
 
   it('new release → snapshot before, download at the commit, validate, pin (version, commit, sha256), snapshot after', () => {
     const f = fakeGitHub();
     const r = syncClashKing(f.deps);
-    expect(r).toMatchObject({ outcome: 'updated', from: 'clashking-v1.0.0', to: 'clashking-v1.0.1' });
-    expect(f.calls).toEqual(['resolve', 'snapshot clashking-v1.0.0', 'download b', 'write clashking-v1.0.1', 'snapshot clashking-v1.0.1']);
+    expect(r).toMatchObject({ outcome: 'updated', from: V_OLD, to: V_NEW });
+    expect(f.calls).toEqual(['resolve', `snapshot ${V_OLD}`, 'download b', `write ${V_NEW}`, `snapshot ${V_NEW}`]);
     const pin = f.pinned()!.pin;
-    expect(pin).toMatchObject({ ref: 'v1.0.1', tag: 'v1.0.1', commit: NEW.commit, version: 'clashking-v1.0.1', maxTH: 3, fetchedAt: '2026-11-17T10:00:00.000Z' });
+    expect(pin).toMatchObject({ ref: 'v1.0.1', tag: 'v1.0.1', commit: NEW.commit, version: V_NEW, maxTH: 3, fetchedAt: '2026-11-17T10:00:00.000Z' });
     expect(pin.sha256).toBe(sha256(f.deps.download(NEW.commit))); // of the downloaded (untrimmed) text
     expect((f.pinned()!.raw as Record<string, unknown>).achievements).toBeUndefined(); // stored trimmed
-    expect(f.state().lastGoodClashKing).toBe('clashking-v1.0.1');
+    expect(f.state().lastGoodClashKing).toBe(V_NEW);
     expect(r.snapshot?.changes?.[0].text).toBe('Cannon 3: 5K gold → 4K gold');
   });
 
@@ -366,10 +371,10 @@ describe('npm run sync: the ClashKing stage', () => {
     const f = fakeGitHub({ file: '{"buildings": "oops"' });
     const r = syncClashKing(f.deps);
     expect(r.outcome).toBe('kept-previous');
-    expect(f.pinned()!.pin.version).toBe('clashking-v1.0.0');
-    expect(f.calls).not.toContain('write clashking-v1.0.1');
-    expect(f.state().clashKingFailure).toMatchObject({ version: 'clashking-v1.0.1' });
-    expect(f.logs.some((l) => l.includes('Keeping the known-good ClashKing clashking-v1.0.0'))).toBe(true);
+    expect(f.pinned()!.pin.version).toBe(V_OLD);
+    expect(f.calls).not.toContain(`write ${V_NEW}`);
+    expect(f.state().clashKingFailure).toMatchObject({ version: V_NEW });
+    expect(f.logs.some((l) => l.includes(`Keeping the known-good ClashKing ${V_OLD}`))).toBe(true);
   });
 
   it('a new file that fails validation (max TH dropped) keeps the known-good copy', () => {
@@ -379,14 +384,14 @@ describe('npm run sync: the ClashKing stage', () => {
     const f = fakeGitHub({ file: JSON.stringify(smaller) });
     const r = syncClashKing(f.deps);
     expect(r).toMatchObject({ outcome: 'kept-previous', reason: 'max TH dropped from 3 to 2' });
-    expect(f.pinned()!.pin.version).toBe('clashking-v1.0.0');
+    expect(f.pinned()!.pin.version).toBe(V_OLD);
   });
 
   it('GitHub unreachable or download failing → the pinned copy stays', () => {
     expect(syncClashKing(fakeGitHub({ latest: new Error('HTTP 503') }).deps)).toMatchObject({ outcome: 'check-failed', reason: 'GitHub check failed: HTTP 503' });
     const f = fakeGitHub({ file: new Error('HTTP 404') });
     expect(syncClashKing(f.deps)).toMatchObject({ outcome: 'download-failed' });
-    expect(f.pinned()!.pin.version).toBe('clashking-v1.0.0');
+    expect(f.pinned()!.pin.version).toBe(V_OLD);
   });
 
   it('nothing pinned and GitHub down → no copy: the backup is used', () => {
@@ -397,7 +402,7 @@ describe('npm run sync: the ClashKing stage', () => {
 
   it('offline: validates the pinned copy only', () => {
     const f = fakeGitHub();
-    expect(syncClashKing(f.deps, { offline: true })).toMatchObject({ outcome: 'up-to-date', to: 'clashking-v1.0.0' });
+    expect(syncClashKing(f.deps, { offline: true })).toMatchObject({ outcome: 'up-to-date', to: V_OLD });
     expect(f.calls).toEqual([]);
   });
 
@@ -420,13 +425,20 @@ describe('GitHub release lookup (latest release, main as fallback)', () => {
   it('uses the latest release tag when it has the file', () => {
     const r = resolveLatestWith(get({ '/releases/latest': { status: 200, body: { tag_name: 'v0.1.20' } }, '/commits/v0.1.20': { status: 200, body: { sha: 'c'.repeat(40) } }, 'ref=v0.1.20': { status: 200 } }), {});
     expect(r).toEqual({ ref: 'v0.1.20', tag: 'v0.1.20', commit: 'c'.repeat(40) });
-    expect(clashKingVersion(r)).toBe('clashking-v0.1.20');
+    expect(clashKingVersion(r)).toBe('clashking-v0.1.20+ccccccc'); // tag + commit (REVIEW-2 #5)
+    expect(versionLabel(clashKingVersion(r))).toBe('ClashKing v0.1.20'); // the UI shows the tag only
   });
-  it('falls back to main when there is no release, or the release lacks the file', () => {
+  it('no release with the file → main, with the reason (a release pin is kept, see "release without the file")', () => {
     const main = { '/commits/main': { status: 200, body: { sha: 'd'.repeat(40) } } };
-    expect(resolveLatestWith(get(main), {})).toEqual({ ref: 'main', commit: 'd'.repeat(40) });
-    expect(resolveLatestWith(get({ ...main, '/releases/latest': { status: 200, body: { tag_name: 'v2' } }, '/commits/v2': { status: 200, body: { sha: 'e'.repeat(40) } } }), {}).ref).toBe('main');
+    expect(resolveLatestWith(get(main), {})).toEqual({ ref: 'main', commit: 'd'.repeat(40), releaseProblem: { reason: 'ClashKing has no release' } });
+    const r = resolveLatestWith(get({ ...main, '/releases/latest': { status: 200, body: { tag_name: 'v2' } }, '/commits/v2': { status: 200, body: { sha: 'e'.repeat(40) } } }), {});
+    expect(r).toMatchObject({ ref: 'main', releaseProblem: { tag: 'v2', reason: 'the latest ClashKing release "v2" has no static/static_data.json' } });
     expect(clashKingVersion({ commit: 'd'.repeat(40) })).toBe('clashking-main-ddddddd');
+  });
+  it("a GitHub error on the release's commit or contents throws instead of switching to main", () => {
+    const rel = { '/releases/latest': { status: 200, body: { tag_name: 'v2' } }, '/commits/main': { status: 200, body: { sha: 'd'.repeat(40) } } };
+    expect(() => resolveLatestWith(get({ ...rel, '/commits/v2': { status: 502 } }), {})).toThrow('HTTP 502');
+    expect(() => resolveLatestWith(get({ ...rel, '/commits/v2': { status: 200, body: { sha: 'e'.repeat(40) } }, 'ref=v2': { status: 500 } }), {})).toThrow('HTTP 500');
   });
   it('a GitHub error is thrown (the caller keeps the pinned copy)', () => {
     expect(() => resolveLatestWith(get({ '/releases/latest': { status: 500 } }), {})).toThrow('HTTP 500');
@@ -467,7 +479,7 @@ describe('daily data-update Action with ClashKing (fake GitHub + npm)', () => {
   it('a new ClashKing release → updated, commit message names it, cross-check included', () => {
     const f = fakeGitHub();
     const r = runDataUpdate({ sync: npm(), clashKing: f.deps, loadData: () => mini(), crossCheck: () => ['Cross-check: …'] });
-    expect(r).toMatchObject({ status: 'updated', clashKingFrom: 'clashking-v1.0.0', clashKingTo: 'clashking-v1.0.1', crossCheck: ['Cross-check: …'] });
+    expect(r).toMatchObject({ status: 'updated', clashKingFrom: V_OLD, clashKingTo: V_NEW, crossCheck: ['Cross-check: …'] });
     expect(r.commitMessage).toBe('data: ClashKing v1.0.0 → v1.0.1 (1 change)');
     expect(fullCommitMessage({ ck: ['clashking-v1', 'clashking-v2'], coc: ['0.19.1', '0.20.0'], changes: 3 })).toBe('data: ClashKing v1 → v2, clash-of-clans-data 0.19.1 → 0.20.0 (3 changes)');
   });
@@ -485,9 +497,9 @@ describe('daily data-update Action with ClashKing (fake GitHub + npm)', () => {
   it('a bad ClashKing file fails the update: known-good copy kept, issue titled with the version', () => {
     const f = fakeGitHub({ file: 'not json' });
     const r = runDataUpdate({ sync: npm(), clashKing: f.deps, loadData: () => mini() });
-    expect(r).toMatchObject({ status: 'failed', failedStep: 'ClashKing load + validate the new data', clashKingTo: 'clashking-v1.0.1' });
-    expect(issueTitle(r)).toBe('Data update failed: clashking-v1.0.1');
-    expect(f.pinned()!.pin.version).toBe('clashking-v1.0.0');
+    expect(r).toMatchObject({ status: 'failed', failedStep: 'ClashKing load + validate the new data', clashKingTo: V_NEW });
+    expect(issueTitle(r)).toBe(`Data update failed: ${V_NEW}`);
+    expect(f.pinned()!.pin.version).toBe(V_OLD);
     expect(issueTitle(runDataUpdate({ sync: npm(), clashKing: fakeGitHub({ latest: new Error('503') }).deps, loadData: () => mini() }))).toBe('Data update failed: ClashKing check');
   });
 });
@@ -508,7 +520,7 @@ describe('predev refresh: ClashKing check', () => {
       hasToken: () => false,
       runMeta: () => ({ code: 0, stderr: '' }),
       clashKingPinned: () => OLD.commit,
-      clashKingLatest: () => ({ commit: NEW.commit, version: 'clashking-v1.0.1' }),
+      clashKingLatest: () => ({ commit: NEW.commit, version: V_NEW }),
       log: (l) => logs.push(l),
       ...o,
     };
@@ -519,19 +531,19 @@ describe('predev refresh: ClashKing check', () => {
     const f = deps();
     expect(refreshGameData(f.d)).toBe('synced');
     expect(f.calls).toEqual(['sync']);
-    expect(f.logs[0]).toContain('ClashKing clashking-v1.0.1 is out (pinned: aaaaaaa)');
+    expect(f.logs[0]).toContain('ClashKing v1.0.1 (bbbbbbb) is out (pinned: aaaaaaa)');
   });
 
   it('same commit and same npm version → up to date', () => {
-    const f = deps({ clashKingLatest: () => ({ commit: OLD.commit, version: 'clashking-v1.0.0' }) });
+    const f = deps({ clashKingLatest: () => ({ commit: OLD.commit, version: V_OLD }) });
     expect(refreshGameData(f.d)).toBe('up-to-date');
     expect(f.calls).toEqual([]);
   });
 
   it('a recorded ClashKing failure warns on every start and is not retried automatically', () => {
-    const f = deps({}, { clashKingFailure: { version: 'clashking-v1.0.1', reason: 'max TH dropped', at: 0 } });
+    const f = deps({}, { clashKingFailure: { version: V_NEW, reason: 'max TH dropped', at: 0 } });
     expect(refreshGameData(f.d)).toBe('known-bad');
-    expect(f.logs[0]).toContain("ClashKing clashking-v1.0.1 can't be used (max TH dropped); staying on the pinned known-good copy");
+    expect(f.logs[0]).toContain("ClashKing v1.0.1 can't be used (max TH dropped); staying on the pinned known-good copy");
     expect(f.calls).toEqual([]);
   });
 
@@ -578,5 +590,128 @@ describe('cross-check report (ClashKing vs clash-of-clans-data)', () => {
 
   it('levelInfo still finds levels in ClashKing items', () => {
     expect(levelInfo(mini().byId.get('cannon')!, 3)!.cost).toBe(5000);
+  });
+});
+
+// ── REVIEW-2 #5, #8, #9, ambiguity 10 ──
+const npmSame = (): SyncDeps => ({
+  installedVersion: () => '0.19.1',
+  latestInMajor: () => '0.19.1',
+  install: () => {},
+  check: () => ({ ok: true, warnings: [], maxTH: 18 }),
+  readState: () => ({}),
+  writeState: () => {},
+  log: () => {},
+});
+
+describe('data identity = tag + commit (REVIEW-2 #5)', () => {
+  const memIO = (initial: Record<string, Snapshot> = {}) => {
+    const files = new Map(Object.entries(initial));
+    let changes: unknown;
+    const io: SnapshotIO = {
+      list: () => [...files.keys()],
+      read: (n) => files.get(n)!,
+      write: (n, s) => void files.set(n, s),
+      remove: (n) => void files.delete(n),
+      writeChanges: (f) => void (changes = f),
+    };
+    return { io, files, changes: () => changes };
+  };
+
+  it('a re-pointed tag (same tag, new commit) is a new version: snapshot + diff, not "no diff was produced"', () => {
+    const before = toSnapshot(normalizeClashKing(raw(), { version: clashKingVersion({ tag: 'v0.1.20', commit: '04babd0'.padEnd(40, '0') }) }), '2026-11-16');
+    const changed = structuredClone(FULL);
+    changed.buildings.find((b: any) => b.name === 'Cannon').levels[2].build_cost = 4000;
+    const after = toSnapshot(normalizeClashKing(trimClashKing(changed), { version: clashKingVersion({ tag: 'v0.1.20', commit: 'f'.repeat(40) }) }), '2026-11-17');
+    expect(before.version).toBe('clashking-v0.1.20+04babd0');
+    expect(after.version).toBe('clashking-v0.1.20+fffffff');
+    const m = memIO({ [snapshotFileName(before)]: before });
+    const r = recordSnapshot(m.io, after, () => {});
+    expect(r.written).toBe(true);
+    expect(r.changes!.map((c) => c.text)).toContain('Cannon 3: 5K gold → 4K gold');
+    expect(m.changes()).toMatchObject({ version: 'clashking-v0.1.20+fffffff', previousVersion: 'clashking-v0.1.20+04babd0' });
+  });
+
+  it('the Action: same tag at a new commit → updated, with the commits in the commit message', () => {
+    const f = fakeGitHub({ latest: { ...OLD, commit: 'f'.repeat(40) } });
+    const deps: ClashKingDeps = {
+      ...f.deps,
+      snapshot: () => ({ file: 'x', written: true, changes: [{ kind: 'cost', key: '1', item: 'Cannon', level: 3, text: 'Cannon 3: 5K gold → 4K gold' }] }),
+    };
+    const r = runDataUpdate({ sync: npmSame(), clashKing: deps, loadData: () => mini() });
+    expect(r).toMatchObject({ status: 'updated', clashKingFrom: V_OLD, clashKingTo: 'clashking-v1.0.0+fffffff' });
+    expect(r.commitMessage).toBe('data: ClashKing v1.0.0+aaaaaaa → v1.0.0+fffffff (1 change)');
+  });
+
+  it('old pins (version = tag only) get the identity from their tag + commit; the UI shows the tag only', () => {
+    expect(pinVersion({ tag: 'v0.1.20', commit: '04babd0'.padEnd(40, '1'), version: 'clashking-v0.1.20' })).toBe('clashking-v0.1.20+04babd0');
+    expect(pinVersion({ commit: '', version: 'clashking-v9.9.9' })).toBe('clashking-v9.9.9');
+    expect(dataSourceLabel({ source: 'clashking', version: 'clashking-v0.1.20+04babd0' })).toBe('ClashKing v0.1.20');
+    expect(dataSourceLabel({ source: 'clashking', version: 'clashking-main-04babd0' })).toBe('ClashKing main@04babd0');
+    expect(versionLabel('0.19.1')).toBe('clash-of-clans-data 0.19.1');
+  });
+
+  it('the committed pin and data-changes.json use the identity, so the banner still matches', () => {
+    const pin = JSON.parse(fs.readFileSync(path.join(CK_DIR, 'pin.json'), 'utf8')) as ClashKingPin;
+    expect(pin.version).toBe(pinVersion(pin));
+    if (!process.env.CK_DATA_DIR) {
+      const dc = JSON.parse(fs.readFileSync('public/data-changes.json', 'utf8'));
+      expect(dc.version).toBe(data.version);
+    }
+  });
+});
+
+describe('issue titles name the ClashKing version whenever it changed (REVIEW-2 #8)', () => {
+  const base = { from: '0.19.1', to: '0.19.1', clashKingFrom: 'clashking-v0.1.20+04babd0', clashKingTo: 'clashking-v0.1.21+abcdef0' };
+  it('a ClashKing update failing after the check (tests, commit, deploy): the ClashKing version', () => {
+    expect(issueTitle(base)).toBe('Data update failed: clashking-v0.1.21+abcdef0');
+    expect(issueTitle({ ...base, failedStep: 'snapshot + diff' })).toBe('Data update failed: clashking-v0.1.21+abcdef0');
+  });
+  it('both changed: both named', () => {
+    expect(issueTitle({ ...base, to: '0.20.0' })).toBe('Data update failed: clashking-v0.1.21+abcdef0, clash-of-clans-data 0.20.0');
+  });
+  it('only clash-of-clans-data changed: its version; nothing known: the check names', () => {
+    expect(issueTitle({ ...base, clashKingTo: base.clashKingFrom, to: '0.20.0' })).toBe('Data update failed: 0.20.0');
+    expect(issueTitle({ failedStep: 'ClashKing check (GitHub)', from: '0.19.1', to: '0.19.1', clashKingFrom: 'clashking-v0.1.20+04babd0' })).toBe('Data update failed: ClashKing check');
+    expect(issueTitle({ failedStep: 'npm registry check', from: '0.19.1' })).toBe('Data update failed: npm check');
+  });
+});
+
+describe('release tags are validated and slugged (REVIEW-2 #9)', () => {
+  it('a tag outside [A-Za-z0-9._-] is treated as no tag: main-<sha7>, and not stored as the pin tag', () => {
+    expect(clashKingVersion({ tag: 'v0.2/beta', commit: 'c'.repeat(40) })).toBe('clashking-main-ccccccc');
+    expect(clashKingVersion({ tag: 'v1"); rm -rf ("', commit: 'c'.repeat(40) })).toBe('clashking-main-ccccccc');
+    const f = fakeGitHub({ latest: { ref: 'v2/beta', tag: 'v2/beta', commit: 'b'.repeat(40) } });
+    const r = syncClashKing(f.deps);
+    expect(r.to).toBe('clashking-main-bbbbbbb');
+    expect(f.pinned()!.pin.tag).toBeUndefined();
+    expect(f.logs.some((l) => l.includes("isn't a plain name"))).toBe(true);
+  });
+  it('snapshot file names stay one file inside data/snapshots/', () => {
+    expect(snapshotFileName({ date: '2026-11-17', version: 'clashking-v0.2/beta"x' })).toBe('2026-11-17_clashking-v0.2-beta-x.json');
+    expect(versionSlug('clashking-v0.1.20+04babd0')).toBe('clashking-v0.1.20+04babd0');
+  });
+});
+
+describe('no release has the file: the release pin stays (REVIEW-2 ambiguity 10)', () => {
+  const main = { ref: 'main', commit: 'c'.repeat(40), releaseProblem: { tag: 'v1.0.2', reason: 'the latest ClashKing release "v1.0.2" has no static/static_data.json' } };
+  it('keeps the pin, downloads nothing, records the failure', () => {
+    const f = fakeGitHub({ latest: main as never });
+    const r = syncClashKing(f.deps);
+    expect(r).toMatchObject({ outcome: 'release-missing-file', from: V_OLD, to: 'clashking-v1.0.2' });
+    expect(r.reason).toContain('keeping the release pin');
+    expect(f.calls).toEqual(['resolve']);
+    expect(f.pinned()!.pin.version).toBe(V_OLD);
+    expect(f.state().clashKingFailure).toMatchObject({ version: 'clashking-main-ccccccc' });
+  });
+  it('the Action fails with a stable issue title (one issue, updated daily, not one per main commit)', () => {
+    const f = fakeGitHub({ latest: main as never });
+    const r = runDataUpdate({ sync: npmSame(), clashKing: f.deps, loadData: () => mini() });
+    expect(r).toMatchObject({ status: 'failed', failedStep: 'ClashKing release check' });
+    expect(issueTitle(r)).toBe('Data update failed: clashking-v1.0.2');
+  });
+  it('nothing pinned yet: main is still followed', () => {
+    const f = fakeGitHub({ latest: main as never, pinned: false });
+    expect(syncClashKing(f.deps).outcome).toBe('updated');
   });
 });

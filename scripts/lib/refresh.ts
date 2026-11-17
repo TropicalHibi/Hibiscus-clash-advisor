@@ -1,5 +1,6 @@
 // Pre-dev refresh (SPEC §9a): keep game data and the Legend I meta fresh without an OS scheduler.
 // The decision logic lives here with injected side effects so it can be tested without network.
+import { versionLabel } from '../../src/data/source';
 
 export const REFRESH_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
@@ -178,7 +179,7 @@ export function refreshGameData(d: RefreshDeps): DataOutcome {
     );
   const ckBad = state.clashKingFailure;
   if (ckBad)
-    d.log(`[refresh] warning: ClashKing ${ckBad.version} can't be used (${oneLine(ckBad.reason, 'load failed')}); staying on the pinned known-good copy. Run npm run sync after a fix.`);
+    d.log(`[refresh] warning: ${versionLabel(ckBad.version)} can't be used (${oneLine(ckBad.reason, 'load failed')}); staying on the pinned known-good copy. Run npm run sync after a fix.`);
   try {
     const backup = d.backupWarning?.();
     if (backup) d.log(`[refresh] warning: ${backup}`);
@@ -195,7 +196,7 @@ export function refreshGameData(d: RefreshDeps): DataOutcome {
       const pinned = d.clashKingPinned?.();
       if (latest.commit !== pinned) {
         if (ckBad && latest.version === ckBad.version) ckKnownBad = true; // don't retry a known-bad file on every start
-        else ckReason = `ClashKing ${latest.version} is out (pinned: ${pinned ? pinned.slice(0, 7) : 'none'})`;
+        else ckReason = `${versionLabel(latest.version)} (${latest.commit.slice(0, 7)}) is out (pinned: ${pinned ? pinned.slice(0, 7) : 'none'})`;
       }
     } catch (e) {
       d.log(`[refresh] warning: ClashKing check skipped (${oneLine(msg(e), 'GitHub unreachable')}); starting the site anyway.`);

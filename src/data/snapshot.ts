@@ -2,6 +2,7 @@
 // model (not the raw package JSON) per data version, diffs it against the previous version's snapshot,
 // prints the changes and saves them to public/data-changes.json for the site's "Game data updated" banner.
 import { fmtDuration, fmtNum, RESOURCE_LABEL } from '../engine/format';
+import { versionSlug } from './source';
 import type { GameData, Item, LevelInfo } from './types';
 
 export interface Snapshot {
@@ -40,8 +41,8 @@ export function toSnapshot(data: GameData, date: string): Snapshot {
   return { version: data.version, date, maxTH: data.maxTH, items };
 }
 
-/** Snapshot file name: `<YYYY-MM-DD>_<version>.json`. */
-export const snapshotFileName = (s: Pick<Snapshot, 'date' | 'version'>) => `${s.date}_${s.version}.json`;
+/** Snapshot file name: `<YYYY-MM-DD>_<version>.json`, the version slugged so it always stays one file name (REVIEW-2 #9). */
+export const snapshotFileName = (s: Pick<Snapshot, 'date' | 'version'>) => `${s.date}_${versionSlug(s.version)}.json`;
 
 /** "8M gold", "350K DE" … */
 const money = (l: LevelInfo) => `${fmtNum(l.cost)} ${RESOURCE_LABEL[l.resource]}`;

@@ -4,7 +4,7 @@
 import { assertClashKingShape, normalizeClashKing } from './clashking';
 import { cocTownHallWeapons } from './normalize';
 import { parseOverrides } from './overrides';
-import { backupWarning, type ClashKingPin } from './source';
+import { backupWarning, pinVersion, type ClashKingPin } from './source';
 import type { GameData } from './types';
 import mergesYaml from '../../config/merges.yaml?raw';
 import superTroopsYaml from '../../config/super-troops.yaml?raw';
@@ -24,7 +24,7 @@ export async function loadGameDataBrowser(): Promise<GameData> {
     try {
       assertClashKingShape(raw);
       const th = Object.values(thFiles)[0];
-      return normalizeClashKing(raw, { version: pin.version, overrides: parseOverrides(texts), weapons: th ? cocTownHallWeapons(th) : [] });
+      return normalizeClashKing(raw, { version: pinVersion(pin), overrides: parseOverrides(texts), weapons: th ? cocTownHallWeapons(th) : [] });
     } catch (e) {
       reason = `the pinned ClashKing data can't be loaded (${(e as Error).message})`;
     }

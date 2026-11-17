@@ -1,6 +1,6 @@
 import './style.css';
 import { loadGameDataBrowser } from './data/loadBrowser';
-import { dataSourceLabel } from './data/source';
+import { dataSourceLabel, versionLabel } from './data/source';
 import type { GameData } from './data/types';
 import { fmtClock } from './engine/format';
 import type { DataChangesFile } from './data/snapshot';
@@ -81,7 +81,7 @@ function dataChangesBanner(): string {
   if (!dc || dc.version !== data.version || !dc.changes.length || storage.loadDataChangesSeen() === dc.version) return '';
   return `<div class="card banner" id="data-banner">
     <div class="row"><b>Game data updated: ${dc.changes.length} change${dc.changes.length === 1 ? '' : 's'}</b>
-      <span class="small muted">clash-of-clans-data ${esc(dc.previousVersion)} → ${esc(dc.version)}</span>
+      <span class="small muted">${esc(versionLabel(dc.previousVersion))} → ${esc(versionLabel(dc.version))}</span>
       <button class="btn secondary small" id="dismiss-banner">Dismiss</button></div>
     <details><summary class="small">Show changes</summary><ul class="small changes">${dc.changes.map((c) => `<li>${esc(c.text)}</li>`).join('')}</ul></details>
   </div>`;

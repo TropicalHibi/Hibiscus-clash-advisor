@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import type { MetaFile } from '../../src/meta/meta';
 import { ApiError } from './api';
 import { AuthError, redact, type TokenSource } from './auth';
+import { fence } from './ghText';
 import type { MetaRunResult } from './metaRun';
 
 /** A meta.json built from fewer attacks than this is never committed (a normal daily run has ~13k). */
@@ -103,8 +104,6 @@ export async function runMetaCi(d: MetaCiDeps): Promise<MetaCiResult> {
   }
   return { ...who, ...decideMeta(d.current, d.readNext(), run) };
 }
-
-const fence = (lines: string[]) => ['```', ...lines.map((l) => l.replace(/```/g, "'''")), '```'];
 
 /** Issue body (already redacted inputs; scrubbed once more). */
 export function metaIssueBody(r: MetaCiResult | undefined, o: { step?: string; runUrl?: string; committed?: boolean; secrets?: (string | undefined)[] } = {}): string {

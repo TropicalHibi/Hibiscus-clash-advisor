@@ -17,6 +17,7 @@ import { createClient } from './lib/api';
 import { obtainToken, redact } from './lib/auth';
 import { LEGEND_I_TIER } from './lib/collect';
 import { hashTag, META_ISSUE_TITLE, metaIssueBody, runMetaCi, type MetaCiResult } from './lib/metaCi';
+import { setOutputs } from './lib/ghText';
 import { metaConfFrom, runMeta } from './lib/metaRun';
 
 const args = process.argv.slice(2);
@@ -32,12 +33,6 @@ const readMeta = (): MetaFile | undefined => {
     return undefined;
   }
 };
-function setOutputs(values: Record<string, string | number | boolean | undefined>): void {
-  const file = process.env.GITHUB_OUTPUT;
-  if (!file) return;
-  fs.appendFileSync(file, Object.entries(values).map(([k, v]) => `${k}=${String(v ?? '').replace(/\r?\n/g, ' ')}\n`).join(''));
-}
-
 async function run(): Promise<void> {
   const conf = metaConfFrom(readConfig('settings.sample.yaml'), LEGEND_I_TIER);
   const data = loadGameDataNode();

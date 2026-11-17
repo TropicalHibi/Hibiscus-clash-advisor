@@ -4,6 +4,7 @@ import { COC_BACKUP_MERGES } from '../src/data/cocDataBackup';
 import { dataVersion, loadGameDataNode, normalizeClashKingNode, readClashKing, readOverrideTexts, readRawFiles } from '../src/data/loadNode';
 import { countAt, maxLevelAt, normalize, type RawFile } from '../src/data/normalize';
 import type { OverrideTexts } from '../src/data/overrides';
+import { pinVersion } from '../src/data/source';
 import type { GameData } from '../src/data/types';
 import { heroCapAt } from '../src/engine/book';
 import { parseExport } from '../src/state/parseExport';
@@ -120,7 +121,7 @@ export function ckRaw(): ClashKingRaw {
 export function modifiedData(mutate: (raw: ClashKingRaw) => void, overrides: OverrideTexts = readOverrideTexts()): GameData {
   const raw = ckRaw();
   mutate(raw);
-  return normalizeClashKingNode(raw, readClashKing()!.pin.version, overrides);
+  return normalizeClashKingNode(raw, pinVersion(readClashKing()!.pin), overrides);
 }
 /** A ClashKing raw entry by item id (slug of its name), from any section. */
 export function rawItem(raw: ClashKingRaw, id: string): any {

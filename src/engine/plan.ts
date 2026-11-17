@@ -137,8 +137,8 @@ export function buildPlan(data: GameData, account: AccountState, settings: Setti
   for (const u of account.unresolved.filter((x) => !isLikelyUnreleased(x)))
     warnings.push(
       u.upgrading
-        ? `Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${data.version}): its running upgrade still occupies a slot until it finishes.`
-        : `Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${data.version}); ignored.`,
+        ? `Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${dataSourceLabel(data)}): its running upgrade still occupies a slot until it finishes.`
+        : `Unknown dataId ${u.dataId} in "${u.section}" (not in game data ${dataSourceLabel(data)}); ignored.`,
     );
   if (!account.exportTimestamp) warnings.push('Export has no timestamp; timers count from the import time.');
 

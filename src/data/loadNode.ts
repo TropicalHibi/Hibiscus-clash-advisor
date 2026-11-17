@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { assertClashKingShape, normalizeClashKing, type ClashKingRaw } from './clashking.ts';
 import { DATA_FOLDERS, cocTownHallWeapons, imageCandidates, normalize, type RawFile } from './normalize.ts';
 import { parseOverrides, type OverrideTexts } from './overrides.ts';
-import { backupWarning, type ClashKingPin } from './source.ts';
+import { backupWarning, pinVersion, type ClashKingPin } from './source.ts';
 import type { GameData, Item } from './types';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -120,7 +120,7 @@ export function loadGameDataFresh(dir = CK_DIR): GameData {
   let reason = 'data/clashking/static_data.json is missing or unreadable';
   if (ck) {
     try {
-      return normalizeClashKingNode(ck.raw, ck.pin.version);
+      return normalizeClashKingNode(ck.raw, pinVersion(ck.pin));
     } catch (e) {
       reason = `the pinned ClashKing data can't be loaded (${(e as Error).message})`;
     }

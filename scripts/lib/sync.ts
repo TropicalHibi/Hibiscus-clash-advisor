@@ -198,7 +198,7 @@ export function syncAll(d: FullSyncDeps, opts: SyncOptions = {}): FullSyncResult
   }
   for (const l of crossCheck) d.log(l);
 
-  const ckBad = clashKing.outcome === 'kept-previous' ? 'restored' : ['check-failed', 'download-failed', 'no-copy'].includes(clashKing.outcome) ? 'failed' : undefined;
+  const ckBad = clashKing.outcome === 'kept-previous' || clashKing.outcome === 'release-missing-file' ? 'restored' : ['check-failed', 'download-failed', 'no-copy'].includes(clashKing.outcome) ? 'failed' : undefined;
   const outcome: SyncOutcome =
     coc === 'failed' || ckBad === 'failed' || !active.ok
       ? 'failed'
