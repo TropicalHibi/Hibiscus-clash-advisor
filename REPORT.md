@@ -1115,3 +1115,52 @@ The 14-day and Gold Pass runs show the same differences, shifted in time (e.g. 1
 
 The Gold Pass run shows the same swap with Gold Pass times (Eagle Artillery 7d 4h instead of Town Hall 7d 14h).
 
+
+# Review 2 fixes
+
+All 14 findings in REVIEW-2.md are fixed, plus the 11 spec ambiguities and the "Missing tests" list (except the mobile screenshot). The decisions are in DECISIONS.md ("Review 2 fixes"), and SPEC.md is updated wherever behaviour changed.
+
+**Status**
+- `npm test`: **403 tests pass** (24 files; 345 before, 58 new).
+- `npm run test:mutated`: passes on a mutated copy of the data (TH20 + new top levels): 398 passed, 1 skipped (the browser-loader parity test, which always reads the committed file).
+- `npm run build` and `npm run build:pages` both succeed. Main chunk 778 kB (118 kB gzip).
+
+## Your plans: before / after
+- **Your export** (`samples/myexport.json`, TH18) and the **fixture** (`tests/fixtures/export-th16.json`, TH16): the 24 h plans are **identical** apart from the clock. None of the fixed scenarios occurs in either export.
+- Two small text changes show up:
+  - The helper line now says "Builder's Apprentice L8 (−8h per 23h cycle)" instead of "(−8h/day)".
+  - A warning names the data as "ClashKing v0.1.20" instead of "clashking-v0.1.20".
+- **Everything tab, total cost** (finding 10):
+
+| Export | Before | After (total) | "Not scheduled" subtotal (new line) |
+|---|---|---|---|
+| Yours (TH18) | 1,499 upgrades: 3,958M gold, 2,115M elixir, 55.3M DE, 3,488M gold-or-elixir | 1,468 upgrades: 3,931M gold, 1,924M elixir, 45.4M DE, 3,488M gold-or-elixir | 31 upgrades: 27M gold, 191M elixir, 9.9M DE (the next Town Hall and the book-ready hero levels) |
+| Fixture (TH16) | 217 upgrades, 613M gold | 216 upgrades, 597M gold | the next Town Hall, 16M gold |
+
+## Per finding
+| # | What was wrong | Before | After |
+|---|---|---|---|
+| 1 | Tests tied to today's data | A new ClashKing level or TH failed `npm test`: 1 failure for a new Cannon level, 11 on my mutated copy. The data Action and Pages stopped. | Data-dependent tests compute their expectations from the data. Facts about today's data moved to `tests/current-data.test.ts`, which only `npm test` runs. The Action and Pages run `npm run test:ci`, and Pages also runs `npm run test:mutated`. 0 failures on the mutated copy. |
+| 2 | Guardian Shrine (counted, no levels) held the TH gate | After a TH20 release, a TH19 account without a shrine got **0 Town Hall jobs in 365 days**. | The Town Hall is offered. The plan shows "T0 (info): Build Guardian Shrine (no level data yet)". |
+| 3 | Levelless item under construction freed its builder | TH18, 6 builders, shrine under construction: **6** new jobs at t = 0 | **5** new jobs; "Guardian Shrine (no level data)" stays busy until its timer ends |
+| 4 | A local meta / sync blocked `git pull` | Every `npm run dev` printed "git pull --ff-only failed", and no Action commit came in after that | The refresh discards its own generated copy when the incoming commit replaces it, and says so in one line. Your own edits are never discarded: the warning names the file and the fix (`git stash` or `git checkout -- <file>`). |
+| 5 | A re-pointed ClashKing tag | The Action failed every day: "no diff was produced" | The data version is now tag + commit (`clashking-v0.1.20+04babd0`), so a re-pointed tag gets its own diff and commit. The site still shows "ClashKing v0.1.20". |
+| 6 | CRLF checkout on Windows | Fresh clone: 1 failed | Added `.gitattributes` (LF), and the workflow tests normalize line endings. There's a CRLF test. |
+| 7 | A free top level got through | "Barbarian King 116 (0, 0s)" would be pinned | Rejected: "Archer Queen 116: costs nothing and takes no time (…)". The known-good copy stays. |
+| 8 | Wrong issue title | "Data update failed: 0.19.1" for a ClashKing failure | The title names the ClashKing version whenever it changed, and both versions when both changed |
+| 9 | Unsafe tag in file names / jq | A tag with `/` broke the snapshot. A `"` could pick another issue. | Tags are validated (else `main-<sha7>`), file names are slugged, and the title goes to `jq --arg` in one shared script |
+| 10 | Everything total included the next TH and book-ready levels | See the table above | Total = the scheduled groups + walls. "Not scheduled" has its own subtotal. |
+| 11 | Dragging text onto the hero list reordered it | Dropping "3" moved hero #4 | Ignored (only drags that start in the list count) |
+| 12 | Small items | Wall line from the export TH; "h/day"; the helper cycle advanced with no job; an override typo was reported as "ClashKing can't be loaded"; Sour Elixir Cauldron would land in the offense tier | Wall line from now; "per 23h cycle"; the helper waits for the next job; "Override file error: config/merges.yaml: …" (the data loads without the overrides, and the Action fails); unknown Resource buildings → `other`. Unused exports and duplicates removed. The large files weren't split, as you asked. |
+| 13 | CI token exposure | The write token sat in `.git/config` while npm code ran. Pages permissions were granted to every job. | `persist-credentials: false`, and the token is used only for pushes. `npm ci --ignore-scripts` in data-update and meta. Pages write permissions only on the deploy job. |
+| 14 | A real-looking player tag in a test | `#2PP0JQ8` | `#ABC123X` (history left as is) |
+
+**Spec ambiguities, as decided:**
+- **Supercharges:** offered only when the base is at the level that carries the supercharge block. Only Monolith is affected: a TH17 Monolith 4 is no longer offered its supercharge.
+- **Guardians:** stay out of planned builds.
+- **No release has the file:** the release pin stays, and the issue is opened or updated instead of following main.
+- **The other ambiguities** are covered by the findings above: 1 → #2, 3 → #5, 4 → #8, 5 → #4, 6 → #10, 7 and 9 → #12, 11 → #7.
+
+## Check
+- **Banner:** the banner for v0.1.20 may show once more in a browser that had dismissed it, because the dismissal is keyed by the new version name.
+- **Mobile layout:** still not checked visually, as in REVIEW-2's last missing test.

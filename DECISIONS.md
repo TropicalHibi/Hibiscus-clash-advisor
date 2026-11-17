@@ -522,3 +522,72 @@ The game data now comes from ClashKing's `static/static_data.json` (`ClashKingIn
 - **An upgrading level-1 entry still warns:** a running upgrade on an unknown id occupies a slot (SPEC "Unknown ids"), which the player should know about.
 - **Where it shows:** the Import tab, under the account status (shown whenever an account is loaded, so "once" = one note listing them all, not one warning each), and an `== Info ==` section in `npm run plan` ahead of the warnings. The import message's "N unknown id(s) ignored" counts only the ones that still warn. `Unresolved` now carries the entry's `level`.
 - **Your export:** the two warnings for 90000062 and 90000063 are gone; the CLI shows "Unrecognized items (likely unreleased): equipment 90000062 (level 1), equipment 90000063 (level 1)". 90000061 (level 1) is known to ClashKing, so it isn't listed.
+
+# Decisions (Review 2 fixes, REVIEW-2.md)
+
+## Tests vs today's data (#1)
+- **Rule tests compute their expectations from the data.** Max TH = the highest Town Hall level in the raw file; the Cannon image = the highest level clash-of-clans-data has an image for (it can lag ClashKing); the book threshold, hero caps and "first book-ready level" come from the data; max-TH tier tests use an export two THs of levels behind, so every tier has work in any release. *Why:* a new ClashKing level or TH must never fail the daily Action or Pages by itself.
+- **Facts about today's data live in `tests/current-data.test.ts`** (max TH 19, 8-day threshold, AQ caps 110/115, Cannon top 21 + its image). `npm test` runs them; `npm run test:ci` (the data-update Action and Pages) leaves them out. *Why:* they're a record of the pinned data, not rules; when a data update changes one, the number is updated by hand without blocking the deploy.
+- **`npm run test:mutated`** writes a mutated copy of the pinned data to a temp dir (new Town Hall level; new top levels for Cannon, Laboratory, Gold Storage, Army Camp, Hero Hall, Archer Tower at today's max TH, Archer Queen (longer than any hero level, needs the new Hero Hall level), Barbarian, L.A.S.S.I, Barbarian Puppet) and runs `test:ci` with `CK_DATA_DIR` pointing at it. It's a Pages step. An item missing from the data is skipped, so a ClashKing rename can't break the check itself. The browser-loader parity test is skipped there (the browser glob always reads the committed file).
+- `CK_DATA_DIR` is read only by the Node loader (`loadNode.ts`); nothing else uses it.
+
+## Counted buildings without levels (#2, ambiguity 1)
+- **Never planned, never in the TH gate.** `plannedBuildings` only creates copies of items on the builder queue with a first level; the gate only counts planned items with a first level. *Why:* the planner can't build or time them, so holding the gate deadlocked the Town Hall (0 TH jobs in 365 days after a TH20 release).
+- **Informational Tier 0 row** "Build Guardian Shrine (no level data yet)" (`×N` when several are missing) in the Plan tab's "Now" card (greyed, italic) and `npm run plan` ("T0 (info): …"). Only for items that would otherwise be new buildings (same filter as planned copies) and only while not owned; an export entry, even level 0 under construction, counts as built.
+
+## Running jobs on levelless items (#3)
+- **They hold their slot**, mapped by category: troop/spell/siege → lab, pet → pet house, equipment/helper → none, everything else → builder (incl. heroes, guardians, modules, `other` buildings). Shown as "<name> (no level data)". When the timer runs out the instance's level is set to the target. Their helper tier comes from `runningJobTier` like any running job.
+
+## Refresh vs committed files (#4, ambiguity 5)
+- **Discard only what the refresh generated and the incoming commits replace.** Before `git pull --ff-only`, `git fetch`, then for files that are both locally changed (`git status --porcelain`, incl. untracked) and touched by `HEAD...@{u}`: discard `data/clashking/*`, `public/meta.json`, `public/data-changes.json`; `package.json` / `package-lock.json` only when they differ from HEAD solely in the clash-of-clans-data dependency / lockfile entries. Discard = `git checkout HEAD -- <files>` (untracked: delete). One log line names them.
+- **Everything else is a blocker, never touched:** the warning names the files and both fixes (`git stash` … `git stash pop`, or `git checkout -- <files>`). *Why:* the owner's own edits must never be lost to an automatic refresh.
+- "Changed only by sync" for package files is a structural JSON comparison with the clash-of-clans-data entries removed, not a guess from the diff text.
+- Tested end to end on throwaway repos in the temp dir with a local bare origin (no network).
+
+## Data identity (#5, ambiguity 3)
+- **`version` = `clashking-<tag>+<sha7>`** (main: `clashking-main-<sha7>` as before). It names snapshots, diffs, `data-changes.json`, banner dismissal, failure records and issue titles. **The UI shows only the tag** (`versionLabel`: "ClashKing v0.1.20"; the banner now says "clash-of-clans-data 0.19.1 → ClashKing v0.1.20" instead of always prefixing clash-of-clans-data).
+- **Old pins** (version = tag only) get the identity from `pin.tag` + `pin.commit` (`pinVersion`), in both loaders and in sync. The committed `pin.json` and `public/data-changes.json` were updated to `clashking-v0.1.20+04babd0` so the banner keeps matching. Side effect: a browser that dismissed the v0.1.20 banner sees it once more (the dismissal is keyed by version).
+- **Commit messages show tags only**, and the commits too when the tag didn't change ("ClashKing v1.0.0+aaaaaaa → v1.0.0+fffffff").
+- The refresh's log lines use the label plus the commit ("ClashKing v1.0.1 (bbbbbbb) is out (pinned: aaaaaaa)").
+
+## Line endings (#6)
+- `.gitattributes`: `* text=auto eol=lf` (binary files are auto-detected). Workflow-file tests read through `tests/workflow.ts`, which normalizes `\r\n`. A test feeds a CRLF copy and expects the same result.
+
+## Free levels (#7, ambiguity 11)
+- **Error on any level > 1 of an item with queue ≠ none that costs 0 and takes 0 s; equipment: all three ores 0** (`checkFreeLevels`, run by `validateClashKing`). Level 1 is free by design; seasonal units have queue none; walls cost something; today's data has none. *Why:* it's exactly what a new top level looks like when ClashKing forgets to fill in the row before it.
+- Not run on the clash-of-clans-data backup (frozen, not shifted).
+
+## Issue titles and tags (#8, #9, ambiguity 4)
+- **Title:** the ClashKing version whenever it changed (any failing step), both versions when both changed ("clashking-v…, clash-of-clans-data 0.20.0"), else the clash-of-clans-data version; "ClashKing check" / "npm check" when a version was never known.
+- **Tags:** `^[A-Za-z0-9._-]+$`, else the release is versioned `clashking-main-<sha7>` (of the release's commit, which is still what's downloaded), with a warning, and `pin.tag` is left out (`pin.ref` keeps the raw tag; it's JSON). Snapshot file names are slugged (`[^A-Za-z0-9._+-]` → `-`).
+- **The issue shell block is one script** (`.github/scripts/upsert-issue.sh`) for both workflows; the title goes to `jq --arg t` (gh's `--jq` takes no arguments, so `gh … --json | jq`). The search query has quotes stripped; the exact match is in jq.
+
+## Everything totals (#10, ambiguity 6)
+- **Total cost = builder tiers + Laboratory + Pet House + walls**; the count excludes "Not scheduled" too. "Not scheduled (N, not in the total)" gets its own line in the totals card. *Why:* SPEC §11 describes the tab as what's left at the current TH; the next TH and book-ready levels are the player's call. On your export the total drops by 191M elixir, 27M gold and 9.9M DE (31 upgrades).
+
+## Hero drag (#11)
+- `dragover` only accepts drags that started in the list (`dragFrom ≥ 0`), and `drop` ignores anything else. The `text/plain` payload is still set (some browsers need it to start a drag) but never read.
+
+## Small items (#12)
+- **Wall line from now:** `wallDump(data, account, nowTH)`. The wall counts themselves come from the export (walls aren't simulated).
+- **Helper text:** "−8h per 23h cycle".
+- **Helper cycle waits (ambiguity 7):** at a work hour with no eligible job (none on its queue, or only Goblin jobs) the helper waits; it's assigned to the next job that runs and its next hour is 23 h after that. Before now nothing starts, so a helper that found nothing between the export and now is assigned at now. The event loop doesn't advance on a waiting helper's time (no busy loop). The "next work hour" in the summary line is still the regular schedule (it's a hint).
+- **Several `helper_recurrent` jobs:** the planner's priority picks among them (deterministic). A flag on a Goblin job is ignored like any Goblin job.
+- **Override errors:** `OverrideError` (YAML error, or a merges.yaml recipe naming an unknown item / a different dataId). The loaders retry **without the override files** and put "Override file error: config/<file>: …" first in the warnings. *Why:* the overrides ship empty, so loading without them is the safe default and the message points at the real culprit; falling back to the backup blamed ClashKing and, since the backup re-parses the same YAML, could fail outright. The daily Action fails on it ("validation: override files (config/)") so a broken override never deploys silently. Unknown super-troop bases were already skipped silently and still are.
+- **Resource buildings:** not a storage/collector → `other` (not planned). The warning appears only once such a building has levels, so today's levelless Sour Elixir Cauldron adds no Plan-tab noise. The clash-of-clans-data backup keeps its old mapping (frozen data).
+- **Removed / shared:** `CK_DATA_FILE`, `CK_PIN_FILE`, `cocDataVersion`, `readIdOverrides`, the `req` alias; `STORAGES`/`COLLECTORS` exported once from `normalize.ts`; `fence`/`tail`/`setOutputs` in `scripts/lib/ghText.ts`.
+- **Not done:** splitting `tiers.ts` / `clashking.ts` / `scheduler.ts` (as instructed).
+
+## CI hardening (#13)
+- Checkout `persist-credentials: false` in all three workflows. Pushes (data commit, meta commit, meta-data force push, and their `git pull --rebase`) go through `.github/scripts/git-auth.sh`, which passes the token as a one-command `http.extraheader` (masked), so it's never in `.git/config`. The meta restore step fetches `meta-data` anonymously (public repo).
+- `npm ci --ignore-scripts` in data-update and meta (esbuild and sharp ship prebuilt binaries as optional packages). The sync's `npm install clash-of-clans-data@x` also uses `--ignore-scripts` (it's a data-only package).
+- Pages: workflow-level `contents: read`; `pages: write` + `id-token: write` only on the deploy job. Actions stay pinned to major tags (all `actions/*`; low risk, as the review says).
+
+## Test tag (#14)
+- `#2PP0JQ8` → `#ABC123X` (contains `A`, `B`, `X`: not valid tag characters, still matches the redaction pattern). History left as is.
+
+## Ambiguity decisions
+- **2 (supercharge level):** offered only when the base is at its max for the TH **and** at the level that carries ClashKing's supercharge block (`superchargeBaseLevel`). Today only Monolith differs (block on level 5 / TH18, supercharge TH17): a TH17 Monolith 4 is no longer offered it. The backup has no block level and keeps the old rule.
+- **8 (guardians):** stay out of planned builds and the TH gate. *Why:* their count is our own derivation (first level's TH), not a Town Hall unlock, and ClashKing lists a guardian clash-of-clans-data doesn't (Logger), so planning one could suggest something the game doesn't offer and hold the gate. Owned guardians are still upgraded (tier 6).
+- **9 (wall line):** from now (above).
+- **10 (no release has the file):** with a release pinned, keep it and fail with "the latest ClashKing release "vX" has no static/static_data.json; keeping the release pin …" (issue "Data update failed: clashking-vX", stable across days). With no release at all the title is "clashking-release". Nothing pinned yet → follow main as before (bootstrap). A GitHub error on the release lookup now throws instead of silently following main. Locally, the failure is recorded (refresh warns each start, doesn't re-sync until a newer main commit / release).
