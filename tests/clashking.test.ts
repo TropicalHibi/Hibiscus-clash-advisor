@@ -133,10 +133,12 @@ describe('normalizing ClashKing into the Item model', () => {
     const ice = d.byId.get('ice-wizard')!;
     expect(ice).toMatchObject({ category: 'troop', queue: 'none', seasonal: true });
     expect(d.byId.get('santas-surprise')!).toMatchObject({ queue: 'none', seasonal: true });
+    // Named and flagged in the meta catalog (so they're never "Unknown troop"), but left out of the meta itself.
     const cat = buildCatalog(d);
-    expect(cat.has(4000030)).toBe(false);
-    expect(cat.has(26000006)).toBe(false);
+    expect(cat.get(4000030)).toMatchObject({ name: 'Ice Wizard', seasonal: true });
+    expect(cat.get(26000006)).toMatchObject({ seasonal: true });
     expect(cat.get(4000000)!.kind).toBe('troop');
+    expect(cat.get(4000000)!.seasonal).toBeUndefined();
   });
 
   it('supercharges come from the `supercharge` block: their own levels and TH requirement', () => {

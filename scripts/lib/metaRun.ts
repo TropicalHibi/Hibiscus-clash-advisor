@@ -53,6 +53,8 @@ export interface MetaRunOptions {
   conf: MetaConf;
   fresh?: boolean;
   aggregateOnly?: boolean;
+  /** --aggregate-only: read this battles.jsonl instead of <dir>/battles.jsonl (e.g. the meta-data branch copy). */
+  battlesFile?: string;
   /** Required unless aggregateOnly. */
   api?: ApiClient;
   catalog: Catalog;
@@ -128,7 +130,7 @@ export async function runMeta(o: MetaRunOptions): Promise<MetaRunResult> {
   const log = o.log ?? ((l: string) => console.log(l));
   const progress = o.progress ?? ((l: string, final: boolean) => final && log(l));
   const started = now();
-  const battles = path.join(o.dir, 'battles.jsonl');
+  const battles = (o.aggregateOnly && o.battlesFile) || path.join(o.dir, 'battles.jsonl');
   const stateFile = path.join(o.dir, 'run-state.json');
   fs.mkdirSync(o.dir, { recursive: true });
 
@@ -179,6 +181,10 @@ export async function runMeta(o: MetaRunOptions): Promise<MetaRunResult> {
     L.push(`No housing space in the data (${result.noHousing.size}) — these rank by usage share instead of army share:`);
     for (const [id, name] of result.noHousing) L.push(`  ${id}  ${name}`);
   } else L.push('Housing space:        found for every known troop and spell');
+  if (result.seasonal.size)
+    L.push(
+      `Seasonal units (left out of the meta): ${[...result.seasonal.values()].sort((x, y) => y.attacks - x.attacks).map((u) => `${u.name} (${u.attacks})`).join(', ')}`,
+    );
   if (result.unknown.size) {
     L.push(`Unknown IDs (${result.unknown.size}) — not in the game data (${o.dataVersion}) or config/super-troops.yaml:`);
     for (const [id, u] of [...result.unknown].sort((a, b) => b[1].attacks - a[1].attacks))

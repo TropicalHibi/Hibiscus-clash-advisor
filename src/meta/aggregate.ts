@@ -35,6 +35,10 @@ export interface UnitInfo {
   baseId?: number; // super troops → base troop dataId
   /** Housing space (troops, super troops, spells, sieges). Missing → no army-share score. */
   housing?: number;
+  /** Squads (TH19): a troop of its own whose share is also credited to its troops (SPEC §8.3). */
+  squad?: true;
+  /** Seasonal / event units (ClashKing `is_seasonal`): named, but left out of the meta entirely. */
+  seasonal?: true;
 }
 export type Catalog = Map<number, UnitInfo>;
 
@@ -51,15 +55,19 @@ const KIND_BY_CATEGORY: Record<string, UnitInfo['kind'] | undefined> = {
 };
 
 /**
- * dataId → unit info for the meta. Seasonal units are left out (never ranked, SPEC §6.7). Super troops come
- * from the data; `superTroops` (config/super-troops.yaml) adds or replaces entries.
+ * dataId → unit info for the meta. Names (squads included) and seasonal flags come from the game data the planner
+ * uses (ClashKing). Seasonal units are flagged so the aggregation skips them instead of calling them unknown
+ * (never ranked, SPEC §6.7). Super troops come from the data; `superTroops` (config/super-troops.yaml) adds or
+ * replaces entries.
  */
 export function buildCatalog(data: GameData, superTroops: Record<number, SuperTroopEntry> = {}): Catalog {
   const cat: Catalog = new Map();
   for (const item of data.items.values()) {
     const kind = KIND_BY_CATEGORY[item.category];
-    if (!kind || item.key !== String(item.dataId) || item.seasonal) continue;
+    if (!kind || item.key !== String(item.dataId)) continue;
     const info: UnitInfo = { kind, name: item.name };
+    if (item.seasonal) info.seasonal = true;
+    if (item.squad) info.squad = true;
     if (item.housingSpace) info.housing = item.housingSpace;
     cat.set(item.dataId, info);
   }
@@ -98,6 +106,8 @@ export interface AttackUsage {
   /** Known units that have no housing space in the data (they fall back to usage share). */
   noHousing: number[];
   unknown: UnknownId[];
+  /** Seasonal units in the army (left out of usage and the totals). */
+  seasonal: number[];
 }
 
 const UNKNOWN_KIND: Record<string, UnitKind> = { u: 'troop', s: 'spell', pet: 'pet', equipment: 'equipment' };
@@ -112,14 +122,22 @@ const UNKNOWN_KIND: Record<string, UnitKind> = { u: 'troop', s: 'spell', pet: 'p
 export function attackUsage(recipe: ArmyRecipe, catalog: Catalog): AttackUsage {
   const units = new Map<number, number>();
   const unknown: UnknownId[] = [];
+  const seasonal: number[] = [];
   const add = (id: number, qty: number) => units.set(id, (units.get(id) ?? 0) + qty);
+  const isSeasonal = (id: number) => {
+    if (!catalog.get(id)?.seasonal) return false;
+    if (!seasonal.includes(id)) seasonal.push(id);
+    return true;
+  };
 
   for (const t of recipe.troops) {
+    if (isSeasonal(t.id)) continue;
     const info = catalog.get(t.id);
     if (!info) unknown.push({ id: t.id, section: 'u', counted: true });
     add(t.id, info?.kind === 'siege' ? 1 : t.qty);
   }
   for (const s of recipe.spells) {
+    if (isSeasonal(s.id)) continue;
     if (!catalog.has(s.id)) unknown.push({ id: s.id, section: 's', counted: true });
     add(s.id, s.qty);
   }
@@ -147,7 +165,7 @@ export function attackUsage(recipe: ArmyRecipe, catalog: Catalog): AttackUsage {
     const space = new Map<number, number>();
     for (const id of ids) {
       const info = catalog.get(id);
-      if (!info || !kinds.includes(info.kind as UnitKind)) continue;
+      if (!info || info.seasonal || !kinds.includes(info.kind as UnitKind)) continue;
       if (!info.housing) {
         if (!noHousing.includes(id)) noHousing.push(id);
         continue;
@@ -159,7 +177,7 @@ export function attackUsage(recipe: ArmyRecipe, catalog: Catalog): AttackUsage {
   };
   part([...new Set(recipe.troops.map((t) => t.id))], ['troop', 'superTroop']);
   part([...new Set(recipe.spells.map((s) => s.id))], ['spell']);
-  return { units, shares, noHousing, unknown };
+  return { units, shares, noHousing, unknown, seasonal };
 }
 
 // ── Aggregation ──
@@ -177,6 +195,8 @@ export interface AggregateResult {
   emptyArmies: number;
   /** Known troops/spells with no housing space in the data: dataId → name. Ranked by usage share. */
   noHousing: Map<number, string>;
+  /** Seasonal units seen in the window (left out of the meta): dataId → { name, attacks }. */
+  seasonal: Map<number, { name: string; attacks: number }>;
 }
 
 const DAY_MS = 86_400_000;
@@ -196,11 +216,17 @@ export function aggregate(rows: BattleRow[], catalog: Catalog, opts: AggregateOp
   const acc = new Map<number, { w: number; w3: number; wQty: number; wShare: number }>();
   const noHousing: AggregateResult['noHousing'] = new Map();
   const unknown: AggregateResult['unknown'] = new Map();
+  const seasonal: AggregateResult['seasonal'] = new Map();
 
   for (const r of rows) {
     const t = Date.parse(r.ts);
     if (!Number.isFinite(t) || t < cutoff) continue;
     const usage = attackUsage(parseArmyCode(r.armyShareCode ?? ''), catalog);
+    for (const id of usage.seasonal) {
+      const e = seasonal.get(id) ?? { name: catalog.get(id)?.name ?? String(id), attacks: 0 };
+      e.attacks++;
+      seasonal.set(id, e);
+    }
     if (usage.units.size === 0) {
       emptyArmies++;
       continue;
@@ -262,5 +288,6 @@ export function aggregate(rows: BattleRow[], catalog: Catalog, opts: AggregateOp
     unknown,
     emptyArmies,
     noHousing,
+    seasonal,
   };
 }

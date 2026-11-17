@@ -1,4 +1,4 @@
-// npm run meta [-- --max-players <n>] [--fresh] [--aggregate-only]
+// npm run meta [-- --max-players <n>] [--fresh] [--aggregate-only [--battles <file>]]
 // Pulls Legend League I battle logs, appends new attacks to data/meta/battles.jsonl,
 // aggregates the last 14 days and writes public/meta.json (SPEC §8). Logic: scripts/lib/metaRun.ts.
 //
@@ -32,6 +32,12 @@ if (argVal('--max-players') !== undefined) {
 }
 
 const aggregateOnly = args.includes('--aggregate-only');
+// --battles <file>: aggregate another battles.jsonl (e.g. the Action's copy from the meta-data branch, gunzipped).
+const battlesFile = argVal('--battles');
+if (battlesFile && !aggregateOnly) {
+  console.error('--battles only works with --aggregate-only');
+  process.exit(1);
+}
 const tty = process.stdout.isTTY;
 const data = loadGameDataNode();
 
@@ -53,6 +59,7 @@ async function token(): Promise<string> {
   conf,
   fresh: args.includes('--fresh'),
   aggregateOnly,
+  ...(battlesFile ? { battlesFile: path.resolve(battlesFile) } : {}),
   api: aggregateOnly
     ? undefined
     : createClient({
