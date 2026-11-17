@@ -41,8 +41,8 @@ A local website that reads a Clash of Clans account export and tells the player 
 |---|---|
 | `npm run dev` | Refresh stale game data / meta (§9a), then start the local site |
 | `npm run dev:fast` | Start the local site without the refresh |
-| `npm run sync` | Update game data (ClashKing, pinned in `data/clashking/`; clash-of-clans-data for images / backup), run validation, snapshot it, print the diff vs the last snapshot and the ClashKing vs clash-of-clans-data cross-check (`-- --offline`: no GitHub / npm, validate + snapshot what's pinned and installed) |
-| `npm run meta` | Pull Legend I battle logs, aggregate, write `public/meta.json` |
+| `npm run sync` | Update game data (ClashKing, pinned in `data/clashking/`; clash-of-clans-data for images / backup), run validation, snapshot it, print the diff vs the last snapshot and the ClashKing vs clash-of-clans-data cross-check, then look up images for items clash-of-clans-data has no picture for (§13) (`-- --offline`: no GitHub / npm / image hosts, validate + snapshot what's pinned and installed) |
+| `npm run meta` | Pull Legend I battle logs, aggregate, write `public/meta.json` (`-- --aggregate-only [--battles <file>]`: re-aggregate the local, or another, `battles.jsonl` without API calls) |
 | `npm run push-meta` | Commit `public/meta.json` (only that file) as `meta: <generatedAt>` and push `main`, if it changed — redeploys the live site (§15) |
 | `npm run build` | Typecheck + production build at base `/` |
 | `npm run build:pages` | Same, at the GitHub Pages base `/Hibiscus-clash-advisor/` (used by CI) |
@@ -57,7 +57,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 ### 3.1 Game data — ClashKing static data (primary), `clash-of-clans-data` (images, TH weapons, backup)
 
 **Primary: `static/static_data.json` from [ClashKingInc/clashy.go](https://github.com/ClashKingInc/clashy.go).**
-- `npm run sync` and the daily Action (§9, §9b) download it from the **latest release tag**, **at that tag's commit**, and pin it in `data/clashking/` (committed): `static_data.json` (trimmed to the sections below, home village only, no `info` / `TID` text) and `pin.json` (`repo`, `ref`, `tag`, `commit`, `sha256` of the downloaded file, `version`, `fetchedAt`, `maxTH`, `items`). The site and the scripts only ever read the pinned copy.
+- `npm run sync` and the daily Action (§9, §9b) download it from the **latest release tag**, **at that tag's commit**, and pin it in `data/clashking/` (committed): `static_data.json` (trimmed to the sections below, home village only, no `info` / `TID` text, except each **squad's `info`**, whose description names its troops and counts, §6.7) and `pin.json` (`repo`, `ref`, `tag`, `commit`, `sha256` of the downloaded file, `version`, `fetchedAt`, `maxTH`, `items`). The site and the scripts only ever read the pinned copy.
 - **No release has the file** (no release at all, or the latest release lacks `static/static_data.json`): with a **release already pinned, the pin stays** and the run fails with that reason (the daily Action opens / updates its issue, titled with the release tag). Only with nothing pinned (or a `main` pin) is ClashKing's `main` followed. A GitHub error on the release's commit or contents is a failed check, never a switch to `main`.
 - **Data identity = tag + commit:** `version` is `clashking-<tag>+<sha7>` (e.g. `clashking-v0.1.20+04babd0`), or `clashking-main-<sha7>` without a tag. Snapshots, diffs, `data-changes.json`, the banner dismissal and failure records use it, so a re-pointed tag or a re-uploaded file is a new version with its own diff. A pin written before this derives it from its `tag` + `commit`. **People see only the tag** ("ClashKing v0.1.20" in the footer, the banner, `npm run plan`).
 - **Tags are validated:** a tag that isn't `^[A-Za-z0-9._-]+$` (a `/`, a quote, …) is treated as no tag (`clashking-main-<sha7>`, with a warning) and isn't stored as `pin.tag`. Snapshot file names are slugged (anything outside `[A-Za-z0-9._+-]` → `-`).
@@ -74,7 +74,8 @@ A local website that reads a Clash of Clans account export and tells the player 
 - **TH upgrade requirements:** any building level a Town Hall level lists (any array on the level whose entries name a building or trap `_id` with a `level`; today TH17's `merge_requirement`: Eagle Artillery 7) is required before upgrading to that TH. They go into the TH gate (§6.3). Read generically: no building is hard-coded. The clash-of-clans-data backup has none.
 - **Merges:** a building whose **level 1** has `merge_requirement` is a merged defense; the entries name the sources and their **exact** required levels (2 entries of the same `_id` = 2 copies). Counts after merges are derived (§7).
 - **Super troops:** troops with `super_troop {original_id, original_min_level}` have their own dataId and housing space and are credited to the base troop (§8.3). They are not lab items.
-- **Seasonal units** (`is_seasonal`): recognised (no unknown-id warning) but never in the lab queue, the Lab tab or the meta.
+- **Seasonal units** (`is_seasonal`): recognised (no unknown-id warning) but never in the lab queue, the Lab tab or the meta. The meta catalog names and flags them, so `npm run meta` leaves them out (and lists them in its summary) instead of reporting them as unknown (§8.3).
+- **Squads** (TH19, `production_building: "Squad Barracks"`, today 4000195–4000206): troops with their own dataId, levels and (mostly) housing space; lab items like any troop (§6.7). Their component troops come from `config/squads.yaml` (§12).
 - **Crafting Station:** `seasonal_defenses[].modules[]` → one item per module (`<defense>:m<module>`), with their own levels and TH requirements.
 - **Helpers:** `boost_multiplier` per level = the Builder's Apprentice / Lab Assistant work rate (hours of progress per work hour, §10.1). The Alchemist and Prospector are recognised but don't affect timing.
 - **TH weapons are not in ClashKing's data**: they're taken from clash-of-clans-data's `town-hall.json`.
@@ -83,7 +84,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 **Optional overrides** (`config/merges.yaml`, `config/super-troops.yaml`, `config/id-overrides.yaml`, §12) ship **empty**. An entry that exists **wins** over the data (a differing dataId is a warning; two items on one dataId too). **An override file that doesn't parse, or a recipe in it that names an item the data lacks / a different dataId, is an override error:** the data loads **without** the override files and the Plan tab, `npm run sync` and `npm run dev` show "Override file error: config/<file>: …". It's never reported as unusable ClashKing data and never switches to the backup. The daily Action fails on it (§9b).
 
 **`clash-of-clans-data` (npm, `chiefpansancolt/clash-of-clans-data`)** stays a dependency for:
-- **Item images:** `images.icon` or per-level `levels[].images.normal`, matched to ClashKing items by item id, then dataId. The files are WebP saved as `.png`, some up to 4096 px, so the build resizes them (§13 Step 3). Items only ClashKing has show their name only.
+- **Item images:** `images.icon` or per-level `levels[].images.normal`, matched to ClashKing items by item id, then dataId. The files are WebP saved as `.png`, some up to 4096 px, so the build resizes them (§13 Step 3). Items only ClashKing has get an image from ClashKing's asset host or the Fandom wiki, looked up by `npm run sync` and the daily Action (§13 "Images for new items"); with none found they show their name only.
 - **TH weapon levels** (above).
 - **Backup source:** if there is no usable ClashKing copy (missing, or the pinned file can't be loaded), the planner normalizes clash-of-clans-data instead (its `availablePerTownHall`, `buildCost`/`researchCost`, `townHallRequired`, …) and shows a **visible warning** on the Plan tab, in `npm run sync` and on every `npm run dev`. Its merge recipes, super-troop table and the Alchemist's dataId (which it lacks) are built in (`src/data/cocDataBackup.ts`, frozen at 0.19.1); the override files still win. In the browser it's a separate chunk, fetched only then.
 - The cross-check report (§9).
@@ -132,12 +133,14 @@ coc-planner/
     merges.yaml          # optional merge-recipe overrides (ships empty; ClashKing has the merges)
     super-troops.yaml    # optional super-troop overrides (ships empty)
     id-overrides.yaml    # optional dataId overrides (ships empty)
+    squads.yaml          # squad → component troops (+ counts from ClashKing's descriptions), §6.7 / §8.3
     settings.sample.yaml # defaults the UI starts from
   scripts/
     sync.ts              # npm run sync
     meta.ts              # npm run meta
     refresh.ts           # predev refresh (§9a)
     data-update.ts       # the daily data-update Action's steps (§9b)
+    lib/extraImages.ts   # images for new items: ClashKing assets → Fandom wiki → name only (§13)
     push-meta.ts         # npm run push-meta (§15)
     meta-ci.ts           # the daily meta Action's steps (§8.4)
   src/
@@ -163,6 +166,7 @@ coc-planner/
   public/
     meta.json            # aggregated meta the site reads (committed; the live site serves the pushed copy)
     data-changes.json    # latest game-data diff for the "Game data updated" banner (written by sync, committed)
+    item-images-extra/   # 96 px WebP icons for items clash-of-clans-data lacks + sources.json (sync / the Action, committed, §13)
   tests/                 # rule tests use fixtures / modifiedData or compute expectations from the data;
                          # current-data.test.ts holds the facts about today's pinned data (npm test only)
 ```
@@ -290,7 +294,9 @@ Tier 0 order: **Laboratory upgrade → new unbuilt buildings → Archer Queen.**
 - Resources are **not** a scheduling constraint in v1 (player resources unknown).
 
 ### 6.7 Lab queue
-- Candidates: all troops, spells, siege machines with an available next level (respecting TH/lab level).
+- Candidates: all troops, spells, siege machines with an available next level (respecting TH/lab level). **Squads are troops here**: a squad's own upgrade is a lab item in the Troops section, ranked by its own score (§8.3), and only offered where the data allows it (today level 2+ needs TH19 and Laboratory 17).
+- **Squads count toward their troops:** a squad's share of troop space (§8.3) is credited to each of its component troops (`config/squads.yaml`), split by that troop's share of the squad: `count × housingSpace ÷ Σ(count × housingSpace)`, or **equally** when a count isn't known. The squad's usage is added to the troop's usage too (like a super troop's). A squad with no housing space in the data (no army share) adds usage only, never score. The credited share is part of the troop's score everywhere it's used (Lab tab, lab pick, the kind's top score, plan reasons).
+- **"incl. squads"**: a troop row in the Lab tab shows `incl. squads +X%: <squad> Y% (Z% of its W%)` when squads add to its score, and the plan reason adds `; incl. squads X% (<squads>)`.
 - **Lab tab: three sections — Troops, Spells, Sieges** — each ordered by its own meta score (§8.3) descending: troops and spells by share of housing space, sieges by usage share. **Unused items are still listed at the bottom of each section** (not greyed out), ordered by shortest time.
 - **Lab queue pick (scheduler + 24h forecast):** normalize within kind, then weight:
   - `normScore = score ÷ top score of its kind`, where the top is the highest score of any unit of that kind in the Legend I meta (so each kind's Legend I #1 = 1.0; the player's best upgrade of a kind can be < 1.0).
@@ -367,6 +373,8 @@ Port from the ClashKing `clashy.go` parser (`game.go: ParseArmyRecipe`). The pay
   - **Spells:** same formula with spell housing space (÷ total spell space in that army).
   - **Sieges, pets, equipment:** plain `usage` (one siege per attack; pets/equipment are on or off).
   - Housing space comes from the game data (`housing_space`; super troops: their own entry, mapped to the base troop by `super_troop.original_id`, §3.1). A unit missing it (today: Baby Dragon Squad, P.E.K.K.A Titan Squad) is listed in the run summary and ranked by `usage` instead. Unknown IDs and seasonal units are left out of the per-attack totals.
+  - **Unit names and seasonal flags come from the game data the planner uses (ClashKing).** Squads (4000195–4000206) are named troops with their own army share. Seasonal units are left out of `meta.json` entirely (no "Unknown troop" entry) and listed in the run summary with their attack counts.
+  - **Squads:** score = their own army share (or usage without a housing space), like any troop. The lab score also credits it to the squad's component troops (§6.7).
   - A `meta.json` without `armyShare` (older file) falls back to `usage`.
 - Keep `usage` and `threeStarRate` in the output for display and later tuning.
 - Write `public/meta.json`: `{ generatedAt, windowDays, halfLifeDays, attacks, players, units: { [dataId]: { name, usage, threeStarRate, avgQty?, armyShare?, kind?, baseId? } } }`.
@@ -412,7 +420,8 @@ Runs **daily at 11:07 UTC** and on **manual dispatch**. Secrets: `COC_DEV_EMAIL`
    - **Merge consumption check** (§7).
    - Max TH changed → print "mode may flip to rush".
 5. **Cross-check report** (every sync, and in the daily Action's log and step summary): compare the normalized ClashKing data with clash-of-clans-data, item by item (by key) and level by level: **cost** (incl. resource and ore), **time** and **TH requirement**. Print the differences (capped at 60 lines, counts always complete); **never fail** on them. Also print which source has the **higher max TH** and which has **newer items** (items / levels only one side has), so after a patch (e.g. TH19) it's visible which source updated first. TH weapons (taken from clash-of-clans-data in both) aren't compared.
-6. Site footer shows: data source and version (`ClashKing v0.1.20`, or `clash-of-clans-data 0.19.1 (backup)`) + snapshot date (from `data-changes.json` when it matches), meta `generatedAt`.
+6. **Images for new items** (§13): after the data steps, items clash-of-clans-data has no picture for get one (ClashKing assets → Fandom wiki → name only), saved in `public/item-images-extra/`. Lookup problems are warnings and never change the exit code; `--offline` skips it.
+7. Site footer shows: data source and version (`ClashKing v0.1.20`, or `clash-of-clans-data 0.19.1 (backup)`) + snapshot date (from `data-changes.json` when it matches), meta `generatedAt`.
 
 ## 9a. Automatic refresh — no OS schedulers
 
@@ -437,8 +446,9 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 1. Checkout with `persist-credentials: false` (the write token is never stored in `.git/config`; only the push step uses it, through `.github/scripts/git-auth.sh`), `npm ci --ignore-scripts` (no dependency install scripts), then `scripts/data-update.ts check`. That's the same code as `npm run sync` (§9): clash-of-clans-data within the current major (`syncData`), then ClashKing's latest release (`syncClashKing`). If neither is newer, the run **ends successfully** ("Nothing new").
 2. If newer: snapshot the pinned data, download + validate the new ClashKing file (the **known-good copy stays** if it fails), pin it, snapshot it, diff the two and write `public/data-changes.json`. A new clash-of-clans-data alone (images / backup) commits with no game-data diff. The cross-check report goes to the log and the step summary. The CI path and a local `npm run sync` produce the same diff (tested).
 3. **Stricter than local, because nobody is watching:** a merge the recipes don't explain (§7 consumption check) **fails** the update instead of being a warning. So does a missing diff for a new ClashKing version, and an override-file error (§3.1). Hero-cap mismatches stay warnings.
+3b. **Item images for new items** (`scripts/data-update.ts images`), on **every** run, whether the data changed or not (a picture can appear upstream after the data did): the same lookup as `npm run sync` (§13), saving new icons in `public/item-images-extra/`. It never fails the job (name only instead). If it saved any, the run tests, commits and deploys like a data update: the images are appended to the data commit's message, or committed alone as `data: N new item images (<names>)`.
 4. `npm run test:ci` on the new data: the rule and validation tests. The facts about the previous data (`tests/current-data.test.ts`) aren't run, so a new level or TH never fails the update by itself. Tests compute their expectations from the data (max TH from the raw file, the image = the highest level clash-of-clans-data has, …).
-5. All good → commit **only** `data/clashking/`, `package.json`, `package-lock.json` and `public/data-changes.json` to `main` as `data: ClashKing <old> → <new>, clash-of-clans-data <old> → <new> (N changes)` (only the parts that changed; author `github-actions[bot]`), rebase on `main` and push. Then start the Pages workflow with `gh workflow run pages.yml --ref main`. A push made with the workflow's `GITHUB_TOKEN` doesn't trigger other workflows, but a `workflow_dispatch` does. Pages then runs its own `npm test` + build on the new commit and deploys.
+5. All good → commit **only** `data/clashking/`, `package.json`, `package-lock.json`, `public/data-changes.json` and `public/item-images-extra/` to `main` as `data: ClashKing <old> → <new>, clash-of-clans-data <old> → <new> (N changes)` (only the parts that changed; author `github-actions[bot]`), rebase on `main` and push. Then start the Pages workflow with `gh workflow run pages.yml --ref main`. A push made with the workflow's `GITHUB_TOKEN` doesn't trigger other workflows, but a `workflow_dispatch` does. Pages then runs its own `npm test` + build on the new commit and deploys.
 6. **Anything fails → nothing is committed** (the live site keeps the known-good data), and the run opens an issue titled **`Data update failed: <new version>`**: the new ClashKing version (`clashking-v…+<sha7>`) **whenever ClashKing changed**, whichever step failed (validation, tests, commit, deploy); **both** (`clashking-v…, clash-of-clans-data 0.20.0`) when both changed; else the clash-of-clans-data version. `… ClashKing check` when GitHub couldn't be asked, `… npm check` when npm couldn't be asked, `clashking-<tag>` when the latest release has no file (§3.1). If an open issue with that exact title exists, it's updated and gets a "Failed again" comment instead of a duplicate (`.github/scripts/upsert-issue.sh`, shared with the meta Action; the title is passed to `jq` with `--arg`, never spliced into the filter). The body names the failing step and has the reason, the sync/validation output, the diff summary and, for a test failure, the end of the test log. If the cause is a merge the recipes don't explain, it says so plainly and names the new merged defense and its sources (candidates derived from the counts and ranked: new in this release, then the name contains a source's name, then ≤ 2 of each source); the fix is an entry in `config/merges.yaml`.
 7. Permissions: `contents: write` (push), `issues: write` (report), `actions: write` (dispatch Pages). Concurrency group `data-update`, never cancelled midway.
 
@@ -515,7 +525,8 @@ Mobile-friendly layout (the player checks on a phone later), single page with ta
 - `config/super-troops.yaml` — optional super-troop overrides (`<dataId>: { name, base }`, §8.3). Ships empty.
 - `config/settings.sample.yaml` — defaults loaded into the UI on first run. The UI persists edits to localStorage; the YAML is the reset point. Includes `lab.kindWeights` (troop / spell / siege, §6.7) and `simulateHelpers` (§10.1), both editable in the Settings tab. A saved hero order keeps its order, drops duplicates and gets any missing default hero appended; the Archer Queen is moved to the front if she's elsewhere (YAML or localStorage).
 - `config/id-overrides.yaml` — optional dataId overrides (`ids: { <dataId>: <item id> }`, §3.1). Ships empty.
-- All three: an entry that exists wins over ClashKing's data (and over the backup's built-in tables). A file that doesn't parse, or a merge recipe naming an unknown item / a different dataId, is an override error named by file; the data then loads without the overrides (§3.1).
+- `config/squads.yaml` — **not an override; ships filled in**: `squads: { <squad item id>: { troops: [{ id, count? }] } }`, each squad's component troops and, where ClashKing's description (`info`, same text in `translations.json`) states them, the counts (§6.7). A squad or troop id the data doesn't know is a warning and is left out; a file that doesn't parse is a warning and squads aren't credited (the data still loads). `npm run sync` lists any squad in the data without an entry, with its description, so a new squad can be added.
+- The three override files: an entry that exists wins over ClashKing's data (and over the backup's built-in tables). A file that doesn't parse, or a merge recipe naming an unknown item / a different dataId, is an override error named by file; the data then loads without the overrides (§3.1).
 
 ---
 
@@ -547,6 +558,17 @@ Goal: run `npm run dev`, paste a real export, and get a correct upgrade plan.
   - **resized at build time** (`vite build`, so also in the Pages workflow) with `sharp` (dev dependency) to **96×96 WebP** (fit inside, transparent padding, quality 80). Results are cached in `.cache/item-images/` (git-ignored), keyed by a hash of the source bytes plus the resize settings, so unchanged images are never reprocessed; icons no longer referenced are removed. The Pages workflow keeps that folder between runs with `actions/cache`. The dev server and tests use the original files (no sharp needed). An image that can't be read or resized is a build warning, and that item shows its name only;
   - lazy-load (`loading="lazy"`, `width`/`height` attributes so the layout doesn't jump), kept as separate files (never inlined into the JS);
   - text fallback: if an image is missing or fails to load (`onerror` removes the `<img>`), show the name only.
+
+### Images for new items (clash-of-clans-data has no picture yet)
+- **Which items:** base items shown in the site (not seasonal, no supercharge / module / weapon keys) for which the build's own pick finds no clash-of-clans-data image. Today: the TH19 buildings (Squad Barracks, Spiky Tower, Firecracker Tower, Guardian Shrine, Sour Elixir Cauldron), the 12 squads and the Heroic Spell.
+- **Where from, in order** (`scripts/lib/extraImages.ts`):
+  1. **ClashKing's asset host** `https://assets.clashk.ing/<path>`. Its `manifest.json` lists every file (`assets.<category>[].path`, `sha`). Paths: buildings `buildings/home-village/<name>/level_<N>.webp` (traps `traps/home-village/…`), troops / sieges / heroes / pets / guardians `<category>/<name>/icon.webp`, spells / equipment / helpers `<category>/<name>.webp`; `<name>` is matched to the item name on letters and digits only (`builder's_hut` = Builder's Hut, `pekka_titan_squad` = P.E.K.K.A Titan Squad). A building takes its top level's image (the highest level the data has; with no levels, the highest listed). The download must match the manifest's sha256.
+  2. **The Clash of Clans Fandom wiki** via its MediaWiki API (`clashofclans.fandom.com/api.php`, `prop=imageinfo`): the item's level image by name (`File:<Name><top level>.png`, `File:<Name>1.png`, `File:<Name>.png`; units `File:<Name> info.png`, `File:Avatar <Name>.png`, `File:<Name>.png`), else the page's lead image (`prop=pageimages`). Responses are parsed defensively: either `pages` format, `normalized` titles, missing pages; non-image MIME types, oversized files and anything not on `static.wikia.nocookie.net` over https are skipped.
+  3. Nothing found → the item shows its name only (the next run tries again).
+- **Only in Node** (`npm run sync`, the daily data-update Action), never in the browser. Downloads are capped at 10 MB and 30 s per request, and only come from those two hosts.
+- **Saved** with the build's sharp step (96×96 WebP, §13 Step 3) as `public/item-images-extra/<item id>.webp`, **committed** with the data update. `sources.json` records, per item key: name, file, source (`clashking` / `fandom`), original URL, its sha256 and the fetch time.
+- **Never re-downloaded:** an item with a record whose file exists is skipped. **clash-of-clans-data's image wins once it has one:** the item is no longer looked up, and the build uses the package image (the saved icon stays in the folder, unused).
+- **The build** (`virtual:item-images`) serves a saved icon as `<base>item-images-extra/<file>` (already 96 px: no resize, so dev, tests and Pages behave the same) for items without a clash-of-clans-data image.
 
 ---
 
