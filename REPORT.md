@@ -1083,8 +1083,35 @@ The 14-day and Gold Pass runs show the same differences, shifted in time (e.g. 1
 - The push of this work also ran the Pages workflow: tests and build passed on Linux, and it deployed.
 
 ## Check / follow-ups
-- [ ] **Town Hall 17 needs Eagle Artillery 7** (ClashKing: TH17's own `merge_requirement`). The planner counts the Eagle Artillery as gone from TH17, as before, but doesn't gate the TH17 upgrade on it. If the game really blocks the TH17 upgrade until EA 7, that should become a TH-gate rule. Say if you want it.
+- [x] ~~**Town Hall 17 needs Eagle Artillery 7**~~ — done, see "Update: TH upgrade requirements, hero order lock". (ClashKing: TH17's own `merge_requirement`). The planner counts the Eagle Artillery as gone from TH17, as before, but doesn't gate the TH17 upgrade on it. If the game really blocks the TH17 upgrade until EA 7, that should become a TH-gate rule. Say if you want it.
 - [ ] **Supercharges for the 10 buildings that got a TH19 level are gone in ClashKing** (Air Defense, X-Bow, Builder's Hut, …). If the game still offers them to TH18 players, they'll need a `supercharge` override (not built yet) or ClashKing data.
 - [ ] **Crafting Station unlocks at TH19 in ClashKing** (TH18 before). It doesn't affect you (you own one), but a TH18 player without one won't be told to build it.
 - [ ] Two squads (Baby Dragon Squad, P.E.K.K.A Titan Squad) have no housing space in ClashKing. If they show up in Legend armies, they rank by usage instead of army share.
 - [ ] clash-of-clans-data is still on TH18. The daily cross-check will show when it catches up; until then, ClashKing-only items have no icon (name only).
+
+# Update: TH upgrade requirements, hero order lock
+
+**Status:** `npm test` passes (**337 tests**, 12 new) and `npm run build` succeeds.
+
+## What changed
+- **TH upgrade requirements are part of the TH gate (rush mode).** Any building level ClashKing lists on a Town Hall level is read generically. Today that's only **TH17 requires Eagle Artillery 7**.
+  - Until it's met, the Town Hall isn't a candidate, and the building is a tier-1 gate item ("TH gate: TH17 requires Eagle Artillery 7").
+  - Once it's met, the TH is back on top with "…, TH17 requirements met: Eagle Artillery 7".
+  - While the TH itself upgrades, the next upgrade's requirement is lookahead: upgrading TH15 → 16 works the Eagle Artillery toward 7 as far as TH15 allows.
+  - A requirement that can't be met at your TH never blocks it.
+- **Hero order: the Archer Queen is locked at position 1** in Settings: greyed out, no drag handle, no ↑/↓, nothing can go above her. The help text says why (her Tier 0 rule). The other five reorder as before. Reset keeps her first, and a saved order with her elsewhere is fixed on load.
+  - The tests caught a small drag bug: a drag dropped on her row left the drag "armed", so the next drop moved the wrong hero. Fixed.
+
+## Plans before / after
+**Your export** (`samples/myexport.json`, TH18): **identical** in all three runs (24 h, 14 days, Gold Pass max without helpers). TH19 has no building requirement, and your hero order already starts with the Queen.
+
+**Committed fixture** (`tests/fixtures/export-th16.json`, TH16, Eagle Artillery at 6):
+| | Before | After |
+|---|---|---|
+| B6 "start now" | Town Hall → 17 (16M gold, 9d 12h) | **Eagle Artillery → 7** (14M gold, 9d), "TH gate: TH17 requires Eagle Artillery 7" |
+| Town Hall 17 starts | now | **when the Eagle Artillery finishes** (9 days later, same builder) |
+| Gold in 24 h | 16M | 14M |
+| 14 days | gold 64M, elixir 133M | gold 30M, elixir 143M (TH17 later, so offense upgrades come sooner) |
+
+The Gold Pass run shows the same swap with Gold Pass times (Eagle Artillery 7d 4h instead of Town Hall 7d 14h).
+

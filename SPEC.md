@@ -65,6 +65,7 @@ A local website that reads a Clash of Clans account export and tells the player 
 - Resources: the item's `upgrade_resource`; a level with `alt_upgrade_resource` (walls) costs gold **or** elixir. Troops and spells carry `housing_space`.
 - **Supercharges:** the `supercharge` block on a building's top level (`upgrade_resource`, `required_townhall`, `levels[]`) becomes the `<id>:sc` item.
 - **Building counts per TH** = running sum of the Town Hall levels' `unlocks[].quantity` (pre-merge totals). A Town Hall level with its own `merge_requirement` absorbs those buildings (TH17 takes the Eagle Artillery). Guardians count 1 from their first level's TH.
+- **TH upgrade requirements:** any building level a Town Hall level lists (any array on the level whose entries name a building or trap `_id` with a `level`; today TH17's `merge_requirement`: Eagle Artillery 7) is required before upgrading to that TH. They go into the TH gate (§6.3). Read generically: no building is hard-coded. The clash-of-clans-data backup has none.
 - **Merges:** a building whose **level 1** has `merge_requirement` is a merged defense; the entries name the sources and their **exact** required levels (2 entries of the same `_id` = 2 copies). Counts after merges are derived (§7).
 - **Super troops:** troops with `super_troop {original_id, original_min_level}` have their own dataId and housing space and are credited to the base troop (§8.3). They are not lab items.
 - **Seasonal units** (`is_seasonal`): recognised (no unknown-id warning) but never in the lab queue, the Lab tab or the meta.
@@ -193,7 +194,8 @@ interface Item {
   seasonal?: boolean;        // is_seasonal: never in the lab queue or the meta
 }
 // GameData also carries: source ('clashking' | 'clash-of-clans-data'), version (e.g. "clashking-v0.1.20"),
-// maxTH, bookThresholdSec, merges (§7), superTroops (dataId → base troop), warnings.
+// maxTH, bookThresholdSec, merges (§7), superTroops (dataId → base troop),
+// thRequirements (TH level → [{ id, dataId, level, qty }], §6.3), warnings.
 
 interface OwnedInstance {
   dataId: number;
@@ -240,8 +242,9 @@ Tier 0 order: **Laboratory upgrade → new unbuilt buildings → Archer Queen.**
    - **TH gate — everything that must be done before the next TH upgrade:**
      - **Every available merge is performed:** source defenses at the required level (§7), then the merge itself. Applies to all merged defenses available at the current TH, not just ones new to it. Ordered by the TH that unlocked them (soonest first), then recipe order (the former `merges.yaml` order — Ricochet Cannon, Multi-Archer Tower, Multi-Gear Tower, Super Wizard Tower — then newer merges in Town Hall `unlocks` order). A merge holds the gate only if it can actually be performed at the current TH: enough source buildings exist and every one of them can reach the required level at this TH. A started merge counts as done.
      - **Every new building that can be built is built.** These are handled in Tier 0 (§6.2), so they're done before the gate is checked. A building under construction counts as built.
+     - **Every building level the next TH requires is reached** (§3.1 TH upgrade requirements, e.g. "TH17 requires Eagle Artillery 7"). The highest copies of that building (as many as required) are upgraded as tier-1 gate items, after the merge-source items, with that text as the reason. An upgrade in progress doesn't count until it finishes. Like a merge, a requirement holds the gate only if it can be met at the current TH (enough copies, level reachable). Once met, the Town Hall's reason lists it ("TH17 requirements met: Eagle Artillery 7").
      - Upgrading merged defenses past level 1 is **not** part of the gate; that goes in the permanent-defense tier.
-   - **While the Town Hall itself is upgrading** (not while only its weapon is): keep working the gate, and immediately start on the **next** TH's (TH+1 only) merge source upgrades if any are available at the current TH. These lookahead items rank in tier 1 after the current TH's gate items and never hold the gate.
+   - **While the Town Hall itself is upgrading** (not while only its weapon is): keep working the gate, and immediately start on the **next** TH's (TH+1 only) merge source upgrades if any are available at the current TH, and on the building levels required by the TH after the one being reached (e.g. upgrading TH15 → 16: "TH-upgrade lookahead: TH17 requires Eagle Artillery 7"), as far as the current TH allows. These lookahead items rank in tier 1 after the current TH's gate items and never hold the gate.
 2. **Offense, non-hero** — Army Camps, Barracks, Dark Barracks, Spell Factory, Dark Spell Factory, Clan Castle, Workshop, Blacksmith, Pet House, Hero Hall. (The Laboratory is Tier 0. The Hero Banner has no levels in the data.)
 3. **Heroes** in configured order (default: Archer Queen > Grand Warden > Dragon Duke > Barbarian King > Royal Champion > Minion Prince), each only until book-ready. A hero capped by Hero Hall level is skipped (the next one in order is used).
 4. **Resources** — Storages (Gold, Elixir, Dark Elixir), then Collectors (Gold Mine, Elixir Collector, Dark Elixir Drill).
@@ -468,7 +471,7 @@ The player never uses Windows Task Scheduler (or cron). Freshness comes from sta
 
 Mobile-friendly layout (the player checks on a phone later), single page with tabs:
 
-1. **Import & Settings** — paste export JSON → parse → save. Toggles: Gold Pass (none / max), **Simulate helpers and boosts** (§10.1). Hero order: drag to reorder on desktop, ↑ / ↓ buttons everywhere (touch), "Reset hero order to default", saved in localStorage. The UI says that the Archer Queen's Tier 0 rule belongs to the Queen, not to slot 1. Show import time and TH / mode detected.
+1. **Import & Settings** — paste export JSON → parse → save. Toggles: Gold Pass (none / max), **Simulate helpers and boosts** (§10.1). Hero order: drag to reorder on desktop, ↑ / ↓ buttons everywhere (touch), "Reset hero order to default", saved in localStorage. **The Archer Queen is locked at position 1:** her row is greyed out with no drag handle and no ↑ / ↓, she's not a drop target, and nothing can move above her (#2's ↑ is disabled). The help text says she's locked because of her Tier 0 rule. The other five stay reorderable; reset keeps her at 1. Show import time and TH / mode detected.
 2. **Plan** (default tab). The "Game data updated" banner (§9) sits on top when a new data version arrives.
    - "Now": what each free builder should start, with the `reason` string.
    - 24h timeline per slot.
@@ -490,7 +493,7 @@ Mobile-friendly layout (the player checks on a phone later), single page with ta
 
 - `config/merges.yaml` — optional merge-recipe overrides (§7). Ships empty.
 - `config/super-troops.yaml` — optional super-troop overrides (`<dataId>: { name, base }`, §8.3). Ships empty.
-- `config/settings.sample.yaml` — defaults loaded into the UI on first run. The UI persists edits to localStorage; the YAML is the reset point. Includes `lab.kindWeights` (troop / spell / siege, §6.7) and `simulateHelpers` (§10.1), both editable in the Settings tab. A saved hero order keeps its order, drops duplicates and gets any missing default hero appended.
+- `config/settings.sample.yaml` — defaults loaded into the UI on first run. The UI persists edits to localStorage; the YAML is the reset point. Includes `lab.kindWeights` (troop / spell / siege, §6.7) and `simulateHelpers` (§10.1), both editable in the Settings tab. A saved hero order keeps its order, drops duplicates and gets any missing default hero appended; the Archer Queen is moved to the front if she's elsewhere (YAML or localStorage).
 - `config/id-overrides.yaml` — optional dataId overrides (`ids: { <dataId>: <item id> }`, §3.1). Ships empty.
 - All three: an entry that exists wins over ClashKing's data (and over the backup's built-in tables).
 
