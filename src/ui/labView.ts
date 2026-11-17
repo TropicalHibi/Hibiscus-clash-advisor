@@ -2,7 +2,7 @@
 // Lab: a "Next in lab" line (the weighted pick) and three sections ranked by their own score.
 import { fmtCost, fmtDuration, fmtNum } from '../engine/format';
 import type { Plan } from '../engine/plan';
-import { nextResearch, type QueueCandidate } from '../engine/queues';
+import { creditingSquads, nextResearch, pctFine, type QueueCandidate } from '../engine/queues';
 import type { MetaFile } from '../meta/meta';
 import type { LabKind } from '../state/settings';
 import { icon } from './images';
@@ -30,12 +30,18 @@ function row(c: QueueCandidate, i: number, list: PinList, sub: string): string {
   const supers = c.supers?.length
     ? `<div class="small muted">Includes ${esc(c.supers.map((s) => (c.scoreKind === 'armyShare' && s.armyShare !== undefined ? `${s.name} ${pct(s.armyShare)} of space, ${pct(s.usage)} used` : `${s.name} ${pct(s.usage)}`)).join(', '))}</div>`
     : '';
+  // Squads credit part of their share of troop space to their troops (SPEC §6.7): shown when that adds to the score.
+  const sq = c.scoreKind === 'armyShare' ? creditingSquads(c) : [];
+  const squads = sq.length
+    ? `<div class="small muted squads" title="A squad's share of troop space is split across its troops by count × housing space (equally when the counts aren't known)">incl. squads +${pctFine(sq.reduce((t, x) => t + x.credited!, 0))}: ${esc(sq.map((x) => `${x.name} ${pctFine(x.credited!)} (${pct(x.fraction)} of its ${pctFine(x.armyShare!)})`).join(', '))}</div>`
+    : '';
   return `<li class="rank-item${c.pinned ? ' pinned' : ''}">
     <span class="rk">${i + 1}</span>
     <div class="body">
       <div class="title">${icon(c.item.key)}<b>${esc(c.item.name)}</b> ${c.instance.level}→${c.toLevel} <span class="small muted">${esc(sub)}</span></div>
       <div class="stats">${stats}</div>
       ${supers}
+      ${squads}
     </div>
     <button class="icon pin" data-pin="${list}" data-id="${esc(c.item.id)}" aria-pressed="${c.pinned}" title="${c.pinned ? 'Unpin' : 'Pin to the top'}">${c.pinned ? 'Unpin' : 'Pin'}</button>
   </li>`;

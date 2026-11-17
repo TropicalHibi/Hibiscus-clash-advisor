@@ -1,7 +1,8 @@
 // Lab, Pet House and Blacksmith ordering (SPEC §6.7–6.9).
 import { levelInfo, maxLevelAt } from '../data/normalize';
 import type { GameData, Item, OreCost, OwnedInstance, Resource } from '../data/types';
-import { metaStats, type MetaFile, type ScoreKind } from '../meta/meta';
+import { squadPartsFor } from '../data/squads';
+import { metaStats, type MetaFile, type MetaStats, type ScoreKind } from '../meta/meta';
 import type { LabKind, Settings } from '../state/settings';
 import { fmtDuration } from './format';
 import { levelsOf } from '../state/levels';
@@ -24,6 +25,8 @@ export interface QueueCandidate {
   threeStarRate?: number;
   /** Super troops whose usage / army share is credited to this base troop. */
   supers?: { name: string; usage: number; armyShare?: number }[];
+  /** Lab only: squads whose share of troop space is credited to this troop (SPEC §6.7). */
+  squads?: MetaStats['squads'];
   /** Lab only: troop / spell / siege. */
   labKind?: LabKind;
   /** Lab only: score ÷ the top score of its kind in the Legend I meta (0–1). */
@@ -57,7 +60,7 @@ export function labKindTops(data: GameData, meta: MetaFile): Record<LabKind, num
   for (const item of data.items.values()) {
     const kind = LAB_KIND_OF[item.category];
     if (!kind || item.queue !== 'lab' || item.key !== String(item.dataId)) continue;
-    tops[kind] = Math.max(tops[kind], metaStats(meta, item.dataId).score);
+    tops[kind] = Math.max(tops[kind], metaStats(meta, item.dataId, squadPartsFor(data, item.dataId)).score);
   }
   if (!byData) topCache.set(meta, (byData = new WeakMap()));
   byData.set(data, tops);
@@ -93,14 +96,22 @@ function rank(list: QueueCandidate[], pins: string[], unusedKey: (c: QueueCandid
   });
 }
 
+/** Squads that add to a troop's score (credited share > 0). */
+export const creditingSquads = (c: Pick<QueueCandidate, 'squads'>) => (c.squads ?? []).filter((s) => (s.credited ?? 0) > 0);
+
+/** Percent with one decimal, or two below 1% (squad credits are small). */
+export const pctFine = (x: number) => `${(x * 100).toFixed(x < 0.01 ? 2 : 1)}%`;
+
 function reasonFor(c: QueueCandidate, unusedText: string): string {
   if (c.pinned) return 'Pinned';
   if (c.usage > 0) {
     const p = (x: number) => `${(x * 100).toFixed(1)}%`;
     if (c.scoreKind === 'armyShare') {
       const sup = c.supers?.length ? `; incl. ${c.supers.map((x) => `${x.name} ${p(x.armyShare ?? 0)}`).join(', ')}` : '';
+      const sq = creditingSquads(c);
+      const squads = sq.length ? `; incl. squads ${pctFine(sq.reduce((t, x) => t + x.credited!, 0))} (${sq.map((x) => x.name).join(', ')})` : '';
       const space = c.item.category === 'spell' ? 'spell' : 'troop';
-      return `Legend I: ${p(c.score)} of ${space} space${sup} (in ${p(c.usage)} of attacks)`;
+      return `Legend I: ${p(c.score)} of ${space} space${sup}${squads} (in ${p(c.usage)} of attacks)`;
     }
     const sup = c.supers?.length ? ` (incl. ${c.supers.map((x) => `${x.name} ${p(x.usage)}`).join(', ')})` : '';
     return `Legend I usage ${p(c.usage)}${sup}`;
@@ -127,7 +138,7 @@ export function researchCandidates(
     if (inst.level >= max) continue;
     const next = levelInfo(item, inst.level + 1);
     if (!next) continue;
-    const ms = metaStats(meta, item.dataId);
+    const ms = metaStats(meta, item.dataId, queue === 'lab' ? squadPartsFor(data, item.dataId) : []);
     out.push({
       item,
       instance: inst,
@@ -141,6 +152,7 @@ export function researchCandidates(
       usage: ms.usage,
       threeStarRate: ms.threeStarRate,
       supers: ms.supers,
+      ...(ms.squads.length ? { squads: ms.squads } : {}),
       autoPick: true,
       pinned: pins.includes(item.id),
       reason: '',
