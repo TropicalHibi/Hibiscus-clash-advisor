@@ -7,7 +7,7 @@
 // - troops, spells, heroes, pets, guardians, equipment: `upgrade_cost` / `upgrade_time` on level N = the cost
 //   of going N → N+1. So level N's cost/time comes from row N−1, and level 1 costs nothing.
 // - every `required_*` field on level N is the requirement to have level N (no shift).
-import { buildMergeRecipes, mapResource, maxLevelAt, resolveSuperTroops } from './normalize.ts';
+import { buildMergeRecipes, COLLECTORS, mapResource, maxLevelAt, resolveSuperTroops, STORAGES } from './normalize.ts';
 import { EMPTY_OVERRIDES, type MergeOverride, type Overrides } from './overrides.ts';
 import type { Category, GameData, Item, LevelInfo, OreCost, Queue, ThRequirement } from './types.ts';
 
@@ -62,11 +62,7 @@ export interface ClashKingOptions {
 /** Tie-break order of merges unlocked at the same TH: the order config/merges.yaml listed them in. */
 const LEGACY_MERGE_ORDER = ['ricochet-cannon', 'multi-archer-tower', 'multi-gear-tower', 'super-wizard-tower'];
 
-const STORAGES = new Set(['gold-storage', 'elixir-storage', 'dark-elixir-storage']);
-const COLLECTORS = new Set(['gold-mine', 'elixir-collector', 'dark-elixir-drill']);
-
 const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
-const req = (v: unknown): number | undefined => num(v);
 const sortLevels = (levels: LevelInfo[]) => levels.sort((a, b) => a.level - b.level);
 const housing = (x: unknown) => (typeof x === 'number' && Number.isFinite(x) && x > 0 ? x : undefined);
 
@@ -77,7 +73,7 @@ function buildLevel(l: any, resource: string, warn: (m: string) => void): LevelI
     cost: num(l.build_cost) ?? 0,
     resource: l.alt_upgrade_resource ? 'goldOrElixir' : mapResource(resource, warn),
     timeSec: num(l.build_time) ?? 0,
-    ...(req(l.required_townhall) !== undefined ? { thRequired: l.required_townhall } : {}),
+    ...(num(l.required_townhall) !== undefined ? { thRequired: l.required_townhall } : {}),
   };
 }
 
@@ -182,7 +178,11 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
           category = 'army';
           break;
         case 'Resource':
-          category = STORAGES.has(id) ? 'resourceStorage' : COLLECTORS.has(id) ? 'resourceCollector' : 'army';
+          // Unknown Resource buildings (Sour Elixir Cauldron) are 'other', never the offense tier (REVIEW-2 #12).
+          // A warning only once one has levels, i.e. once it could be planned: it needs a category mapping here.
+          category = STORAGES.has(id) ? 'resourceStorage' : COLLECTORS.has(id) ? 'resourceCollector' : 'other';
+          if (category === 'other' && (b.levels ?? []).length)
+            warn(`ClashKing Resource building "${b.name}" is neither a known storage nor a collector: not planned (category "other") until the planner maps it.`);
           break;
         case 'Wall':
           category = 'wall';
@@ -221,6 +221,7 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
           category: 'supercharge',
           queue: 'builder',
           baseKey: String(dataId),
+          superchargeBaseLevel: top.level,
           levels: sortLevels(sc.levels.map((l: any) => ({ ...buildLevel({ ...l, required_townhall: l.required_townhall ?? sc.required_townhall }, sc.upgrade_resource ?? b.upgrade_resource, warn) }))),
           images: imagesOf(id, b._id),
         },
@@ -261,7 +262,7 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
   const unlockOrder = new Map<number, number>();
   for (const l of thLevels) for (const u of l.unlocks ?? []) if (!unlockOrder.has(u._id)) unlockOrder.set(u._id, unlockOrder.size);
   const legacy = (id: string) => (LEGACY_MERGE_ORDER.indexOf(id) + 1 || LEGACY_MERGE_ORDER.length + 1) - 1;
-  const merges = buildMergeRecipes(byId, recipes, 'merges').sort(
+  const merges = buildMergeRecipes(byId, recipes, 'merges', (id) => id in overrides.merges).sort(
     (a, b) => a.unlockTH - b.unlockTH || legacy(a.id) - legacy(b.id) || (unlockOrder.get(a.dataId) ?? 1e9) - (unlockOrder.get(b.dataId) ?? 1e9),
   );
   for (const m of merges) byDataId.get(m.dataId)!.category = 'mergedDefense';
@@ -295,7 +296,7 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
       cost: num(prev?.upgrade_cost) ?? 0,
       resource: mapResource(h.upgrade_resource, warn),
       timeSec: num(prev?.upgrade_time) ?? 0,
-      ...(req(row.required_hero_tavern_level) !== undefined ? { heroHallRequired: row.required_hero_tavern_level } : {}),
+      ...(num(row.required_hero_tavern_level) !== undefined ? { heroHallRequired: row.required_hero_tavern_level } : {}),
     }));
     add({ key: String(dataId), dataId, id, name: h.name, category: 'hero', queue: 'builder', levels, images: imagesOf(id, h._id) });
   }
@@ -319,8 +320,8 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
       cost: num(prev?.upgrade_cost) ?? 0,
       resource: mapResource(t.upgrade_resource, warn),
       timeSec: num(prev?.upgrade_time) ?? 0,
-      ...(req(row.required_townhall) !== undefined ? { thRequired: row.required_townhall } : {}),
-      ...(req(row.required_lab_level) !== undefined ? { labRequired: row.required_lab_level } : {}),
+      ...(num(row.required_townhall) !== undefined ? { thRequired: row.required_townhall } : {}),
+      ...(num(row.required_lab_level) !== undefined ? { labRequired: row.required_lab_level } : {}),
     }));
     add({
       key: String(dataId),
@@ -348,8 +349,8 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
       cost: num(prev?.upgrade_cost) ?? 0,
       resource: mapResource(p.upgrade_resource, warn),
       timeSec: num(prev?.upgrade_time) ?? 0,
-      ...(req(row.required_townhall) !== undefined ? { thRequired: row.required_townhall } : {}),
-      ...(req(row.required_pet_house_level) !== undefined ? { petHouseRequired: row.required_pet_house_level } : {}),
+      ...(num(row.required_townhall) !== undefined ? { thRequired: row.required_townhall } : {}),
+      ...(num(row.required_pet_house_level) !== undefined ? { petHouseRequired: row.required_pet_house_level } : {}),
     }));
     add({ key: String(dataId), dataId, id, name: p.name, category: 'pet', queue: 'petHouse', levels, images: imagesOf(id, p._id) });
   }
@@ -366,7 +367,7 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
         cost: ore.shinyOre,
         resource: 'shinyOre',
         timeSec: 0,
-        ...(req(row.required_blacksmith_level) !== undefined ? { blacksmithRequired: row.required_blacksmith_level } : {}),
+        ...(num(row.required_blacksmith_level) !== undefined ? { blacksmithRequired: row.required_blacksmith_level } : {}),
         ore,
       };
     });
@@ -382,7 +383,7 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
       cost: num(prev?.upgrade_cost) ?? 0,
       resource: mapResource(g.upgrade_resource, warn),
       timeSec: num(prev?.upgrade_time) ?? 0,
-      ...(req(row.required_townhall) !== undefined ? { thRequired: row.required_townhall } : {}),
+      ...(num(row.required_townhall) !== undefined ? { thRequired: row.required_townhall } : {}),
     }));
     const firstTH = levels[0]?.thRequired;
     add({

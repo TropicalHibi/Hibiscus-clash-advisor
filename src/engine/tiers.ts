@@ -562,7 +562,11 @@ function genericDrafts(c: Ctx, all: OwnedInstance[], handled: Set<string>): Draf
   return out;
 }
 
-/** Supercharges (temporary tier): the base building must be at its max level for the current TH. */
+/**
+ * Supercharges (temporary tier): the base building must be at its max level for the current TH **and** at the
+ * level that carries the supercharge block (SPEC §6.3 tier 6, REVIEW-2 ambiguity 2: Monolith's block is on level 5,
+ * so a TH17 Monolith 4 isn't offered it).
+ */
 function superchargeDrafts(c: Ctx): Draft[] {
   const out: Draft[] = [];
   for (const inst of c.instances) {
@@ -570,7 +574,7 @@ function superchargeDrafts(c: Ctx): Draft[] {
     if (!sc) continue;
     const base = c.data.items.get(inst.itemKey)!;
     const baseMax = maxLevelAt(base, { th: c.lv.th });
-    if (!baseMax || inst.level < baseMax || c.busy.has(inst.uid)) continue;
+    if (!baseMax || inst.level < baseMax || inst.level < (sc.superchargeBaseLevel ?? 0) || c.busy.has(inst.uid)) continue;
     const next = levelInfo(sc, (inst.superchargeLevel ?? 0) + 1);
     if (!next || (next.thRequired ?? 0) > c.lv.th) continue;
     out.push(draft(sc, inst, next, { g: 'temporary' }, 'Supercharge (temporary tier), longest first', 'supercharge', inst.uid));

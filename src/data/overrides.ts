@@ -28,10 +28,43 @@ export interface OverrideTexts {
   ids?: string;
 }
 
-const yamlOf = (text: string | undefined): unknown => (text ? parseYaml(text) : undefined) ?? undefined;
+/**
+ * A problem in one of the config/ override files (YAML error, unknown id, dataId mismatch), named by file.
+ * Loaders report it as an override error and load the data without the overrides (REVIEW-2 #12), instead of
+ * blaming the pinned ClashKing data and switching to the backup.
+ */
+export class OverrideError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'OverrideError';
+  }
+}
+
+/** The Plan-tab / sync warning for an override error. */
+export const overrideWarning = (e: Error) => `Override file error: ${e.message}. The override files are ignored until it's fixed.`;
+
+/** `load(true)` (with the override files); on an OverrideError, `load(false)` with the warning added. */
+export function loadWithOverrides<T extends { warnings: string[] }>(load: (useOverrides: boolean) => T): T {
+  try {
+    return load(true);
+  } catch (e) {
+    if (!(e instanceof OverrideError)) throw e;
+    const d = load(false);
+    d.warnings.unshift(overrideWarning(e));
+    return d;
+  }
+}
+
+const yamlOf = (text: string | undefined, file: string): unknown => {
+  try {
+    return (text ? parseYaml(text) : undefined) ?? undefined;
+  } catch (e) {
+    throw new OverrideError(`config/${file}: ${(e as Error).message.split('\n')[0]}`);
+  }
+};
 
 export function parseMergeOverrides(text: string | undefined): Record<string, MergeOverride> {
-  const cfg = yamlOf(text) as { merges?: Record<string, unknown> } | undefined;
+  const cfg = yamlOf(text, 'merges.yaml') as { merges?: Record<string, unknown> } | undefined;
   const out: Record<string, MergeOverride> = {};
   for (const [id, raw] of Object.entries(cfg?.merges ?? {})) {
     const r = raw as Partial<MergeOverride> | null;
@@ -45,7 +78,7 @@ export function parseMergeOverrides(text: string | undefined): Record<string, Me
 }
 
 export function parseSuperTroops(text: string | undefined): Record<number, SuperTroopEntry> {
-  const raw = (yamlOf(text) ?? {}) as Record<string, unknown>;
+  const raw = (yamlOf(text, 'super-troops.yaml') ?? {}) as Record<string, unknown>;
   const out: Record<number, SuperTroopEntry> = {};
   for (const [k, v] of Object.entries(raw)) {
     const id = Number(k);
@@ -58,7 +91,7 @@ export function parseSuperTroops(text: string | undefined): Record<number, Super
 /** config/id-overrides.yaml: returns item id → dataId. */
 export function parseIdOverrides(text: string | undefined): Map<string, number> {
   const out = new Map<string, number>();
-  const cfg = yamlOf(text) as { ids?: Record<string, unknown> } | undefined;
+  const cfg = yamlOf(text, 'id-overrides.yaml') as { ids?: Record<string, unknown> } | undefined;
   for (const [k, v] of Object.entries(cfg?.ids ?? {})) {
     const dataId = Number(k);
     if (Number.isInteger(dataId) && typeof v === 'string' && v) out.set(v, dataId);

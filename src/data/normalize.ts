@@ -1,5 +1,5 @@
 import { COC_BACKUP_IDS, COC_BACKUP_MERGES, COC_BACKUP_SUPER_TROOPS } from './cocDataBackup.ts';
-import { parseIdOverrides, parseMergeOverrides, parseSuperTroops, type MergeOverride, type SuperTroopEntry } from './overrides.ts';
+import { OverrideError, parseIdOverrides, parseMergeOverrides, parseSuperTroops, type MergeOverride, type SuperTroopEntry } from './overrides.ts';
 import type { Category, GameData, Item, LevelInfo, MergeRecipe, Queue, Resource, SuperTroop } from './types.ts';
 
 export { parseIdOverrides } from './overrides.ts';
@@ -29,8 +29,9 @@ export const DATA_FOLDERS = [
   'other',
 ];
 
-const STORAGES = new Set(['gold-storage', 'elixir-storage', 'dark-elixir-storage']);
-const COLLECTORS = new Set(['gold-mine', 'elixir-collector', 'dark-elixir-drill']);
+/** Storage / collector item ids (both normalizers). */
+export const STORAGES = new Set(['gold-storage', 'elixir-storage', 'dark-elixir-storage']);
+export const COLLECTORS = new Set(['gold-mine', 'elixir-collector', 'dark-elixir-drill']);
 
 /** Data resource string → Resource (both sources spell them the same way). An unknown string falls back to gold and is reported via `warn`. */
 export function mapResource(r: string | undefined, warn?: (msg: string) => void): Resource {
@@ -94,15 +95,17 @@ function sortLevels(levels: LevelInfo[]): LevelInfo[] {
  * `level` in config/merges.yaml), otherwise the source's max level at the unlock TH, so levels a later TH adds
  * to a source never raise the bar for an older merge.
  */
-export function buildMergeRecipes(byId: Map<string, Item>, recipes: Record<string, MergeOverride>, origin: string): MergeRecipe[] {
+export function buildMergeRecipes(byId: Map<string, Item>, recipes: Record<string, MergeOverride>, origin: string, fromOverride: (id: string) => boolean = () => false): MergeRecipe[] {
   const merges: MergeRecipe[] = [];
   for (const [id, r] of Object.entries(recipes)) {
+    // A recipe from config/merges.yaml that doesn't fit the data is an override error (named by file).
+    const fail = (msg: string) => (fromOverride(id) ? new OverrideError(`config/merges.yaml: ${msg}`) : new Error(`${origin}: ${msg}`));
     const merged = byId.get(id);
-    if (!merged) throw new Error(`${origin}: merged defense "${id}" not found in game data`);
-    if (r.dataId && r.dataId !== merged.dataId) throw new Error(`${origin}: dataId mismatch for ${id} (${r.dataId} vs data ${merged.dataId})`);
+    if (!merged) throw fail(`merged defense "${id}" not found in game data`);
+    if (r.dataId && r.dataId !== merged.dataId) throw fail(`dataId mismatch for ${id} (${r.dataId} vs data ${merged.dataId})`);
     const sources = r.sources.map((s) => {
       const src = byId.get(s.id);
-      if (!src) throw new Error(`${origin}: source "${s.id}" not found in game data`);
+      if (!src) throw fail(`source "${s.id}" not found in game data`);
       return { id: s.id, dataId: src.dataId, qty: s.qty };
     });
     const counts = merged.countPerTH ?? {};
@@ -192,7 +195,8 @@ export function normalize(
   superTroopsYaml?: string,
   builtInMerges: Record<string, MergeOverride> = COC_BACKUP_MERGES,
 ): GameData {
-  const recipes: Record<string, MergeOverride> = { ...builtInMerges, ...parseMergeOverrides(mergesYaml) };
+  const mergeOverrides = parseMergeOverrides(mergesYaml);
+  const recipes: Record<string, MergeOverride> = { ...builtInMerges, ...mergeOverrides };
   const idOverrides = new Map([...COC_BACKUP_IDS, ...parseIdOverrides(idOverridesYaml)]);
   const mergedIds = new Set(Object.keys(recipes));
 
@@ -407,7 +411,7 @@ export function normalize(
     for (const l of it.levels) bookThresholdSec = Math.max(bookThresholdSec, l.timeSec);
   }
 
-  const merges = buildMergeRecipes(byId, recipes, 'merges');
+  const merges = buildMergeRecipes(byId, recipes, 'merges', (id) => id in mergeOverrides);
   const superTroops = resolveSuperTroops(byId, { ...COC_BACKUP_SUPER_TROOPS, ...parseSuperTroops(superTroopsYaml) });
 
   return {

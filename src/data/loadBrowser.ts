@@ -3,7 +3,7 @@
 // ClashKing copy is missing or can't be loaded (backup, with a visible warning).
 import { assertClashKingShape, normalizeClashKing } from './clashking';
 import { cocTownHallWeapons } from './normalize';
-import { parseOverrides } from './overrides';
+import { EMPTY_OVERRIDES, loadWithOverrides, parseOverrides } from './overrides';
 import { backupWarning, pinVersion, type ClashKingPin } from './source';
 import type { GameData } from './types';
 import mergesYaml from '../../config/merges.yaml?raw';
@@ -24,7 +24,9 @@ export async function loadGameDataBrowser(): Promise<GameData> {
     try {
       assertClashKingShape(raw);
       const th = Object.values(thFiles)[0];
-      return normalizeClashKing(raw, { version: pinVersion(pin), overrides: parseOverrides(texts), weapons: th ? cocTownHallWeapons(th) : [] });
+      const weapons = th ? cocTownHallWeapons(th) : [];
+      // An override-file problem is an override warning (data loads without them), not a reason for the backup.
+      return loadWithOverrides((use) => normalizeClashKing(raw, { version: pinVersion(pin), overrides: use ? parseOverrides(texts) : EMPTY_OVERRIDES, weapons }));
     } catch (e) {
       reason = `the pinned ClashKing data can't be loaded (${(e as Error).message})`;
     }

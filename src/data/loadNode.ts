@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertClashKingShape, normalizeClashKing, type ClashKingRaw } from './clashking.ts';
 import { DATA_FOLDERS, cocTownHallWeapons, imageCandidates, normalize, type RawFile } from './normalize.ts';
-import { parseOverrides, type OverrideTexts } from './overrides.ts';
+import { EMPTY_OVERRIDES, loadWithOverrides, parseOverrides, type OverrideTexts } from './overrides.ts';
 import { backupWarning, pinVersion, type ClashKingPin } from './source.ts';
 import type { GameData, Item } from './types';
 
@@ -102,13 +102,17 @@ export function normalizeClashKingNode(raw: ClashKingRaw, version: string, texts
   } catch {
     files = [];
   }
-  return normalizeClashKing(raw, { version, overrides: parseOverrides(texts), weapons: cocWeapons(files), images: cocImageIndex(files) });
+  const weapons = cocWeapons(files);
+  const images = cocImageIndex(files);
+  // An override-file problem is reported as such (the data loads without the overrides), never as bad ClashKing data.
+  return loadWithOverrides((use) => normalizeClashKing(raw, { version, overrides: use ? parseOverrides(texts) : EMPTY_OVERRIDES, weapons, images }));
 }
 
 /** clash-of-clans-data normalized (the backup source), with the optional overrides. */
 export function loadCocDataFresh(): GameData {
   const t = readOverrideTexts();
-  return normalize(readRawFiles(), t.merges, dataVersion(), t.ids, t.superTroops);
+  const files = readRawFiles();
+  return loadWithOverrides((use) => (use ? normalize(files, t.merges, dataVersion(), t.ids, t.superTroops) : normalize(files, undefined, dataVersion())));
 }
 
 /**

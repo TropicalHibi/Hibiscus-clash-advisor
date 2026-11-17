@@ -69,6 +69,8 @@ export interface Item {
   countAfterMergesPerTH?: Record<number, number>;
   /** For supercharge items: key of the base item. */
   baseKey?: string;
+  /** For supercharge items: the base level that carries the supercharge block; the base must reach it (SPEC §6.3 tier 6). */
+  superchargeBaseLevel?: number;
   /** For TH weapons: the TH level they belong to. */
   weaponForTH?: number;
   /** For crafted-defense modules: the crafted defense dataId. */

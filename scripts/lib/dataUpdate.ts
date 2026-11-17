@@ -129,6 +129,10 @@ export function runDataUpdate(d: DataUpdateDeps): DataUpdateResult {
   if (!changes) return fail('snapshot + diff', 'no diff was produced (see the log)', { ...ckFields, crossCheck });
   // … and, unattended, a merge the recipes don't explain blocks the deploy.
   const data = d.loadData();
+  // An override file that doesn't parse or fit the data loads without the overrides locally (a warning);
+  // unattended, it blocks the deploy (REVIEW-2 #12).
+  const overrideErr = data.warnings.find((w) => w.startsWith('Override file error'));
+  if (overrideErr) return fail('validation: override files (config/)', overrideErr, { ...ckFields, changes, crossCheck });
   const mergeIssues = checkMergeConsumption(data);
   if (mergeIssues.length) {
     const newKeys = new Set(changes.filter((c) => c.kind === 'newItem').map((c) => c.key));
