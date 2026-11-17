@@ -82,7 +82,9 @@ describe('Tier 0: Laboratory upgrade → new buildings → Archer Queen', () => 
   });
 
   it('the Laboratory upgrade never holds the TH gate; the Pet House stays in the offense tier', () => {
-    const c = cands(parse(makeExport(16, 15)));
+    const ex = makeExport(16, 15);
+    setLevel(ex, 'buildings', 'eagle-artillery', { lvl: 7 }); // TH17 requires Eagle Artillery 7 (TH gate)
+    const c = cands(parse(ex));
     expect(c[0].item.id).toBe('laboratory');
     expect(c.find((x) => x.item.id === 'town-hall')!.tier).toBe(1);
     expect(c.find((x) => x.item.id === 'pet-house')!.tier).toBe(2);

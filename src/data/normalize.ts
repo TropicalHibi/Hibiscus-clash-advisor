@@ -420,6 +420,7 @@ export function normalize(
     bookThresholdSec,
     merges,
     superTroops,
+    thRequirements: {}, // clash-of-clans-data has no TH upgrade requirements
     heroHallCaps,
     warnings: [...warningSet],
   };

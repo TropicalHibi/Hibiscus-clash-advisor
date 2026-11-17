@@ -5,7 +5,9 @@ import { buildPlan } from '../src/engine/plan';
 import { builderCandidates, detectMode, OFFENSE_ORDER, type EngineState } from '../src/engine/tiers';
 import { EMPTY_META } from '../src/meta/meta';
 import type { AccountState } from '../src/state/parseExport';
-import { cocData, data, makeExport, MAX_TH, maxLab, parse, setLevel, settings, T0 } from './helpers';
+import { cocData, data, makeExport, MAX_TH, maxLab, modifiedData, parse, parseWith, rawItem, setLevel, settings, T0 } from './helpers';
+import { maxLevelAt } from '../src/data/normalize';
+import type { GameData } from '../src/data/types';
 
 function stateOf(a: AccountState): EngineState {
   const busy = new Set<string>();
@@ -231,7 +233,9 @@ describe('merges', () => {
 
     setLevel(ex, 'buildings', 'town-hall', { timer: 5 * 86400 });
     const c = cands(parse(ex));
-    const look = c.filter((x) => x.reason.includes('lookahead'));
+    const look = c.filter((x) => x.reason.includes('lookahead: merge'));
+    // The TH17 requirement (Eagle Artillery 7) is lookahead too (TH+1 after the TH being reached).
+    expect(c.filter((x) => x.reason.includes('lookahead: TH17 requires')).map((x) => x.item.id)).toEqual(['eagle-artillery']);
     // Ricochet Cannon ×2 at TH16 = 4 cannons; Multi-Archer Tower ×2 = 4 archer towers.
     expect(look.filter((x) => x.item.id === 'cannon')).toHaveLength(4);
     expect(look.filter((x) => x.item.id === 'archer-tower')).toHaveLength(4);
@@ -310,5 +314,91 @@ describe('merges', () => {
       const t5 = c.filter((x) => x.tier === 5);
       for (let i = 1; i < t5.length; i++) expect(t5[i - 1].rawTimeSec).toBeGreaterThanOrEqual(t5[i].rawTimeSec);
     }
+  });
+});
+
+describe('TH upgrade requirements (TH gate, SPEC §6.3)', () => {
+  const candsWith = (d: GameData, a: AccountState) => builderCandidates(d, stateOf(a), settings(), { builderBoost: 0 });
+
+  it('ClashKing lists TH17 → Eagle Artillery 7; the clash-of-clans-data backup has none', () => {
+    expect(data.thRequirements[17]).toEqual([{ id: 'eagle-artillery', dataId: dataIdOf('eagle-artillery'), level: 7, qty: 1 }]);
+    expect(Object.keys(data.thRequirements)).toEqual(['17']);
+    expect(cocData().thRequirements).toEqual({});
+  });
+
+  it('an unmet requirement blocks the TH: the building is a tier-1 gate item, the TH is not a candidate', () => {
+    const ex = maxLab(makeExport(16, 15)); // Eagle Artillery at 6 (TH15 max); TH16 allows 7
+    expect(ex.buildings.find((b) => b.data === dataIdOf('eagle-artillery'))!.lvl).toBe(6);
+    const c = cands(parse(ex));
+    expect(c.some((x) => x.item.id === 'town-hall')).toBe(false);
+    const ea = c.filter((x) => x.item.id === 'eagle-artillery');
+    expect(ea).toHaveLength(1);
+    expect(ea[0]).toMatchObject({ tier: 1, toLevel: 7, kind: 'upgrade', reason: 'TH gate: TH17 requires Eagle Artillery 7' });
+    // First in tier 1 (the TH itself isn't there), ahead of offense.
+    expect(c.find((x) => x.tier === 1)!.item.id).toBe('eagle-artillery');
+  });
+
+  it('once the requirement is met, the TH is back at the top of tier 1 and says so', () => {
+    const ex = maxLab(makeExport(16, 15));
+    setLevel(ex, 'buildings', 'eagle-artillery', { lvl: 7 });
+    const c = cands(parse(ex));
+    const th = c.find((x) => x.item.id === 'town-hall')!;
+    expect(th.tier).toBe(1);
+    expect(c.find((x) => x.tier === 1)).toBe(th);
+    expect(th.reason).toContain('TH17 requirements met: Eagle Artillery 7');
+    // The Eagle Artillery is no longer a gate item.
+    expect(c.some((x) => x.item.id === 'eagle-artillery' && x.reason.startsWith('TH gate'))).toBe(false);
+  });
+
+  it('an Eagle Artillery upgrade in progress still holds the gate (the level must be reached)', () => {
+    const ex = maxLab(makeExport(16, 15));
+    setLevel(ex, 'buildings', 'eagle-artillery', { timer: 86400 });
+    const c = cands(parse(ex));
+    expect(c.some((x) => x.item.id === 'town-hall')).toBe(false);
+    expect(c.some((x) => x.item.id === 'eagle-artillery')).toBe(false);
+  });
+
+  it('lookahead while the TH upgrades: the next TH requirement is worked in tier 1, after the merge lookahead', () => {
+    const ex = maxLab(makeExport(15, 14)); // Eagle Artillery at 5; TH15 allows 6
+    const idle = cands(parse(ex));
+    expect(idle.some((x) => x.item.id === 'eagle-artillery' && x.reason.includes('TH17'))).toBe(false); // two THs away
+
+    setLevel(ex, 'buildings', 'town-hall', { timer: 5 * 86400 }); // TH15 → 16 upgrading
+    const c = cands(parse(ex));
+    const ea = c.find((x) => x.item.id === 'eagle-artillery')!;
+    expect(ea).toMatchObject({ tier: 1, toLevel: 6, reason: 'TH-upgrade lookahead: TH17 requires Eagle Artillery 7' });
+    const t1 = c.filter((x) => x.tier === 1);
+    expect(t1.indexOf(ea)).toBeGreaterThan(t1.findIndex((x) => x.reason.includes('lookahead: merge')));
+    expect(c.indexOf(ea)).toBeLessThan(c.findIndex((x) => x.item.category === 'army'));
+  });
+
+  it('generic: any building level on a TH level becomes a requirement (here TH19 → X-Bow), from any field', () => {
+    const xbow = data.byId.get('x-bow')!;
+    const lvl = maxLevelAt(xbow, { th: 18 });
+    const d = modifiedData((raw) => {
+      const th = rawItem(raw, 'town-hall');
+      const xb = rawItem(raw, 'x-bow');
+      th.levels.find((l: any) => l.level === 19).building_requirement = [{ _id: xb._id, name: xb.name, level: lvl }];
+    });
+    expect(d.thRequirements[19]).toEqual([{ id: 'x-bow', dataId: xbow.dataId, level: lvl, qty: 1 }]);
+    const ex = maxLab(makeExport(18, 18));
+    setLevel(ex, 'buildings', 'x-bow', { lvl: lvl - 1 }); // every X-Bow one level short
+    const c = candsWith(d, parseWith(ex, d));
+    expect(c.some((x) => x.item.id === 'town-hall')).toBe(false);
+    const gate = c.filter((x) => x.reason === `TH gate: TH19 requires X-Bow ${lvl}`);
+    expect(gate).toHaveLength(1); // qty 1: only the highest copy is pushed; the others stay in their normal tier
+    expect(gate.every((x) => x.item.id === 'x-bow' && x.toLevel === lvl && x.tier === 1)).toBe(true);
+  });
+
+  it('a requirement that can’t be reached at the current TH never holds the gate (no deadlock)', () => {
+    const xbow = data.byId.get('x-bow')!;
+    const top = xbow.levels[xbow.levels.length - 1].level; // a TH19-only level
+    expect(maxLevelAt(xbow, { th: 18 })).toBeLessThan(top);
+    const d = modifiedData((raw) => {
+      const xb = rawItem(raw, 'x-bow');
+      rawItem(raw, 'town-hall').levels.find((l: any) => l.level === 19).merge_requirement = [{ _id: xb._id, name: xb.name, level: top }];
+    });
+    const c = candsWith(d, parseWith(maxLab(makeExport(18, 18)), d));
+    expect(c.find((x) => x.tier === 1)!.item.id).toBe('town-hall');
   });
 });

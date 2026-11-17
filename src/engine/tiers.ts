@@ -404,6 +404,56 @@ function mergePlan(c: Ctx, all: OwnedInstance[], thUpgrading: boolean): MergePla
   return { drafts, handled, gateOpen };
 }
 
+interface ReqPlan {
+  drafts: Draft[];
+  /** Unmet requirements of the next TH that can be met at the current TH ("TH17 requires Eagle Artillery 7"). */
+  gateOpen: string[];
+  /** Met requirements of the next TH (for the TH candidate's reason). */
+  met: string[];
+}
+
+/**
+ * TH upgrade requirements (§6.3 TH gate, rush only): building levels the data lists for a Town Hall level
+ * (e.g. TH17 needs Eagle Artillery 7). Generic over `data.thRequirements`. While the TH itself is upgrading,
+ * the requirements of the TH after the one being reached are worked as lookahead (they never hold the gate).
+ * Instances drafted or busy here are added to `handled`, so they aren't also offered in their normal tier.
+ */
+function thRequirementPlan(c: Ctx, all: OwnedInstance[], handled: Set<string>, thUpgrading: boolean): ReqPlan {
+  const out: ReqPlan = { drafts: [], gateOpen: [], met: [] };
+  if (c.mode !== 'rush') return out;
+  const { data, lv } = c;
+  const target = thUpgrading ? lv.th + 2 : lv.th + 1;
+  if (target > data.maxTH) return out;
+  const lookahead = thUpgrading;
+  (data.thRequirements[target] ?? []).forEach((req, ri) => {
+    const item = data.byDataId.get(req.dataId);
+    if (!item) return;
+    const label = `TH${target} requires ${item.name} ${req.level}${req.qty > 1 ? ` ×${req.qty}` : ''}`;
+    const picked = all
+      .filter((i) => i.dataId === req.dataId && !handled.has(i.uid))
+      .sort((a, b) => b.level - a.level || (a.uid < b.uid ? -1 : 1))
+      .slice(0, req.qty);
+    const met = picked.length >= req.qty && picked.every((i) => !i.planned && i.level >= req.level);
+    if (met) {
+      if (!lookahead) out.met.push(`${item.name} ${req.level}`);
+      return;
+    }
+    // Like a merge: the requirement holds the gate only if it can be met at the current TH (no deadlock).
+    const reachable = picked.length >= req.qty && maxLevelAt(item, { th: lv.th }) >= req.level;
+    if (!lookahead && reachable) out.gateOpen.push(label);
+    for (const inst of picked) {
+      if (inst.planned || inst.level >= req.level) continue; // unbuilt copies are Tier 0 new buildings
+      handled.add(inst.uid);
+      if (c.busy.has(lockOf(inst))) continue;
+      const next = levelInfo(item, inst.level + 1);
+      if (!next || (next.thRequired ?? 0) > lv.th) continue;
+      const why = `${lookahead ? 'TH-upgrade lookahead: ' : 'TH gate: '}${label}`;
+      out.drafts.push(draft(item, inst, next, { g: 'gate', neededTH: target, recipe: data.merges.length + ri, level: inst.level }, why, 'upgrade'));
+    }
+  });
+  return out;
+}
+
 /** Every other builder item: Laboratory (Tier 0), offense, resources, defenses, temporary; new copies. */
 function genericDrafts(c: Ctx, all: OwnedInstance[], handled: Set<string>): Draft[] {
   const out: Draft[] = [];
@@ -497,15 +547,18 @@ export function builderCandidates(data: GameData, state: EngineState, settings: 
   const merges = mergePlan(c, all, th.thUpgrading);
   const handled = new Set(merges.handled);
   if (th.thInst) handled.add(th.thInst.uid);
+  const reqs = thRequirementPlan(c, all, handled, th.thUpgrading);
 
-  const drafts: Draft[] = [...heroDrafts(c), ...th.drafts, ...merges.drafts, ...genericDrafts(c, all, handled), ...superchargeDrafts(c)];
+  const drafts: Draft[] = [...heroDrafts(c), ...th.drafts, ...merges.drafts, ...reqs.drafts, ...genericDrafts(c, all, handled), ...superchargeDrafts(c)];
 
-  // Rush: the TH upgrade only once the TH gate is clear — every performable merge done, every new building built.
+  // Rush: the TH upgrade only once the TH gate is clear — every performable merge done, every new building
+  // built, every building level the next TH requires reached.
   if (th.thInst && th.thNext && !opts.noTownHall) {
-    const gateOpen = [...merges.gateOpen];
+    const gateOpen = [...merges.gateOpen, ...reqs.gateOpen];
     for (const p of planned) if ((data.items.get(p.itemKey)!.levels[0]?.thRequired ?? 0) <= lv.th) gateOpen.push(p.itemKey);
     if (!gateOpen.length) {
-      drafts.push(draft(data.byDataId.get(IDS.townHall)!, th.thInst, th.thNext, { g: 'th' }, 'Rush: Town Hall upgrade, TH gate clear (all merges done, all new buildings built)', 'upgrade'));
+      const reqText = reqs.met.length ? `, TH${lv.th + 1} requirements met: ${reqs.met.join(', ')}` : '';
+      drafts.push(draft(data.byDataId.get(IDS.townHall)!, th.thInst, th.thNext, { g: 'th' }, `Rush: Town Hall upgrade, TH gate clear (all merges done, all new buildings built${reqText})`, 'upgrade'));
     }
   }
 

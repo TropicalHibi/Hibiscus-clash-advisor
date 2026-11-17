@@ -9,7 +9,7 @@
 // - every `required_*` field on level N is the requirement to have level N (no shift).
 import { buildMergeRecipes, mapResource, maxLevelAt, resolveSuperTroops } from './normalize.ts';
 import { EMPTY_OVERRIDES, type MergeOverride, type Overrides } from './overrides.ts';
-import type { Category, GameData, Item, LevelInfo, OreCost, Queue } from './types.ts';
+import type { Category, GameData, Item, LevelInfo, OreCost, Queue, ThRequirement } from './types.ts';
 
 /** Sections of static_data.json the planner uses (everything else is dropped when the file is pinned). */
 export const CK_SECTIONS = ['buildings', 'traps', 'troops', 'spells', 'heroes', 'pets', 'equipment', 'guardians', 'helpers'] as const;
@@ -428,6 +428,33 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
     if (base && !base.superHousingSpace && superTable[Number(k)]?.housingSpace) base.superHousingSpace = superTable[Number(k)].housingSpace;
   }
 
+  // ── TH upgrade requirements (SPEC §6.3 TH gate): any building level a Town Hall level lists ──
+  // Generic: every array on a TH level whose entries name a building/trap `_id` with a `level`
+  // (today only TH17's merge_requirement: Eagle Artillery 7). `unlocks` carries quantities, not levels.
+  const buildingIds = new Set<number>();
+  for (const b of [...list('buildings'), ...list('traps')]) if (typeof b?._id === 'number' && b !== thRaw) buildingIds.add(b._id);
+  const thRequirements: Record<number, ThRequirement[]> = {};
+  for (const l of thLevels) {
+    const reqs = new Map<string, ThRequirement>();
+    for (const [k, v] of Object.entries(l)) {
+      if (k === 'unlocks' || !Array.isArray(v)) continue;
+      for (const r of v as any[]) {
+        if (typeof r?._id !== 'number' || typeof r?.level !== 'number' || !buildingIds.has(r._id)) continue;
+        const id = ckName.get(r._id) ?? ckSlug(r.name ?? '');
+        const item = byId.get(id);
+        if (!item) {
+          warn(`Town Hall ${l.level} requires "${r.name ?? r._id}" ${r.level}, which isn't in the data; ignored.`);
+          continue;
+        }
+        const cur = reqs.get(id) ?? { id, dataId: item.dataId, level: 0, qty: 0 };
+        cur.level = Math.max(cur.level, r.level);
+        cur.qty += 1;
+        reqs.set(id, cur);
+      }
+    }
+    if (reqs.size) thRequirements[l.level] = [...reqs.values()];
+  }
+
   return {
     version: opts.version,
     source: 'clashking',
@@ -438,6 +465,7 @@ export function normalizeClashKing(raw: ClashKingRaw, opts: ClashKingOptions): G
     bookThresholdSec,
     merges,
     superTroops,
+    thRequirements,
     heroHallCaps: {},
     warnings: [...warningSet],
   };

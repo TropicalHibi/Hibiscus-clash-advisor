@@ -61,20 +61,23 @@ describe('scheduler', () => {
   it('Gold Pass max shortens new builder and research jobs, not running timers', () => {
     const none = simulate(data, fixture(), settings(), EMPTY_META, { nowSec: T0, horizonSec: DAY });
     const max = simulate(data, fixture(), settings({ goldPass: 'max' }), EMPTY_META, { nowSec: T0, horizonSec: DAY });
-    const thNone = none.timeline.find((e) => e.itemName === 'Town Hall')!;
-    const thMax = max.timeline.find((e) => e.itemName === 'Town Hall')!;
+    // A new builder job in both runs (the fixture's Town Hall now waits for Eagle Artillery 7, TH gate).
+    const thNone = none.timeline.find((e) => !e.inProgress && e.itemName === 'Eagle Artillery')!;
+    const thMax = max.timeline.find((e) => !e.inProgress && e.itemName === 'Eagle Artillery')!;
     expect(thMax.end - thMax.start).toBe(Math.round((thNone.end - thNone.start) * (1 - GOLD_PASS_MAX_BOOST.builder)));
     const xbN = none.timeline.find((e) => e.inProgress && e.itemName === 'X-Bow')!;
     const xbM = max.timeline.find((e) => e.inProgress && e.itemName === 'X-Bow')!;
     expect(xbM.end).toBe(xbN.end);
   });
 
-  it('rush mode: free builders take the Laboratory, then new buildings (Tier 0), then the Town Hall', () => {
+  it('rush mode: free builders take the Laboratory, then new buildings (Tier 0), then the TH gate', () => {
     const plan = buildPlan(data, fixture(), settings(), EMPTY_META, T0);
     expect(plan.mode).toBe('rush');
     const builders = plan.startNow.filter((e) => e.slotId.startsWith('B')).map((e) => e.itemName);
-    // The fixture predates the TH19 update: its new Squad Barracks (TH8+) is a Tier 0 build ahead of the TH.
-    expect(builders.slice(0, 3)).toEqual(['Laboratory', 'Squad Barracks', 'Town Hall']);
+    // The fixture predates the TH19 update: its new Squad Barracks (TH8+) is a Tier 0 build. Its Eagle
+    // Artillery is at 6 and TH17 requires 7, so that's the TH gate item and the Town Hall isn't started yet.
+    expect(builders.slice(0, 3)).toEqual(['Laboratory', 'Squad Barracks', 'Eagle Artillery']);
+    expect(builders).not.toContain('Town Hall');
   });
 
   it('merge builds consume sources and create the merged defense in the simulation', () => {

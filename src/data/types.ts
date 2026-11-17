@@ -98,6 +98,16 @@ export interface MergeRecipe {
   requiredSourceLevel: Record<string, number>; // source file id → level
 }
 
+/** A building level a Town Hall upgrade requires (ClashKing: e.g. TH17 needs Eagle Artillery 7). SPEC §6.3 TH gate. */
+export interface ThRequirement {
+  /** Required building item id, e.g. "eagle-artillery". */
+  id: string;
+  dataId: number;
+  level: number;
+  /** How many copies must be at that level (usually 1). */
+  qty: number;
+}
+
 export type DataSource = 'clashking' | 'clash-of-clans-data';
 
 /** A super troop: its own dataId, credited to its base troop's lab upgrade (SPEC §8.3). */
@@ -120,6 +130,8 @@ export interface GameData {
   /** BOOK_THRESHOLD (§6.5): max raw time across all hero levels, seconds. */
   bookThresholdSec: number;
   merges: MergeRecipe[];
+  /** Town Hall level → building levels required before upgrading to it (ClashKing only; empty on the backup). */
+  thRequirements: Record<number, ThRequirement[]>;
   /** Super troop dataId → base troop (from the data's `super_troop`, or config/super-troops.yaml). */
   superTroops: Record<number, SuperTroop>;
   /** Hero Hall heroLevelCaps table (clash-of-clans-data only, stale there; for validation only). */
