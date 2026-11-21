@@ -1,117 +1,117 @@
 {
-  "generatedAt": "2026-11-20T19:04:21.911Z",
+  "generatedAt": "2026-11-21T17:58:02.703Z",
   "windowDays": 14,
   "halfLifeDays": 5,
-  "attacks": 47164,
-  "players": 1407,
+  "attacks": 55574,
+  "players": 1468,
   "units": {
     "4000000": {
       "name": "Barbarian",
-      "usage": 0.0788,
-      "threeStarRate": 0.5281,
+      "usage": 0.0797,
+      "threeStarRate": 0.5158,
       "kind": "troop",
       "avgQty": 1.29,
       "armyShare": 0.0003
     },
     "4000001": {
       "name": "Archer",
-      "usage": 0.8666,
-      "threeStarRate": 0.4453,
+      "usage": 0.8632,
+      "threeStarRate": 0.4313,
       "kind": "troop",
-      "avgQty": 2.71,
-      "armyShare": 0.0067
+      "avgQty": 2.73,
+      "armyShare": 0.0068
     },
     "4000002": {
       "name": "Goblin",
-      "usage": 0.0233,
-      "threeStarRate": 0.4437,
+      "usage": 0.0246,
+      "threeStarRate": 0.4644,
       "kind": "troop",
       "avgQty": 1.04,
       "armyShare": 0.0001
     },
     "4000003": {
       "name": "Giant",
-      "usage": 0.0276,
-      "threeStarRate": 0.5009,
+      "usage": 0.027,
+      "threeStarRate": 0.4833,
       "kind": "troop",
-      "avgQty": 1.62,
+      "avgQty": 1.56,
       "armyShare": 0.0006
     },
     "4000004": {
       "name": "Wall Breaker",
-      "usage": 0.1208,
-      "threeStarRate": 0.4938,
+      "usage": 0.1213,
+      "threeStarRate": 0.482,
       "kind": "troop",
       "avgQty": 3.3,
       "armyShare": 0.0023
     },
     "4000005": {
       "name": "Balloon",
-      "usage": 0.5415,
-      "threeStarRate": 0.4571,
+      "usage": 0.5376,
+      "threeStarRate": 0.4411,
       "kind": "troop",
-      "avgQty": 4.4,
-      "armyShare": 0.0341
+      "avgQty": 4.36,
+      "armyShare": 0.0335
     },
     "4000006": {
       "name": "Wizard",
-      "usage": 0.2643,
-      "threeStarRate": 0.4691,
+      "usage": 0.2654,
+      "threeStarRate": 0.4536,
       "kind": "troop",
       "avgQty": 1.42,
-      "armyShare": 0.0043
+      "armyShare": 0.0044
     },
     "4000007": {
       "name": "Healer",
-      "usage": 0.549,
-      "threeStarRate": 0.4469,
+      "usage": 0.5428,
+      "threeStarRate": 0.4283,
       "kind": "troop",
       "avgQty": 5,
-      "armyShare": 0.1098
+      "armyShare": 0.1086
     },
     "4000008": {
       "name": "Dragon",
-      "usage": 0.2747,
-      "threeStarRate": 0.4174,
+      "usage": 0.2615,
+      "threeStarRate": 0.4043,
       "kind": "troop",
-      "avgQty": 7.26,
-      "armyShare": 0.1134
+      "avgQty": 7.19,
+      "armyShare": 0.107
     },
     "4000009": {
       "name": "P.E.K.K.A",
-      "usage": 0.0011,
-      "threeStarRate": 0.3225,
+      "usage": 0.001,
+      "threeStarRate": 0.3248,
       "kind": "troop",
-      "avgQty": 2.82,
+      "avgQty": 2.79,
       "armyShare": 0.0002
     },
     "4000010": {
       "name": "Minion",
-      "usage": 0.3895,
-      "threeStarRate": 0.4355,
+      "usage": 0.398,
+      "threeStarRate": 0.4262,
       "kind": "troop",
-      "avgQty": 1.81,
-      "armyShare": 0.004
+      "avgQty": 1.88,
+      "armyShare": 0.0043
     },
     "4000011": {
       "name": "Hog Rider",
-      "usage": 0.0081,
-      "threeStarRate": 0.4511,
+      "usage": 0.0082,
+      "threeStarRate": 0.4439,
       "kind": "troop",
-      "avgQty": 1.11,
+      "avgQty": 1.23,
       "armyShare": 0.0001
     },
     "4000012": {
       "name": "Valkyrie",
-      "usage": 0.2661,
-      "threeStarRate": 0.483,
+      "usage": 0.2755,
+      "threeStarRate": 0.464,
       "kind": "troop",
       "avgQty": 1.4,
-      "armyShare": 0.0086
+      "armyShare": 0.0089
     },
     "4000013": {
       "name": "Golem",
-      "usage": 0.0005,
+      "usage": 0.0004,
       "threeStarRate": 0.2321,
       "kind": "troop",
       "avgQty": 1,
@@ -119,23 +119,23 @@
     },
     "4000015": {
       "name": "Witch",
-      "usage": 0.0003,
-      "threeStarRate": 0.2724,
+      "usage": 0.0002,
+      "threeStarRate": 0.3508,
       "kind": "troop",
-      "avgQty": 1.64,
+      "avgQty": 1.57,
       "armyShare": 0
     },
     "4000017": {
       "name": "Lava Hound",
-      "usage": 0.0233,
-      "threeStarRate": 0.5462,
+      "usage": 0.0223,
+      "threeStarRate": 0.5409,
       "kind": "troop",
       "avgQty": 1,
-      "armyShare": 0.002
+      "armyShare": 0.0019
     },
     "4000022": {
       "name": "Bowler",
-      "usage": 0.0004,
+      "usage": 0.0003,
       "threeStarRate": 0.3526,
       "kind": "troop",
       "avgQty": 1.6,
@@ -143,45 +143,45 @@
     },
     "4000023": {
       "name": "Baby Dragon",
-      "usage": 0.5304,
-      "threeStarRate": 0.4474,
+      "usage": 0.5273,
+      "threeStarRate": 0.4337,
       "kind": "troop",
-      "avgQty": 1.21,
-      "armyShare": 0.0183
+      "avgQty": 1.19,
+      "armyShare": 0.018
     },
     "4000024": {
       "name": "Miner",
-      "usage": 0.0018,
-      "threeStarRate": 0.2778,
+      "usage": 0.0016,
+      "threeStarRate": 0.3226,
       "kind": "troop",
-      "avgQty": 3.51,
+      "avgQty": 3.18,
       "armyShare": 0.0001
     },
     "4000026": {
       "name": "Super Barbarian",
-      "usage": 0.0896,
-      "threeStarRate": 0.4756,
+      "usage": 0.0822,
+      "threeStarRate": 0.4581,
       "kind": "superTroop",
       "avgQty": 2.75,
-      "armyShare": 0.0035,
+      "armyShare": 0.0032,
       "baseId": 4000000
     },
     "4000027": {
       "name": "Super Archer",
-      "usage": 0.0027,
-      "threeStarRate": 0.3813,
+      "usage": 0.0023,
+      "threeStarRate": 0.359,
       "kind": "superTroop",
-      "avgQty": 9.69,
-      "armyShare": 0.0009,
+      "avgQty": 9.71,
+      "armyShare": 0.0008,
       "baseId": 4000001
     },
     "4000028": {
       "name": "Super Wall Breaker",
-      "usage": 0.5214,
-      "threeStarRate": 0.4509,
+      "usage": 0.5136,
+      "threeStarRate": 0.4311,
       "kind": "superTroop",
-      "avgQty": 2.33,
-      "armyShare": 0.0278,
+      "avgQty": 2.34,
+      "armyShare": 0.0276,
       "baseId": 4000004
     },
     "4000051": {
@@ -198,136 +198,136 @@
     },
     "4000053": {
       "name": "Yeti",
-      "usage": 0.0836,
-      "threeStarRate": 0.4399,
+      "usage": 0.0879,
+      "threeStarRate": 0.4236,
       "kind": "troop",
-      "avgQty": 1.1,
-      "armyShare": 0.0047
+      "avgQty": 1.12,
+      "armyShare": 0.0051
     },
     "4000055": {
       "name": "Sneaky Goblin",
-      "usage": 0.0175,
-      "threeStarRate": 0.5093,
+      "usage": 0.0192,
+      "threeStarRate": 0.5046,
       "kind": "superTroop",
-      "avgQty": 4.48,
+      "avgQty": 4.39,
       "armyShare": 0.0007,
       "baseId": 4000002
     },
     "4000056": {
       "name": "Super Miner",
-      "usage": 0.0021,
-      "threeStarRate": 0.4194,
+      "usage": 0.0025,
+      "threeStarRate": 0.3938,
       "kind": "superTroop",
-      "avgQty": 2.17,
+      "avgQty": 2,
       "armyShare": 0.0003,
       "baseId": 4000024
     },
     "4000057": {
       "name": "Rocket Balloon",
-      "usage": 0.292,
-      "threeStarRate": 0.4552,
+      "usage": 0.2874,
+      "threeStarRate": 0.4406,
       "kind": "superTroop",
-      "avgQty": 5.94,
-      "armyShare": 0.0398,
+      "avgQty": 5.95,
+      "armyShare": 0.0393,
       "baseId": 4000005
     },
     "4000058": {
       "name": "Ice Golem",
-      "usage": 0.6106,
-      "threeStarRate": 0.4546,
+      "usage": 0.6043,
+      "threeStarRate": 0.4363,
       "kind": "troop",
-      "avgQty": 1.76,
+      "avgQty": 1.77,
       "armyShare": 0.046
     },
     "4000059": {
       "name": "Electro Dragon",
-      "usage": 0.0224,
-      "threeStarRate": 0.3348,
+      "usage": 0.0254,
+      "threeStarRate": 0.324,
       "kind": "troop",
-      "avgQty": 8.85,
-      "armyShare": 0.0169
+      "avgQty": 8.86,
+      "armyShare": 0.0192
     },
     "4000062": {
       "name": "Stone Slammer",
-      "usage": 0.0002,
+      "usage": 0.0001,
       "threeStarRate": 0,
       "kind": "siege"
     },
     "4000063": {
       "name": "Inferno Dragon",
-      "usage": 0.0937,
-      "threeStarRate": 0.4667,
+      "usage": 0.1045,
+      "threeStarRate": 0.4628,
       "kind": "superTroop",
-      "avgQty": 2.37,
-      "armyShare": 0.0095,
+      "avgQty": 2.53,
+      "armyShare": 0.0113,
       "baseId": 4000023
     },
     "4000064": {
       "name": "Super Valkyrie",
-      "usage": 0,
-      "threeStarRate": 0,
+      "usage": 0.0004,
+      "threeStarRate": 0.4134,
       "kind": "superTroop",
-      "avgQty": 3,
+      "avgQty": 2.04,
       "armyShare": 0,
       "baseId": 4000012
     },
     "4000065": {
       "name": "Dragon Rider",
-      "usage": 0.2482,
-      "threeStarRate": 0.4178,
+      "usage": 0.2346,
+      "threeStarRate": 0.3987,
       "kind": "troop",
-      "avgQty": 5.47,
-      "armyShare": 0.0964
+      "avgQty": 5.46,
+      "armyShare": 0.091
     },
     "4000066": {
       "name": "Super Witch",
-      "usage": 0.0065,
-      "threeStarRate": 0.3315,
+      "usage": 0.0059,
+      "threeStarRate": 0.3146,
       "kind": "superTroop",
-      "avgQty": 2.77,
-      "armyShare": 0.0021,
+      "avgQty": 2.81,
+      "armyShare": 0.0019,
       "baseId": 4000015
     },
     "4000075": {
       "name": "Siege Barracks",
-      "usage": 0.0427,
-      "threeStarRate": 0.4296,
+      "usage": 0.0413,
+      "threeStarRate": 0.4084,
       "kind": "siege"
     },
     "4000076": {
       "name": "Ice Hound",
-      "usage": 0.2616,
-      "threeStarRate": 0.4283,
+      "usage": 0.2716,
+      "threeStarRate": 0.4212,
       "kind": "superTroop",
-      "avgQty": 1.32,
-      "armyShare": 0.0392,
+      "avgQty": 1.31,
+      "armyShare": 0.0405,
       "baseId": 4000017
     },
     "4000080": {
       "name": "Super Bowler",
-      "usage": 0.3335,
-      "threeStarRate": 0.448,
+      "usage": 0.3382,
+      "threeStarRate": 0.4307,
       "kind": "superTroop",
-      "avgQty": 5.03,
-      "armyShare": 0.1433,
+      "avgQty": 5.04,
+      "armyShare": 0.1456,
       "baseId": 4000022
     },
     "4000081": {
       "name": "Super Dragon",
-      "usage": 0.0075,
-      "threeStarRate": 0.4103,
+      "usage": 0.0059,
+      "threeStarRate": 0.4068,
       "kind": "superTroop",
-      "avgQty": 6.05,
-      "armyShare": 0.0051,
+      "avgQty": 6.06,
+      "armyShare": 0.0041,
       "baseId": 4000008
     },
     "4000082": {
       "name": "Headhunter",
-      "usage": 0.4768,
-      "threeStarRate": 0.4579,
+      "usage": 0.4714,
+      "threeStarRate": 0.4403,
       "kind": "troop",
       "avgQty": 1.46,
-      "armyShare": 0.012
+      "armyShare": 0.0118
     },
     "4000083": {
       "name": "Super Wizard",
@@ -340,23 +340,23 @@
     },
     "4000084": {
       "name": "Super Minion",
-      "usage": 0.0825,
-      "threeStarRate": 0.4878,
+      "usage": 0.0821,
+      "threeStarRate": 0.4724,
       "kind": "superTroop",
-      "avgQty": 4.82,
-      "armyShare": 0.0137,
+      "avgQty": 4.85,
+      "armyShare": 0.0138,
       "baseId": 4000010
     },
     "4000087": {
       "name": "Log Launcher",
-      "usage": 0.0618,
-      "threeStarRate": 0.4763,
+      "usage": 0.0585,
+      "threeStarRate": 0.4583,
       "kind": "siege"
     },
     "4000091": {
       "name": "Flame Flinger",
-      "usage": 0.061,
-      "threeStarRate": 0.4893,
+      "usage": 0.0627,
+      "threeStarRate": 0.474,
       "kind": "siege"
     },
     "4000092": {
@@ -367,322 +367,330 @@
     },
     "4000095": {
       "name": "Electro Titan",
-      "usage": 0.0486,
-      "threeStarRate": 0.3598,
+      "usage": 0.047,
+      "threeStarRate": 0.3433,
       "kind": "troop",
       "avgQty": 1.04,
-      "armyShare": 0.0046
+      "armyShare": 0.0045
     },
     "4000097": {
       "name": "Apprentice Warden",
-      "usage": 0.4201,
-      "threeStarRate": 0.444,
+      "usage": 0.4204,
+      "threeStarRate": 0.4269,
       "kind": "troop",
-      "avgQty": 1.04,
-      "armyShare": 0.0249
+      "avgQty": 1.03,
+      "armyShare": 0.025
     },
     "4000109": {
       "name": "Ruin Witch",
-      "usage": 0.2582,
-      "threeStarRate": 0.4505,
+      "usage": 0.2464,
+      "threeStarRate": 0.4308,
       "kind": "troop",
-      "avgQty": 2.16,
-      "armyShare": 0.0413
+      "avgQty": 2.14,
+      "armyShare": 0.0392
     },
     "4000110": {
       "name": "Root Rider",
-      "usage": 0.0106,
-      "threeStarRate": 0.3977,
+      "usage": 0.0104,
+      "threeStarRate": 0.379,
       "kind": "troop",
-      "avgQty": 3.21,
+      "avgQty": 3.19,
       "armyShare": 0.0019
     },
     "4000123": {
       "name": "Druid",
-      "usage": 0.1534,
-      "threeStarRate": 0.4453,
+      "usage": 0.1484,
+      "threeStarRate": 0.4341,
       "kind": "troop",
-      "avgQty": 1.99,
-      "armyShare": 0.014
+      "avgQty": 1.97,
+      "armyShare": 0.0134
     },
     "4000132": {
       "name": "Thrower",
-      "usage": 0.1413,
-      "threeStarRate": 0.4573,
+      "usage": 0.133,
+      "threeStarRate": 0.4364,
       "kind": "troop",
-      "avgQty": 8.77,
-      "armyShare": 0.0564
+      "avgQty": 8.78,
+      "armyShare": 0.0532
     },
     "4000135": {
       "name": "Troop Launcher",
-      "usage": 0.3602,
-      "threeStarRate": 0.4573,
+      "usage": 0.3612,
+      "threeStarRate": 0.4363,
       "kind": "siege"
     },
     "4000147": {
       "name": "Super Yeti",
-      "usage": 0.0664,
-      "threeStarRate": 0.4201,
+      "usage": 0.0626,
+      "threeStarRate": 0.3986,
       "kind": "superTroop",
-      "avgQty": 6.4,
-      "armyShare": 0.0424,
+      "avgQty": 6.47,
+      "armyShare": 0.0404,
       "baseId": 4000053
     },
     "4000150": {
       "name": "Furnace",
-      "usage": 0.1176,
-      "threeStarRate": 0.467,
+      "usage": 0.1189,
+      "threeStarRate": 0.4577,
       "kind": "troop",
-      "avgQty": 1.88,
-      "armyShare": 0.0115
+      "avgQty": 1.91,
+      "armyShare": 0.0117
     },
     "4000177": {
       "name": "Meteor Golem",
-      "usage": 0.0029,
-      "threeStarRate": 0.2266,
+      "usage": 0.0025,
+      "threeStarRate": 0.2138,
       "kind": "troop",
-      "avgQty": 4.09,
-      "armyShare": 0.0013
+      "avgQty": 4.08,
+      "armyShare": 0.0012
     },
     "4000188": {
       "name": "Sky Wagon",
-      "usage": 0.4721,
-      "threeStarRate": 0.4239,
+      "usage": 0.4742,
+      "threeStarRate": 0.4161,
       "kind": "siege"
     },
     "4000195": {
       "name": "Barch Squad",
       "usage": 0.0042,
-      "threeStarRate": 0.4394,
+      "threeStarRate": 0.4154,
       "kind": "troop",
-      "avgQty": 2.33,
-      "armyShare": 0.0004
+      "avgQty": 3.3,
+      "armyShare": 0.0006
     },
     "4000196": {
       "name": "Giant Wizard Squad",
-      "usage": 0.0001,
-      "threeStarRate": 0,
+      "usage": 0.0003,
+      "threeStarRate": 0.0926,
       "kind": "troop",
-      "avgQty": 2,
+      "avgQty": 1.26,
       "armyShare": 0
     },
     "4000197": {
       "name": "Wall Breaker Squad",
-      "usage": 0.0147,
-      "threeStarRate": 0.4507,
+      "usage": 0.0177,
+      "threeStarRate": 0.4624,
       "kind": "troop",
-      "avgQty": 1.84,
-      "armyShare": 0.0006
+      "avgQty": 1.9,
+      "armyShare": 0.0008
     },
     "4000198": {
       "name": "Minion Squad",
-      "usage": 0.0035,
-      "threeStarRate": 0.6686,
+      "usage": 0.0076,
+      "threeStarRate": 0.5774,
       "kind": "troop",
-      "avgQty": 1.24,
-      "armyShare": 0.0001
+      "avgQty": 1.6,
+      "armyShare": 0.0004
     },
     "4000199": {
       "name": "Balloon Squad",
-      "usage": 0.0317,
-      "threeStarRate": 0.5323,
+      "usage": 0.0498,
+      "threeStarRate": 0.5468,
       "kind": "troop",
-      "avgQty": 8.73,
-      "armyShare": 0.0126
+      "avgQty": 11.03,
+      "armyShare": 0.0252
     },
     "4000200": {
       "name": "Golem Witch Squad",
-      "usage": 0.0021,
-      "threeStarRate": 0.4836,
+      "usage": 0.0024,
+      "threeStarRate": 0.4994,
       "kind": "troop",
-      "avgQty": 1.4,
+      "avgQty": 1.28,
       "armyShare": 0.0005
     },
     "4000201": {
       "name": "Hog Rider Squad",
-      "usage": 0.0017,
-      "threeStarRate": 0.5669,
+      "usage": 0.0023,
+      "threeStarRate": 0.4946,
       "kind": "troop",
-      "avgQty": 1.13,
-      "armyShare": 0.0003
+      "avgQty": 1.53,
+      "armyShare": 0.0005
     },
     "4000202": {
       "name": "Miner Squad",
-      "usage": 0.0018,
-      "threeStarRate": 0.5292,
+      "usage": 0.0021,
+      "threeStarRate": 0.4203,
       "kind": "troop",
-      "avgQty": 2.32,
+      "avgQty": 2.21,
       "armyShare": 0.0006
     },
     "4000203": {
       "name": "Healer Squad",
-      "usage": 0.0302,
-      "threeStarRate": 0.5355,
+      "usage": 0.0339,
+      "threeStarRate": 0.5178,
       "kind": "troop",
       "avgQty": 1,
-      "armyShare": 0.0065
+      "armyShare": 0.0074
     },
     "4000204": {
       "name": "P.E.K.K.A Titan Squad",
-      "usage": 0.0046,
-      "threeStarRate": 0.3543,
+      "usage": 0.0054,
+      "threeStarRate": 0.3396,
       "kind": "troop",
-      "avgQty": 2.92
+      "avgQty": 2.95
     },
     "4000205": {
       "name": "Dragons Squad",
-      "usage": 0.0164,
-      "threeStarRate": 0.4873,
+      "usage": 0.0182,
+      "threeStarRate": 0.5083,
       "kind": "troop",
-      "avgQty": 3.16,
-      "armyShare": 0.0125
+      "avgQty": 3.15,
+      "armyShare": 0.0139
     },
     "4000206": {
       "name": "Baby Dragon Squad",
-      "usage": 0.0003,
-      "threeStarRate": 0.1812,
+      "usage": 0.003,
+      "threeStarRate": 0.6867,
       "kind": "troop",
-      "avgQty": 1.61
+      "avgQty": 2.66
     },
     "26000000": {
       "name": "Lightning Spell",
-      "usage": 0.0253,
-      "threeStarRate": 0.4226,
+      "usage": 0.0246,
+      "threeStarRate": 0.4085,
       "kind": "spell",
-      "avgQty": 2.49,
-      "armyShare": 0.0058
+      "avgQty": 2.52,
+      "armyShare": 0.0057
     },
     "26000001": {
       "name": "Healing Spell",
-      "usage": 0.0012,
-      "threeStarRate": 0.5582,
+      "usage": 0.0025,
+      "threeStarRate": 0.5147,
       "kind": "spell",
-      "avgQty": 1.07,
-      "armyShare": 0.0003
+      "avgQty": 1.03,
+      "armyShare": 0.0005
     },
     "26000002": {
       "name": "Rage Spell",
-      "usage": 0.6054,
-      "threeStarRate": 0.4326,
+      "usage": 0.5962,
+      "threeStarRate": 0.4162,
       "kind": "spell",
-      "avgQty": 1.73,
-      "armyShare": 0.1936
+      "avgQty": 1.76,
+      "armyShare": 0.1935
     },
     "26000003": {
       "name": "Jump Spell",
       "usage": 0.0001,
-      "threeStarRate": 0.2201,
+      "threeStarRate": 0.1642,
       "kind": "spell",
-      "avgQty": 1.94,
-      "armyShare": 0
+      "avgQty": 1.7,
+      "armyShare": 0.0001
     },
     "26000005": {
       "name": "Freeze Spell",
-      "usage": 0.6821,
-      "threeStarRate": 0.4472,
+      "usage": 0.6824,
+      "threeStarRate": 0.4326,
       "kind": "spell",
-      "avgQty": 1.84,
-      "armyShare": 0.1161
+      "avgQty": 1.87,
+      "armyShare": 0.1178
     },
     "26000009": {
       "name": "Poison Spell",
-      "usage": 0.5245,
-      "threeStarRate": 0.4576,
+      "usage": 0.5272,
+      "threeStarRate": 0.4466,
       "kind": "spell",
       "avgQty": 1,
-      "armyShare": 0.0488
+      "armyShare": 0.049
     },
     "26000010": {
       "name": "Earthquake Spell",
-      "usage": 0.3143,
-      "threeStarRate": 0.4725,
+      "usage": 0.3249,
+      "threeStarRate": 0.4632,
       "kind": "spell",
-      "avgQty": 3,
-      "armyShare": 0.088
+      "avgQty": 3.02,
+      "armyShare": 0.0914
     },
     "26000011": {
       "name": "Haste Spell",
-      "usage": 0.0107,
-      "threeStarRate": 0.5091,
+      "usage": 0.0195,
+      "threeStarRate": 0.5152,
       "kind": "spell",
-      "avgQty": 1.78,
-      "armyShare": 0.0018
+      "avgQty": 2.09,
+      "armyShare": 0.0038
     },
     "26000016": {
       "name": "Clone Spell",
-      "usage": 0.0016,
-      "threeStarRate": 0.5264,
+      "usage": 0.0021,
+      "threeStarRate": 0.4726,
       "kind": "spell",
-      "avgQty": 2.86,
-      "armyShare": 0.0013
+      "avgQty": 2.92,
+      "armyShare": 0.0017
     },
     "26000017": {
       "name": "Skeleton Spell",
-      "usage": 0.1316,
-      "threeStarRate": 0.5037,
+      "usage": 0.127,
+      "threeStarRate": 0.4856,
       "kind": "spell",
       "avgQty": 1,
-      "armyShare": 0.0123
+      "armyShare": 0.0119
+    },
+    "26000028": {
+      "name": "Bat Spell",
+      "usage": 0.0004,
+      "threeStarRate": 0.5597,
+      "kind": "spell",
+      "avgQty": 5,
+      "armyShare": 0.0002
     },
     "26000035": {
       "name": "Invisibility Spell",
-      "usage": 0.4929,
-      "threeStarRate": 0.4618,
+      "usage": 0.4988,
+      "threeStarRate": 0.4461,
       "kind": "spell",
       "avgQty": 3,
-      "armyShare": 0.1363
+      "armyShare": 0.138
     },
     "26000053": {
       "name": "Recall Spell",
-      "usage": 0.0563,
-      "threeStarRate": 0.3971,
+      "usage": 0.0577,
+      "threeStarRate": 0.3831,
       "kind": "spell",
       "avgQty": 1,
-      "armyShare": 0.0104
+      "armyShare": 0.0106
     },
     "26000070": {
       "name": "Overgrowth Spell",
-      "usage": 0.1522,
-      "threeStarRate": 0.4054,
+      "usage": 0.1548,
+      "threeStarRate": 0.4017,
       "kind": "spell",
-      "avgQty": 1.12,
-      "armyShare": 0.0316
+      "avgQty": 1.11,
+      "armyShare": 0.0317
     },
     "26000098": {
       "name": "Revive Spell",
-      "usage": 0.43,
-      "threeStarRate": 0.3976,
+      "usage": 0.4162,
+      "threeStarRate": 0.3786,
       "kind": "spell",
       "avgQty": 1.51,
-      "armyShare": 0.121
+      "armyShare": 0.1168
     },
     "26000109": {
       "name": "Ice Block Spell",
-      "usage": 0.2345,
-      "threeStarRate": 0.3953,
+      "usage": 0.2206,
+      "threeStarRate": 0.3842,
       "kind": "spell",
-      "avgQty": 2.28,
-      "armyShare": 0.0496
+      "avgQty": 2.3,
+      "armyShare": 0.047
     },
     "26000120": {
       "name": "Totem Spell",
-      "usage": 0.8006,
-      "threeStarRate": 0.4452,
+      "usage": 0.7949,
+      "threeStarRate": 0.4318,
       "kind": "spell",
-      "avgQty": 2.45,
-      "armyShare": 0.1822
+      "avgQty": 2.44,
+      "armyShare": 0.1796
     },
     "26000123": {
       "name": "Angry Spell",
-      "usage": 0.0045,
-      "threeStarRate": 0.3795,
+      "usage": 0.0041,
+      "threeStarRate": 0.3796,
       "kind": "spell",
       "avgQty": 1,
       "armyShare": 0.0004
     },
     "26000153": {
       "name": "Heroic Spell",
-      "usage": 0.0008,
+      "usage": 0.0006,
       "threeStarRate": 0.2243,
       "kind": "spell",
       "avgQty": 1,
@@ -690,104 +698,104 @@
     },
     "73000001": {
       "name": "Mighty Yak",
-      "usage": 0.0001,
-      "threeStarRate": 0.1999,
+      "usage": 0.0002,
+      "threeStarRate": 0.1288,
       "kind": "pet"
     },
     "73000002": {
       "name": "Electro Owl",
-      "usage": 0.0344,
-      "threeStarRate": 0.5055,
+      "usage": 0.035,
+      "threeStarRate": 0.5227,
       "kind": "pet"
     },
     "73000003": {
       "name": "Unicorn",
-      "usage": 0.1027,
-      "threeStarRate": 0.4733,
+      "usage": 0.0982,
+      "threeStarRate": 0.4422,
       "kind": "pet"
     },
     "73000004": {
       "name": "Phoenix",
-      "usage": 0.7749,
-      "threeStarRate": 0.4392,
+      "usage": 0.7727,
+      "threeStarRate": 0.4261,
       "kind": "pet"
     },
     "73000007": {
       "name": "Poison Lizard",
-      "usage": 0.3626,
-      "threeStarRate": 0.45,
+      "usage": 0.3647,
+      "threeStarRate": 0.4309,
       "kind": "pet"
     },
     "73000008": {
       "name": "Diggy",
-      "usage": 0.1056,
-      "threeStarRate": 0.4143,
+      "usage": 0.1039,
+      "threeStarRate": 0.3995,
       "kind": "pet"
     },
     "73000009": {
       "name": "Frosty",
-      "usage": 0.8127,
-      "threeStarRate": 0.4406,
+      "usage": 0.8087,
+      "threeStarRate": 0.4247,
       "kind": "pet"
     },
     "73000010": {
       "name": "Spirit Fox",
-      "usage": 0.4496,
-      "threeStarRate": 0.4489,
+      "usage": 0.4509,
+      "threeStarRate": 0.4336,
       "kind": "pet"
     },
     "73000011": {
       "name": "Angry Jelly",
-      "usage": 0.2335,
-      "threeStarRate": 0.4704,
+      "usage": 0.2417,
+      "threeStarRate": 0.4525,
       "kind": "pet"
     },
     "73000016": {
       "name": "Sneezy",
-      "usage": 0.6452,
-      "threeStarRate": 0.4347,
+      "usage": 0.6398,
+      "threeStarRate": 0.4244,
       "kind": "pet"
     },
     "73000017": {
       "name": "Greedy Raven",
-      "usage": 0.4743,
-      "threeStarRate": 0.4372,
+      "usage": 0.48,
+      "threeStarRate": 0.4261,
       "kind": "pet"
     },
     "90000001": {
       "name": "Rage Vial",
-      "usage": 0.0001,
+      "usage": 0,
       "threeStarRate": 0.3333,
       "kind": "equipment"
     },
     "90000003": {
       "name": "Invisibility Vial",
       "usage": 0.0006,
-      "threeStarRate": 0.2669,
+      "threeStarRate": 0.2088,
       "kind": "equipment"
     },
     "90000004": {
       "name": "Eternal Tome",
-      "usage": 0.6495,
-      "threeStarRate": 0.4359,
+      "usage": 0.6581,
+      "threeStarRate": 0.4226,
       "kind": "equipment"
     },
     "90000005": {
       "name": "Life Gem",
-      "usage": 0.2086,
-      "threeStarRate": 0.4741,
+      "usage": 0.2155,
+      "threeStarRate": 0.4666,
       "kind": "equipment"
     },
     "90000006": {
       "name": "Seeking Shield",
-      "usage": 0.0849,
-      "threeStarRate": 0.4943,
+      "usage": 0.089,
+      "threeStarRate": 0.4897,
       "kind": "equipment"
     },
     "90000008": {
       "name": "Earthquake Boots",
-      "usage": 0.0678,
-      "threeStarRate": 0.427,
+      "usage": 0.0653,
+      "threeStarRate": 0.4021,
       "kind": "equipment"
     },
     "90000009": {
@@ -798,104 +806,104 @@
     },
     "90000010": {
       "name": "Giant Gauntlet",
-      "usage": 0.0455,
-      "threeStarRate": 0.4286,
+      "usage": 0.0453,
+      "threeStarRate": 0.4161,
       "kind": "equipment"
     },
     "90000012": {
       "name": "Haste Vial",
-      "usage": 0.005,
-      "threeStarRate": 0.4129,
+      "usage": 0.006,
+      "threeStarRate": 0.4056,
       "kind": "equipment"
     },
     "90000013": {
       "name": "Rocket Spear",
-      "usage": 0.0901,
-      "threeStarRate": 0.4902,
+      "usage": 0.0939,
+      "threeStarRate": 0.4848,
       "kind": "equipment"
     },
     "90000014": {
       "name": "Spiky Ball",
-      "usage": 0.5793,
-      "threeStarRate": 0.4497,
+      "usage": 0.5726,
+      "threeStarRate": 0.4321,
       "kind": "equipment"
     },
     "90000015": {
       "name": "Frozen Arrow",
-      "usage": 0.0011,
-      "threeStarRate": 0.3321,
+      "usage": 0.0009,
+      "threeStarRate": 0.3062,
       "kind": "equipment"
     },
     "90000016": {
       "name": "Monolith Arrow",
-      "usage": 0.2294,
-      "threeStarRate": 0.4787,
+      "usage": 0.2343,
+      "threeStarRate": 0.4574,
       "kind": "equipment"
     },
     "90000017": {
       "name": "Giant Arrow",
-      "usage": 0.4845,
-      "threeStarRate": 0.4291,
+      "usage": 0.4847,
+      "threeStarRate": 0.4171,
       "kind": "equipment"
     },
     "90000019": {
       "name": "Heroic Torch",
-      "usage": 0.3922,
-      "threeStarRate": 0.4458,
+      "usage": 0.3945,
+      "threeStarRate": 0.4279,
       "kind": "equipment"
     },
     "90000020": {
       "name": "Healer Puppet",
-      "usage": 0.016,
-      "threeStarRate": 0.462,
+      "usage": 0.0149,
+      "threeStarRate": 0.4202,
       "kind": "equipment"
     },
     "90000022": {
       "name": "Fireball",
-      "usage": 0.1551,
-      "threeStarRate": 0.4547,
+      "usage": 0.1569,
+      "threeStarRate": 0.4456,
       "kind": "equipment"
     },
     "90000024": {
       "name": "Rage Gem",
-      "usage": 0.2981,
-      "threeStarRate": 0.4537,
+      "usage": 0.287,
+      "threeStarRate": 0.4352,
       "kind": "equipment"
     },
     "90000032": {
       "name": "Snake Bracelet",
-      "usage": 0.4403,
-      "threeStarRate": 0.4507,
+      "usage": 0.4344,
+      "threeStarRate": 0.433,
       "kind": "equipment"
     },
     "90000034": {
       "name": "Healing Tome",
-      "usage": 0.1877,
-      "threeStarRate": 0.4161,
+      "usage": 0.183,
+      "threeStarRate": 0.4005,
       "kind": "equipment"
     },
     "90000035": {
       "name": "Dark Crown",
-      "usage": 0.0165,
-      "threeStarRate": 0.4573,
+      "usage": 0.0281,
+      "threeStarRate": 0.4898,
       "kind": "equipment"
     },
     "90000039": {
       "name": "Magic Mirror",
-      "usage": 0.1965,
-      "threeStarRate": 0.4185,
+      "usage": 0.1883,
+      "threeStarRate": 0.4005,
       "kind": "equipment"
     },
     "90000040": {
       "name": "Electro Boots",
-      "usage": 0.0133,
-      "threeStarRate": 0.418,
+      "usage": 0.0141,
+      "threeStarRate": 0.3905,
       "kind": "equipment"
     },
     "90000041": {
       "name": "Lavaloon Puppet",
-      "usage": 0.1064,
-      "threeStarRate": 0.4216,
+      "usage": 0.1027,
+      "threeStarRate": 0.404,
       "kind": "equipment"
     },
     "90000042": {
@@ -906,86 +914,86 @@
     },
     "90000043": {
       "name": "Dark Orb",
-      "usage": 0.2922,
-      "threeStarRate": 0.4204,
+      "usage": 0.2984,
+      "threeStarRate": 0.4093,
       "kind": "equipment"
     },
     "90000044": {
       "name": "Metal Pants",
-      "usage": 0.0013,
-      "threeStarRate": 0.2271,
+      "usage": 0.0012,
+      "threeStarRate": 0.2098,
       "kind": "equipment"
     },
     "90000047": {
       "name": "Noble Iron",
-      "usage": 0.0002,
+      "usage": 0.0001,
       "threeStarRate": 0.1037,
       "kind": "equipment"
     },
     "90000048": {
       "name": "Action Figure",
-      "usage": 0.9027,
-      "threeStarRate": 0.4387,
+      "usage": 0.9009,
+      "threeStarRate": 0.4234,
       "kind": "equipment"
     },
     "90000049": {
       "name": "Meteor Staff",
-      "usage": 0.3441,
-      "threeStarRate": 0.4317,
+      "usage": 0.3379,
+      "threeStarRate": 0.4199,
       "kind": "equipment"
     },
     "90000050": {
       "name": "Frost Flake",
-      "usage": 0.0031,
-      "threeStarRate": 0.4112,
+      "usage": 0.0032,
+      "threeStarRate": 0.3492,
       "kind": "equipment"
     },
     "90000051": {
       "name": "Stick Horse",
-      "usage": 0.1135,
-      "threeStarRate": 0.4562,
+      "usage": 0.1152,
+      "threeStarRate": 0.4444,
       "kind": "equipment"
     },
     "90000052": {
       "name": "Fire Heart",
-      "usage": 0.564,
-      "threeStarRate": 0.4307,
+      "usage": 0.5414,
+      "threeStarRate": 0.4137,
       "kind": "equipment"
     },
     "90000053": {
       "name": "Rocket Backpack",
-      "usage": 0.3706,
-      "threeStarRate": 0.4484,
+      "usage": 0.3814,
+      "threeStarRate": 0.4353,
       "kind": "equipment"
     },
     "90000056": {
       "name": "Stun Blaster",
-      "usage": 0.2137,
-      "threeStarRate": 0.4781,
+      "usage": 0.2193,
+      "threeStarRate": 0.4626,
       "kind": "equipment"
     },
     "90000057": {
       "name": "Flame Blower",
-      "usage": 0.0437,
-      "threeStarRate": 0.3978,
+      "usage": 0.0468,
+      "threeStarRate": 0.3873,
       "kind": "equipment"
     },
     "90000059": {
       "name": "Electro Fangs",
-      "usage": 0.3107,
-      "threeStarRate": 0.4573,
+      "usage": 0.3215,
+      "threeStarRate": 0.4446,
       "kind": "equipment"
     },
     "90000060": {
       "name": "Revenge Deck",
-      "usage": 0.4932,
-      "threeStarRate": 0.4351,
+      "usage": 0.4851,
+      "threeStarRate": 0.42,
       "kind": "equipment"
     },
     "90000061": {
       "name": "Portal Pendant",
-      "usage": 0.0696,
-      "threeStarRate": 0.4822,
+      "usage": 0.0687,
+      "threeStarRate": 0.4914,
       "kind": "equipment"
     }
   }
